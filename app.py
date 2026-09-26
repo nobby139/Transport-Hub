@@ -2230,10 +2230,14 @@ def goodbye():
 # ---------------------------------------------------------
 @app.post("/api/login")
 def unified_login():
-    data = request.get_json() or {}
-
-    email = data.get("email", "").strip().lower()
-    password = data.get("password", "")
+    # Support both JSON requests and standard form submissions
+    if request.is_json:
+        data = request.get_json() or {}
+        email = data.get("email", "").strip().lower()
+        password = data.get("password", "")
+    else:
+        email = request.form.get("email", "").strip().lower()
+        password = request.form.get("password", "")
 
     user = User.query.filter_by(email=email).first()
 
