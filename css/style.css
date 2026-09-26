@@ -509,6 +509,28 @@ header {
         font-size: 16px;
     }
 
+    /* Force the header to span 100% and stack nicely on mobile */
+    header {
+        flex-direction: column;
+        padding: 15px 10px;
+        text-align: center;
+        gap: 15px;
+    }
+
+    /* Reset columns so they don't fight flex alignment on mobile */
+    .header-left, .header-center, #drivershub-logo {
+        flex: unset !important;
+        width: 100%;
+        margin: 0 !important;
+        text-align: center;
+    }
+
+    /* Adjust logo size for mobile screens */
+    #drivershub-logo {
+        height: 80px;
+        margin: 0 auto;
+    }
+
     /* Force the main content area to take up the full screen width */
     main {
         width: 100%;
@@ -516,61 +538,11 @@ header {
         box-sizing: border-box;
     }
 
-    /* Make sure header and elements don't get squished */
-    .main-header {
-        width: 100%;
-        box-sizing: border-box;
-        padding: 10px 15px;
-    }
-
-    /* If your dashboard cards/buttons have a fixed desktop width, make them fluid */
-    .dashboard-card, .menu-card, .btn-container {
+    /* Make sure all dashboard cards and content blocks use full width */
+    .section, .dashboard-card, .menu-card, .btn-container {
         width: 100% !important;
         max-width: 100% !important;
         box-sizing: border-box;
-    }
-
-    .settings-layout {
-        padding: 15px;
-    }
-
-    h2 {
-        font-size: 22px;
-        margin-bottom: 15px;
-    }
-
-    h3 {
-        font-size: 18px;
-        margin-top: 20px;
-    }
-
-    .legal-section {
-        padding: 10px;
-    }
-
-    .nav-btn {
-        display: inline-block;
-        padding: 10px 14px;
-        font-size: 16px;
-        margin-bottom: 15px;
-    }
-
-    /* Sidebar collapses cleanly */
-    aside {
-        width: 100%;
-        margin-bottom: 20px;
-    }
-
-    aside ul {
-        padding-left: 0;
-    }
-
-    aside li {
-        margin-bottom: 10px;
-    }
-
-    aside a {
-        font-size: 16px;
     }
 
     /* Tables scroll horizontally */
