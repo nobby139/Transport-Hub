@@ -760,33 +760,28 @@ def get_companies():
 # =========================================================
 # SUPERADMIN ACCOUNT
 # =========================================================
-@app.route("/create_superadmin", methods=["GET", "POST"])
-def create_superadmin():
-    if request.method == "POST":
-        first_name = request.form.get("first_name")
-        last_name = request.form.get("last_name")
-        email = request.form.get("email")
-        password = request.form.get("password")
-        role = "superadmin"
-
-        # Hash password
-        hashed_password = generate_password_hash(password)
-
-        # Create user
-        new_user = User(
-            first_name=first_name,
-            last_name=last_name,
-            email=email,
-            password=hashed_password,
-            role=role
-        )
-
-        db.session.add(new_user)
+@app.route('/force-create-superadmin')
+def force_create_superadmin():
+    from werkzeug.security import generate_password_hash
+    
+    # Check if the superadmin already exists
+    existing = User.query.filter_by(email='info@transporthub.uk').first()
+    if existing:
+        existing.role = 'superadmin'
         db.session.commit()
-
-        return redirect(url_for("login"))
-
-    return render_template("create_superadmin.html")
+        return "User 'info@transporthub.uk' role updated to superadmin successfully!"
+        
+    # Otherwise, create them from scratch
+    superadmin = User(
+        first_name='Admin',
+        last_name='User',
+        email='info@transporthub.uk',
+        password=generate_password_hash('YOUR_SECURE_PASSWORD_HERE'),
+        role='superadmin'
+    )
+    db.session.add(superadmin)
+    db.session.commit()
+    return "Superadmin created successfully! You can now log in."
 
 # ======================================================
 # ROLE HELPERS
