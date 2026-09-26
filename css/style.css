@@ -509,6 +509,27 @@ header {
         font-size: 16px;
     }
 
+    /* Force the main content area to take up the full screen width */
+    main {
+        width: 100%;
+        padding: 10px 15px;
+        box-sizing: border-box;
+    }
+
+    /* Make sure header and elements don't get squished */
+    .main-header {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 10px 15px;
+    }
+
+    /* If your dashboard cards/buttons have a fixed desktop width, make them fluid */
+    .dashboard-card, .menu-card, .btn-container {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box;
+    }
+
     .settings-layout {
         padding: 15px;
     }
@@ -560,7 +581,6 @@ header {
         border-collapse: collapse;
     }
 }
-
 /* ====================================================
    PLATFORM MESSAGES
 ==================================================== */
