@@ -498,6 +498,236 @@ header {
     margin-left: auto; /* pushes logo to far right */
 }
 
+/* ============================
+   MOBILE LAYOUT (GLOBAL)
+   ============================ */
+@media (max-width: 768px) {
+
+    body {
+        padding: 0;
+        margin: 0;
+        font-size: 16px;
+    }
+
+    .settings-layout {
+        padding: 15px;
+    }
+
+    h2 {
+        font-size: 22px;
+        margin-bottom: 15px;
+    }
+
+    h3 {
+        font-size: 18px;
+        margin-top: 20px;
+    }
+
+    .legal-section {
+        padding: 10px;
+    }
+
+    .nav-btn {
+        display: inline-block;
+        padding: 10px 14px;
+        font-size: 16px;
+        margin-bottom: 15px;
+    }
+
+    /* Sidebar collapses cleanly */
+    aside {
+        width: 100%;
+        margin-bottom: 20px;
+    }
+
+    aside ul {
+        padding-left: 0;
+    }
+
+    aside li {
+        margin-bottom: 10px;
+    }
+
+    aside a {
+        font-size: 16px;
+    }
+
+    /* Tables scroll horizontally */
+    table {
+        width: 100%;
+        display: block;
+        overflow-x: auto;
+        border-collapse: collapse;
+    }
+}
+
+/* ====================================================
+   PLATFORM MESSAGES
+==================================================== */
+.chat-window {
+    background: #f5f5f5;
+    padding: 20px;
+    height: 60vh;
+    overflow-y: auto;
+    border-radius: 10px;
+}
+
+.chat-message {
+    margin: 10px 0;
+    padding: 12px;
+    border-radius: 10px;
+    max-width: 70%;
+}
+
+.admin-msg {
+    background: #e3f2fd;
+    border-left: 4px solid #1e88e5;
+    margin-right: auto;
+}
+
+.user-msg {
+    background: #fff3e0;
+    border-right: 4px solid #fb8c00;
+    margin-left: auto;
+}
+
+.msg-header {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.timestamp {
+    font-size: 0.8em;
+    color: #777;
+    margin-left: 10px;
+}
+
+.chat-input {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+}
+
+.chat-input textarea {
+    flex: 1;
+    height: 80px;
+}
+
+.chat-input button {
+    padding: 10px 20px;
+}
+
+/* ==========================================
+   PROFESSIONAL SCENARIO SECTION STYLING
+   ========================================== */
+
+.scenario-section {
+    margin: 50px 0;
+    padding: 40px 20px;
+    background: #f8f9fa;
+    border-top: 4px solid #1E88E5;
+    border-bottom: 4px solid #1E88E5;
+}
+
+.scenario-container-inner {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.scenario-row {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    margin-bottom: 35px;
+}
+
+.scenario-row.reverse {
+    flex-direction: row-reverse;
+}
+
+.scenario-avatar {
+    flex: 0 0 110px;
+    text-align: center;
+}
+
+.scenario-avatar i {
+    font-size: 2.8rem;
+    color: #1E88E5;
+}
+
+.scenario-avatar p {
+    margin-top: 8px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: #555;
+    text-transform: uppercase;
+}
+
+/* Speech Bubble Box */
+.speech-bubble {
+    position: relative;
+    background: #ffffff;
+    border: 2px solid #cbd5e1;
+    border-radius: 12px;
+    padding: 20px 25px;
+    font-size: 1.05rem;
+    color: #1e293b;
+    line-height: 1.6;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.03);
+    flex: 1;
+}
+
+/* Left-pointing speech bubble tail */
+.speech-bubble.left-tail::after {
+    content: "";
+    position: absolute;
+    left: -14px;
+    top: 25px;
+    border-style: solid;
+    border-width: 10px 14px 10px 0;
+    border-color: transparent #ffffff transparent transparent;
+    display: block;
+    width: 0;
+    z-index: 1;
+}
+.speech-bubble.left-tail::before {
+    content: "";
+    position: absolute;
+    left: -17px;
+    top: 24px;
+    border-style: solid;
+    border-width: 11px 15px 11px 0;
+    border-color: transparent #cbd5e1 transparent transparent;
+    display: block;
+    width: 0;
+    z-index: 0;
+}
+
+/* Right-pointing speech bubble tail */
+.speech-bubble.right-tail::after {
+    content: "";
+    position: absolute;
+    right: -14px;
+    top: 25px;
+    border-style: solid;
+    border-width: 10px 0 10px 14px;
+    border-color: transparent transparent transparent #ffffff;
+    display: block;
+    width: 0;
+    z-index: 1;
+}
+.speech-bubble.right-tail::before {
+    content: "";
+    position: absolute;
+    right: -17px;
+    top: 24px;
+    border-style: solid;
+    border-width: 11px 0 11px 15px;
+    border-color: transparent transparent transparent #cbd5e1;
+    display: block;
+    width: 0;
+    z-index: 0;
+}
 
 
 
