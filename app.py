@@ -1603,7 +1603,7 @@ def role_change_history():
 # ============================================================
 # GLOBAL SYSTEM SETTINGS
 # ============================================================
-from database import SystemSettings
+from models import SystemSettings
 
 from database import db, SystemSettings
 from flask import request, redirect
