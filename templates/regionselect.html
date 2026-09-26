@@ -1,0 +1,63 @@
+<!-- REGION SELECT DROPDOWN -->
+<label for="regionSelect" id="regionLabel" style="display:none;">Select Region:</label>
+<select id="regionSelect" style="display:none;">
+    <option value="">-- Select Region --</option>
+</select>
+
+<button id="continueBtn" style="display:none;">Continue</button>
+
+<script src="../js/companyRegions.js"></script>
+<script>
+    const selectedCompany = localStorage.getItem("selectedCompany");
+
+    const regionSelect = document.getElementById("regionSelect");
+    const regionLabel = document.getElementById("regionLabel");
+    const continueBtn = document.getElementById("continueBtn");
+
+    function loadRegions() {
+        if (!selectedCompany || !companyRegions[selectedCompany]) {
+            alert("No company selected or company not found.");
+            return;
+        }
+
+        const companyData = companyRegions[selectedCompany];
+
+        // Company HAS REGIONS
+        if (companyData.regions) {
+            const regions = Object.keys(companyData.regions);
+
+            regions.forEach(region => {
+                const option = document.createElement("option");
+                option.value = region;
+                option.textContent = region;
+                regionSelect.appendChild(option);
+            });
+
+            // SHOW LABEL + DROPDOWN + BUTTON
+            regionLabel.style.display = "block";
+            regionSelect.style.display = "block";
+            continueBtn.style.display = "block";
+        }
+
+        // Company has MAIN (NO REGIONS)
+        else if (companyData.main) {
+            // Skip region page entirely
+            localStorage.setItem("selectedRegion", "main");
+            window.location.href = "depotSelect.html";
+        }
+    }
+
+    continueBtn.addEventListener("click", () => {
+        const selectedRegion = regionSelect.value;
+
+        if (!selectedRegion) {
+            alert("Please select a region.");
+            return;
+        }
+
+        localStorage.setItem("selectedRegion", selectedRegion);
+        window.location.href = "depotSelect.html";
+    });
+
+    loadRegions();
+</script>

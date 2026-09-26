@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% block content %}
+
+
+
+<style>
+.form-container {
+  max-width: 600px;
+  margin: 40px auto; /* centres on page */
+  background: #fff;
+  padding: 25px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.enthusiast-form label {
+  display: block;
+  margin-bottom: 15px;
+  font-weight: 600;
+}
+
+.enthusiast-form input,
+.enthusiast-form textarea {
+  width: 100%;
+  padding: 8px;
+  margin-top: 6px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.enthusiast-form button {
+  display: block;
+  margin: 20px auto 0;
+}
+
+/* Right‑aligned link container */
+.right-link {
+  text-align: right;
+  margin-top: 20px;
+}
+
+</style>
+
+<div class="right-link">
+  <a href="{{ url_for('enthusiast_hub') }}" class="btn">Back to Enthusiast Hub</a>
+</div>
+
+<div class="form-container">
+  <h2>Add Enthusiast Record</h2>
+  <form method="POST" enctype="multipart/form-data" class="enthusiast-form">
+    <label>Operator:
+      <input type="text" name="operator">
+    </label>
+
+    <label>Vehicle No.:
+      <input type="text" name="vehicle_number">
+    </label>
+
+    <label>Registration:
+      <input type="text" name="registration">
+    </label>
+
+    <label>Make/Model:
+      <input type="text" name="make_model">
+    </label>
+
+    <label>Depot:
+      <input type="text" name="depot">
+    </label>
+
+    <label>Route Number:
+      <input type="text" name="route_number">
+    </label>
+	
+	<label>Route Start / Destination:
+	  <input type="text" name="route_destination">
+	</label>
+
+    <label>Notes:
+      <textarea name="notes"></textarea>
+    </label>
+
+    <label>Spotted At:
+      <input type="datetime-local" name="spotted_at">
+    </label>
+
+    <label>Photos Uploaded:
+      <input type="number" name="photos_uploaded" value="0">
+    </label>
+	
+	<label>Photo:
+	  <input type="file" name="photos" multiple accept="image/*">
+	</label>
+
+
+    <button type="submit" class="btn">Save</button>
+  </form>
+</div>
+
+
+
+{% endblock %}

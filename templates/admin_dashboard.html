@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+{% set page_title = "UK Transport Hub" %}
+{% set home_target = "home" %}
+
+{% block content %}
+
+
+<a href="javascript:history.back()" class="back-btn">← Back</a>
+
+    <h1 style="text-align:center; margin-top:20px;">
+        Admin Dashboard
+    </h1>
+
+    <p style="text-align:center; margin-top:10px; font-size:18px;">
+        You are logged in as an Administrator. Full access is enabled.
+    </p>
+
+<div class="dashboard-grid">
+
+    <!-- USER MANAGEMENT -->
+	<a class="dash-card" href="/user_accounts">
+		<h3>User Management</h3>
+		<p>Manage users, Create, Edit Roles, Delete Users, messages auto sent.</p>
+	</a>
+
+
+    <!-- COMPANY / REGION / DEPOT MANAGEMENT -->
+    <a class="dash-card" href=>
+        <h3>Company Management</h3>
+        <p>Manage companies, regions, depots, and outstations.</p>
+		<P>Coming Soon</p>
+    </a>
+
+</div>
+
+{% if show_birthday %}
+<!-- Birthday Modal -->
+<div id="birthdayModal" class="birthday-modal">
+    <div class="birthday-modal-content">
+        <span class="birthday-close-btn" onclick="closeBirthdayModal()">&times;</span>
+        <img src="/static/images/birthday_poster.png" alt="Happy Birthday!" class="birthday-poster" />
+    </div>
+</div>
+
+{% if show_birthday %}
+<!-- Reopen Modal Trigger Button -->
+<div style="margin: 15px 0;">
+    <button type="button" onclick="openBirthdayModal()" class="birthday-reopen-btn">
+        🎉 View Birthday Poster
+    </button>
+</div>
+{% endif %}
+<script>
+    // Automatically display the modal on page load
+    document.addEventListener("DOMContentLoaded", function() {
+        document.getElementById("birthdayModal").style.display = "flex";
+    });
+
+    // Close function
+    function closeBirthdayModal() {
+        document.getElementById("birthdayModal").style.display = "none";
+    }
+
+    // Close modal if user clicks outside the content box
+    window.onclick = function(event) {
+        var modal = document.getElementById("birthdayModal");
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+	
+
+    // Show automatically on page load
+    document.addEventListener("DOMContentLoaded", function() {
+        openBirthdayModal();
+    });
+
+    function openBirthdayModal() {
+        document.getElementById("birthdayModal").style.display = "flex";
+    }
+
+    function closeBirthdayModal() {
+        document.getElementById("birthdayModal").style.display = "none";
+    }
+
+    // Close when clicking overlay background
+    window.onclick = function(event) {
+        var modal = document.getElementById("birthdayModal");
+        if (event.target == modal) {
+            closeBirthdayModal();
+        }
+    }
+
+</script>
+{% endif %}
+
+<style>
+/* Fullscreen overlay using fixed pixel viewports */
+.birthday-modal {
+    display: none; /* Controlled by JS on load */
+    position: fixed;
+    z-index: 9999;
+    left: 0px;
+    top: 0px;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.7);
+    justify-content: center;
+    align-items: center;
+}
+
+/* Modal Content Box */
+.birthday-modal-content {
+    position: relative;
+    background-color: #ffffff;
+    padding: 15px;
+    border-radius: 12px;
+    max-width: 900px;
+    box-shadow: 0px 8px 24px rgba(0, 0, 0, 0.3);
+    text-align: center;
+}
+
+/* Close Button (X) */
+.birthday-close-btn {
+    position: absolute;
+    top: 5px;
+    right: 15px;
+    color: #333333;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 10;
+}
+
+.birthday-close-btn:hover {
+    color: #ff0000;
+}
+
+/* Poster Image */
+.birthday-poster {
+    max-width: 850px;
+    max-height: 650px; /* Added px and reduced slightly to fit standard screen heights */
+    width: auto;
+    height: auto;
+    border-radius: 8px;
+    display: block;
+}
+
+.birthday-reopen-btn {
+    position: absolute;
+    top: 160px;
+    left: 20px;
+    z-index: 100; /* Ensures it sits on top of other dashboard cards */
+    background-color: #2b5876;
+    color: #ffffff;
+    border: none;
+    padding: 10px 18px;
+    font-size: 15px;
+    font-weight: bold;
+    border-radius: 6px;
+    cursor: pointer;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15);
+    transition: background-color 0.2s ease;
+}
+
+.birthday-reopen-btn:hover {
+    background-color: #4e4376;
+}
+</style>
+
+{% endblock %}

@@ -1,0 +1,384 @@
+{% extends "base.html" %}
+{% set is_UK_transport_hub = True %}
+{% set page_title = "UK Transport Hub" %}
+
+{% block content %}
+
+
+
+<a class="nav-btn" href="{{ return_to }}">Back</a>
+
+
+<div class="settings-layout">
+
+    <!-- =============================== -->
+    <!-- LEFT‑SIDE SETTINGS MENU (NEW) -->
+    <!-- =============================== -->
+    <aside class="settings-sidebar">
+        <h2>Settings</h2>
+        <ul>
+            <li><button onclick="openSettingsSection('yeardate')">Year & Date Settings</button></li>
+            <li><button onclick="openSettingsSection('preferences')">Driver Preferences</button></li>
+            <li><button onclick="openSettingsSection('account')">Account Settings</button></li>
+            <li><button onclick="openSettingsSection('payrates')">Pay Rate Settings</button></li>
+            <li><button onclick="openSettingsSection('specialdays')">Special Days</button></li>
+		    <li><button onclick="window.location.href='/settings/system'">System Settings</button></li>
+        </ul>
+
+		<h3>Legal & Info</h3>
+		<ul>
+			<li><a href="/legal">Legal Disclaimers</a></li>
+			<li><a href="/terms">Terms & Conditions</a></li>
+			<li><a href="/privacy">Privacy Notice</a></li>
+			<li><a href="/about">About Transport Hub</a></li>
+		</ul>
+		</aside>
+
+
+
+    <!-- =============================== -->
+    <!-- RIGHT‑SIDE CONTENT PANEL -->
+    <!-- =============================== -->
+    <main class="settings-content">
+
+
+        <!-- ===================================================== -->
+        <!-- YEAR & DATE SETTINGS -->
+        <!-- ===================================================== -->
+        <section id="settings-yeardate" class="settings-section">
+            <h1>Year & Date Settings</h1>
+
+            <form method="POST" action="/settings">
+
+                <div class="settings-item">
+                    <label for="year_mode">Year Mode:</label>
+                    <select id="year_mode" name="year_mode">
+                        <option value="calendar" {% if settings.year_mode == 'calendar' %}selected{% endif %}>Calendar Year</option>
+                        <option value="tax" {% if settings.year_mode == 'tax' %}selected{% endif %}>Tax Year</option>
+                    </select>
+                </div>
+
+                <div class="settings-item">
+                    <label for="tax_year_preset">Tax Year Start:</label>
+                    <select id="tax_year_preset" name="tax_year_preset">
+                        <option value="6-apr" {% if settings.tax_year_preset == '6-apr' %}selected{% endif %}>6 April</option>
+                        <option value="1-apr" {% if settings.tax_year_preset == '1-apr' %}selected{% endif %}>1 April</option>
+                        <option value="1-jan" {% if settings.tax_year_preset == '1-jan' %}selected{% endif %}>1 January</option>
+                        <option value="custom" {% if settings.tax_year_preset == 'custom' %}selected{% endif %}>Custom Date</option>
+                    </select>
+
+                    <input type="date"
+                           id="custom_tax_year_start"
+                           name="custom_tax_year_start"
+                           value="{{ settings.custom_tax_year_start }}"
+                           style="{% if settings.tax_year_preset == 'custom' %}display:block{% else %}display:none{% endif %};">
+                </div>
+
+                <button type="submit" class="save-btn">Save Settings</button>
+            </form>
+        </section>
+		
+		<!-- ===================================================== -->
+        <!-- DRIVER PREFERENCES -->
+        <!-- ===================================================== -->
+        <section id="settings-preferences" class="settings-section" style="display:none;">
+            <h1>Driver Preferences</h1>
+
+            <form method="POST" action="/settings">
+
+                <div class="settings-item">
+                    <label for="week_start_day">Week Starts On:</label>
+					<select id="week_start_day" name="week_start_day">
+						<option value="monday"   {% if settings.week_start_day == 'monday' %}selected{% endif %}>Monday</option>
+						<option value="friday"   {% if settings.week_start_day == 'friday' %}selected{% endif %}>Friday</option>
+						<option value="saturday" {% if settings.week_start_day == 'saturday' %}selected{% endif %}>Saturday</option>
+						<option value="sunday"   {% if settings.week_start_day == 'sunday' %}selected{% endif %}>Sunday</option>
+					</select>
+                </div>
+
+                <button type="submit" class="save-btn">Save Preferences</button>
+            </form>
+        </section>
+
+
+
+        <!-- ===================================================== -->
+        <!-- ACCOUNT SETTINGS -->
+        <!-- ===================================================== -->
+        <section id="settings-account" class="settings-section" style="display:none;">
+            <h1>Account Settings</h1>
+
+            <form action="/change_password" method="POST" class="settings-action-row" data-no-ajax="true">
+                <a href="/change_password" class="settings-small-btn">Change Password</a>
+            </form>
+
+            <form action="/upload_profile_photo" method="POST" enctype="multipart/form-data" class="settings-upload-row">
+                <input type="file" name="photo" accept="image/*" required class="profile-file-input">
+                <button type="submit" class="settings-small-btn">Upload New Photo</button>
+            </form>
+
+            <form action="/logout" method="GET" class="settings-action-row">
+                <button type="submit" class="settings-small-btn logout-red">Log Out</button>
+            </form>
+        </section>
+
+
+
+        <!-- ===================================================== -->
+        <!-- PAY RATE SETTINGS -->
+        <!-- ===================================================== -->
+		<section id="settings-payrates" class="settings-section" style="display:none;">
+
+			<h1>Pay Rate Settings</h1>
+			<p class="section-desc">
+				Pay rates are stored by effective date. Adding a new rate will not overwrite older rates.
+			</p>
+
+			<form method="POST" action="/add_pay_rate" class="settings-form">
+
+				<!-- Add New Pay Rate Band -->
+				<div class="settings-block">
+					<h3 class="block-title">Add New Pay Rate Band</h3>
+
+					<div class="form-row">
+						<label>Effective From:</label>
+						<input type="date" name="effective_from" required>
+					</div>
+				</div>
+
+				<!-- Base Rates -->
+				<div class="settings-block">
+					<h4 class="block-title">Base Rates</h4>
+
+					<div class="form-row">
+						<label>Mon–Fri (£):</label>
+						<input type="text" name="mon_fri_rate">
+					</div>
+
+					<div class="form-row">
+						<label>Saturday (£):</label>
+						<input type="text" name="sat_rate">
+					</div>
+
+					<div class="form-row">
+						<label>Sunday (£):</label>
+						<input type="text" name="sun_rate">
+					</div>
+
+					<div class="form-row">
+						<label>Bank Holiday (£):</label>
+						<input type="text" name="bank_hol_rate">
+					</div>
+				</div>
+
+				<!-- Premiums -->
+				<div class="settings-block">
+					<h4 class="block-title">Premiums</h4>
+
+					<div class="form-row">
+						<label>Late_Week (£):</label>
+						<input type="text" name="early_rate">
+					</div>
+
+					<div class="form-row">
+						<label>Late_Sat (£):</label>
+						<input type="text" name="late_rate">
+					</div>
+
+					<div class="form-row">
+						<label>Late_Sun (£):</label>
+						<input type="text" name="midlate_rate">
+					</div>
+
+					<div class="form-row">
+						<label>Night (£):</label>
+						<input type="text" name="night_rate">
+					</div>
+				</div>
+
+				<!-- Special Day Rates -->
+				<div class="settings-block">
+					<h4 class="block-title">Special Day Rates</h4>
+
+					<div class="form-row">
+						<label>Christmas Day (£):</label>
+						<input type="text" name="christmas_rate">
+					</div>
+
+					<div class="form-row">
+						<label>Boxing Day (£):</label>
+						<input type="text" name="boxingday_rate">
+					</div>
+
+					<div class="form-row">
+						<label>New Year’s Day (£):</label>
+						<input type="text" name="newyear_rate">
+					</div>
+
+					<div class="form-row">
+						<label>Good Friday (£):</label>
+						<input type="text" name="goodfriday_rate">
+					</div>
+				</div>
+
+				<div class="settings-footer">
+					<button type="submit" class="settings-small-btn">Add Pay Rate Band</button>
+				</div>
+
+			</form>
+
+
+
+			<hr>
+
+			<h3>Existing Pay Rate Band</h3>
+
+			<table class="settings-table">
+				<thead>
+					<tr>
+						<th>Effective From</th>
+						<th>Mon–Fri</th>
+						<th>Sat</th>
+						<th>Sun</th>
+						<th>Bank Hol</th>
+						<th>Late Week</th>
+						<th>Late Sat</th>
+						<th>Late Sun</th>
+						<th>Night</th>
+						<th>Xmas Day</th>
+						<th>Boxing Day</th>
+						<th>New Year</th>
+						<th>Good Friday</th>
+						<th>Actions</th>
+					</tr>
+				</thead>
+
+				<tbody>
+					{% for rate in pay_rates %}
+					<tr>
+						<td>{{ rate.effective_from.strftime("%d/%m/%Y") }}</td>
+
+						<td>£{{ "%.2f"|format(rate.mon_fri_rate or 0) }}</td>
+						<td>£{{ "%.2f"|format(rate.sat_rate or 0) }}</td>
+						<td>£{{ "%.2f"|format(rate.sun_rate or 0) }}</td>
+						<td>£{{ "%.2f"|format(rate.bank_hol_rate or 0) }}</td>
+
+						<td>£{{ "%.2f"|format(rate.late_week_rate or 0) }}</td>
+						<td>£{{ "%.2f"|format(rate.late_sat_rate or 0) }}</td>
+						<td>£{{ "%.2f"|format(rate.late_sun_rate or 0) }}</td>
+						<td>£{{ "%.2f"|format(rate.night_rate or 0) }}</td>
+
+						<td>£{{ "%.2f"|format(rate.christmas_rate or 0) }}</td>
+						<td>£{{ "%.2f"|format(rate.boxingday_rate or 0) }}</td>
+						<td>£{{ "%.2f"|format(rate.newyear_rate or 0) }}</td>
+						<td>£{{ "%.2f"|format(rate.goodfriday_rate or 0) }}</td>
+
+
+						<td>
+							<form method="POST" action="/delete_pay_rate">
+								<input type="hidden" name="rate_id" value="{{ rate.id }}">
+								<button class="delete-bin-btn">🗑️</button>
+							</form>
+						</td>
+					</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+
+		</section>
+
+
+
+
+
+        <!-- ===================================================== -->
+        <!-- SPECIAL DAYS -->
+        <!-- ===================================================== -->
+		<section id="settings-specialdays" class="settings-section" style="display:none;">
+
+			<h1>Custom Special Days</h1>
+
+			<form method="POST" action="/add_special_day" class="settings-form">
+			
+				<div class="form-row">
+					<label>Date:</label>
+					<input type="date" name="special_date" required>
+				</div>
+
+				<div class="form-row">
+					<label>Special Day Name:</label>
+					<input type="text" name="special_name" required>
+				</div>
+
+				<div class="form-row">
+					<label>Rate (£):</label>
+					<input type="number" step="0.01" name="special_rate" required>
+				</div>
+
+				<button type="submit" class="settings-small-btn">Add Special Day</button>
+			</form>
+
+			<hr>
+
+			<h3>Existing Special Days</h3>
+
+			<table class="settings-table">
+				<thead>
+					<tr>
+						<th>Date</th>
+						<th>Name</th>
+						<th>Rate</th>
+						<th>Actions</th>
+					</tr>
+				</thead>
+
+				<tbody>
+					{% for day in special_days %}
+					<tr>
+						<td>{{ day.date.strftime("%d/%m/%Y") }}</td>
+						<td>{{ day.name }}</td>	
+						<td>£{{ "%.2f"|format(day.rate) }}</td>
+						<td>
+							<form method="POST" action="/delete_special_day" style="display:inline;">
+								<input type="hidden" name="day_id" value="{{ day.id }}">
+								<button class="delete-bin-btn">🗑️</button>
+							</form>
+						</td>
+					</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+
+		</section>
+
+
+
+    </main>
+</div>
+
+
+<!-- ===================================================== -->
+<!-- SECTION SWITCHING JS -->
+<!-- ===================================================== -->
+<script>
+function openSettingsSection(name) {
+    document.querySelectorAll('.settings-section').forEach(sec => {
+        sec.style.display = 'none';
+    });
+    document.getElementById('settings-' + name).style.display = 'block';
+}
+
+// Show/hide custom tax year date field
+const taxPreset = document.getElementById("tax_year_preset");
+if (taxPreset) {
+    taxPreset.addEventListener("change", function () {
+        const customField = document.getElementById("custom_tax_year_start");
+        if (customField) {
+            customField.style.display = (this.value === "custom") ? "block" : "none";
+        }
+    });
+}
+</script>
+
+
+{% endblock %}

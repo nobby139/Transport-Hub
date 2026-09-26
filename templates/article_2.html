@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% set home_target = "driver_dashboard" %}
+{% set is_UK_transport_hub = True %}
+{% set page_title = "UK Transport Hub" %}
+
+{% block content %}
+
+
+
+<div class="article-container">
+
+    <a href="/driver-information" class="back-link">← Back to Articles</a>
+
+    <div class="article-nav">
+        {% if prev_url %}
+            <a class="nav-prev" href="{{ prev_url }}">← Previous</a>
+        {% endif %}
+        {% if next_url %}
+            <a class="nav-next" href="{{ next_url }}">Next →</a>
+        {% endif %}
+    </div>
+
+    <p class="article-date">
+        Published: {{ published }}
+        {% if updated %}
+            • Last updated: {{ updated }}
+        {% endif %}
+    </p>
+
+    <!-- MAIN HEADER ICON (dynamic) -->
+    <div class="section-header">
+        <img src="/static/assets/Target.png"
+             class="article-header-image"
+             alt="Article Icon">
+        <h1>Making the most of the Drivers Hub</h1>
+    </div>
+
+    <div class="article-content">
+
+
+            <h2>1. What the Drivers Hub Can Do for You</h2>
+         <p>
+            The Drivers Hub is designed to make your day smoother by putting useful tools and 
+            information in one place. Whether you're starting your shift, checking updates, or 
+            looking for quick guidance, the Hub is here to support you throughout your working 
+            day.
+        </p>
+
+        <h2>2. Quick Access to What Matters</h2>
+        <p>
+            Instead of searching through multiple systems or asking around for information, 
+            the Hub gives you fast access to the things drivers use most. This includes:
+        </p>
+        <ul>
+            <li><strong>Articles</strong> that cover everyday topics, tips, and updates.</li>
+            <li><strong>Resources</strong> such as guides, forms, and helpful information.</li>
+            <li><strong>Announcements</strong> for anything new happening within the Hub.</li>
+        </ul>
+
+        <h2>3. Designed Around Real Driver Needs</h2>
+        <p>
+            Every part of the Hub is built with drivers in mind. The layout is simple, the 
+            navigation is clear, and the content is written in a way that’s easy to follow. 
+            Whether you're on a break or checking something before a shift, the Hub is quick 
+            to use and always available.
+        </p>
+
+        <!-- SECTION ICON #1 -->
+        <div class="section-header">
+            <img src="/static/assets/Refresh_Arrow.png"
+                 class="what-icon"
+                 alt="Section Icon">
+        <h2>4. Staying Updated</h2>
+		</div>
+        <p>
+            New content will be added regularly, including short articles, updates, and 
+            driver-focused features. The goal is to keep the Hub fresh and useful, giving you 
+            a place to check in and stay informed without digging through long documents.
+        </p>
+
+        <h2>5. What’s Coming Soon</h2>
+        <p>
+            Future updates will introduce more tools and features, including driver profiles, 
+            messaging, downloadable documents, and expanded article categories. These additions 
+            will help make the Hub an even more complete and supportive platform.
+        </p>
+
+        <!-- SECTION ICON #2 (Final Thoughts) -->
+        <div class="section-header">
+            <img src="/static/assets/Thoughts.png"
+                 class="thinking-icon"
+                 alt="Final Thoughts Icon">
+            <h2>6. Final Thoughts</h2>
+        </div>
+
+        <p>
+            The Drivers Hub is here to make your working life easier, more organised, and 
+            better connected. Keep an eye on the Articles section for new posts, updates, and 
+            useful information designed specifically for drivers like you.
+        </p>
+
+{% endblock %}

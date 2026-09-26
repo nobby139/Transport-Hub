@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+{% set home_target = "driver_dashboard" %}
+{% set is_UK_transport_hub = True %}
+{% set page_title = "UK Transport Hub" %}
+
+{% block content %}
+
+
+
+<div class="article-container">
+
+    <a href="/driver-information" class="back-link">← Back to Articles</a>
+
+    <div class="article-nav">
+        {% if prev_url %}
+            <a class="nav-prev" href="{{ prev_url }}">← Previous</a>
+        {% endif %}
+        {% if next_url %}
+            <a class="nav-next" href="{{ next_url }}">Next →</a>
+        {% endif %}
+    </div>
+
+<p class="article-date">
+    Published: {{ published }}
+    {% if updated %}
+        • Last updated: {{ updated }}
+    {% endif %}
+</p>
+
+	<div class="article-content">
+
+		<!-- ICON + MAIN HEADER -->
+		<div class="section-header">
+			<img src="/static/assets/Difficult_Passengers.png" class="article-header-image" alt="Article Icon">
+			<h2>Dealing With Difficult Passengers: A Practical Guide for Bus & Coach Drivers</h2>
+		</div>
+
+		<p>
+			Professional drivers interact with hundreds of passengers every week. Most journeys are smooth and uneventful,
+			but occasionally you’ll encounter challenging behaviour. Knowing how to respond calmly and confidently helps
+			protect your safety, your passengers, and your licence.
+		</p>
+
+		<p>
+			This guide covers practical, real‑world techniques used across the industry.
+		</p>
+
+		<h2>1. Stay Calm and Professional</h2>
+		<p>Your tone sets the atmosphere. Even when a passenger is frustrated or confrontational:</p>
+		<ul>
+			<li>Keep your voice steady</li>
+			<li>Avoid raising your volume</li>
+			<li>Maintain neutral body language</li>
+			<li>Don’t take comments personally</li>
+		</ul>
+		<p>Passengers often calm down when the driver remains composed.</p>
+
+		<h2>2. Use Clear, Simple Communication</h2>
+		<p>When addressing an issue:</p>
+		<ul>
+			<li>Speak slowly and clearly</li>
+			<li>Give short, direct instructions</li>
+			<li>Avoid jargon or long explanations</li>
+			<li>Repeat key points if needed</li>
+		</ul>
+		<p>Passengers under stress may not process complex information.</p>
+
+		<h2>3. Set Boundaries Early</h2>
+		<p>If behaviour becomes disruptive:</p>
+		<ul>
+			<li>Politely explain what needs to change</li>
+			<li>State the rule or safety concern</li>
+			<li>Avoid arguing or debating</li>
+			<li>Keep instructions factual, not emotional</li>
+		</ul>
+		<p>Example: “Sir, I need you to remain seated while the vehicle is moving for your safety.”</p>
+
+		<!-- ICON + MID SECTION -->
+		<div class="section-header">
+			<img src="/static/assets/Common_Passenger_issues.png" class="article-header-image" alt="Article Icon">
+			<h2>4. Common Passenger Issues & How to Handle Them</h2>
+		</div>
+
+		<h3>Refusing to Pay or Wrong Ticket</h3>
+		<ul>
+			<li>Stay polite</li>
+			<li>Clearly explain the fare or rule</li>
+			<li>Avoid confrontation</li>
+			<li>If they still refuse, allow travel if safe or politely refuse travel depending on policy</li>
+			<li>Never escalate the situation over a fare</li>
+		</ul>
+
+		<h3>Aggressive or Abusive Behaviour</h3>
+		<ul>
+			<li>Do not engage</li>
+			<li>Keep distance if possible</li>
+			<li>Stop the vehicle in a safe place</li>
+			<li>Contact control or emergency services if needed</li>
+		</ul>
+
+		<h3>Intoxicated Passengers</h3>
+		<ul>
+			<li>Assess if they are safe to travel</li>
+			<li>If not, refuse boarding calmly</li>
+			<li>Never physically assist an intoxicated person onto the vehicle</li>
+		</ul>
+
+		<h3>Passengers Standing in Unsafe Areas</h3>
+		<ul>
+			<li>Politely instruct them to move</li>
+			<li>Do not move the vehicle until safe</li>
+			<li>Repeat instructions calmly if ignored</li>
+		</ul>
+
+		<h2>5. When to Stop the Vehicle</h2>
+		<p>You should stop the vehicle if:</p>
+		<ul>
+			<li>A passenger threatens safety</li>
+			<li>There is a physical altercation</li>
+			<li>Someone is interfering with driving</li>
+			<li>Abuse becomes severe</li>
+		</ul>
+		<p>Always stop in a safe location and follow company procedures.</p>
+
+		<h2>6. When to Call for Assistance</h2>
+		<p>Contact control or emergency services if:</p>
+		<ul>
+			<li>A passenger becomes violent</li>
+			<li>You feel unsafe</li>
+			<li>There is a medical emergency</li>
+			<li>A crime is taking place</li>
+		</ul>
+		<p>Your safety comes first.</p>
+
+		<h2>7. Recording Incidents</h2>
+		<p>Accurate reporting protects you and your operator. Include:</p>
+		<ul>
+			<li>Time and location</li>
+			<li>Passenger description</li>
+			<li>What was said or done</li>
+			<li>Actions you took</li>
+			<li>Witness details if available</li>
+		</ul>
+		<p>Never exaggerate — stick to facts.</p>
+
+		<!-- ICON + FINAL HEADER -->
+		<div class="section-header">
+			<img src="/static/assets/Protecting_licence.png" class="article-header-image" alt="Article Icon">
+			<h2>8. Protecting Your Licence</h2>
+		</div>
+
+		<p>
+			Professional behaviour during incidents is essential. DVSA, operators, and police all expect:
+		</p>
+		<ul>
+			<li>Calm decision‑making</li>
+			<li>Safe stopping</li>
+			<li>Clear communication</li>
+			<li>Accurate reporting</li>
+		</ul>
+		<p>
+			A well‑handled incident shows professionalism and strengthens your position if reviewed later.
+		</p>
+
+		<h2>9. Final Thoughts</h2>
+		<p>
+			Difficult passengers are part of the job, but they don’t need to escalate. With calm communication,
+			clear boundaries, and proper reporting, you can manage challenging situations safely and confidently.
+		</p>
+		<p>
+			Your role is vital — you keep passengers safe, services running, and the public moving.
+		</p>
+
+{% endblock %}

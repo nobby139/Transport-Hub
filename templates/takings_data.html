@@ -1,0 +1,46 @@
+{% set show_bus2 = daily_weekly_takings_data | selectattr("bus2", "gt", 0) | list | length > 0 %}
+{% set show_bus3 = daily_weekly_takings_data | selectattr("bus3", "gt", 0) | list | length > 0 %}
+
+<table class="table table-bordered table-sm align-middle">
+	<thead class="table-dark">
+		<tr>
+			<th>Day</th>
+			<th class="text-center">Bus 1 (£)</th>
+
+			{% if show_bus2 %}
+				<th class="text-center">Bus 2 (£)</th>
+			{% endif %}
+
+			{% if show_bus3 %}
+				<th class="text-center">Bus 3 (£)</th>
+			{% endif %}
+
+			<th class="text-center">Total (£)</th>
+		</tr>
+	</thead>
+
+	<tbody>
+		{% for item in daily_weekly_takings_data %}
+		<tr>
+			<td><strong>{{ item.day }}</strong></td>
+
+			<td class="text-center">£{{ "%.2f"|format(item.bus1) }}</td>
+
+			{% if show_bus2 %}
+				<td class="text-center">£{{ "%.2f"|format(item.bus2) }}</td>
+			{% endif %}
+
+			{% if show_bus3 %}
+				<td class="text-center">£{{ "%.2f"|format(item.bus3) }}</td>
+			{% endif %}
+
+			<td class="text-center">
+				£{{ "%.2f"|format(item.bus1 + item.bus2 + item.bus3) }}
+			</td>
+		</tr>
+		{% endfor %}
+	</tbody>
+
+
+</table>
+

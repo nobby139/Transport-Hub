@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 200" width="100%" height="100%">
+    <defs>
+        <linearGradient id="bg-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#12081f"/>
+            <stop offset="50%" stop-color="#2d132c"/>
+            <stop offset="100%" stop-color="#1a0033"/>
+        </linearGradient>
+        <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="3" result="blur" />
+            <feComposite in="SourceGraphic" in2="blur" operator="over" />
+        </filter>
+    </defs>
+
+    <!-- Background Banner -->
+    <rect width="800" height="200" rx="12" fill="url(#bg-grad)" stroke="#ff7518" stroke-width="3"/>
+
+    <!-- Glowing Full Moon -->
+    <circle cx="700" cy="65" r="40" fill="#f39c12" opacity="0.85" filter="url(#glow)"/>
+    <circle cx="690" cy="55" r="38" fill="#f1c40f" opacity="0.9"/>
+
+    <!-- Spooky Ground Hills -->
+    <path d="M0,200 L0,170 Q200,140 400,165 Q600,190 800,160 L800,200 Z" fill="#0b0410"/>
+
+    <!-- Flying Bats -->
+    <g fill="#ffffff" opacity="0.85">
+        <!-- Bat 1 -->
+        <path d="M120,60 Q127,50 135,60 Q127,55 120,60 Q113,55 105,60 Q113,50 120,60 Z"/>
+        <!-- Bat 2 -->
+        <path d="M160,40 Q165,32 172,40 Q165,36 160,40 Q155,36 148,40 Q155,32 160,40 Z"/>
+        <!-- Bat 3 -->
+        <path d="M630,45 Q636,38 642,45 Q636,41 630,45 Q624,41 618,45 Q624,38 630,45 Z"/>
+    </g>
+
+    <!-- Main Headings -->
+    <text x="400" y="85" font-family="'Segoe UI', Helvetica, Arial, sans-serif" font-size="34" font-weight="bold" fill="#ff7518" text-anchor="middle" filter="url(#glow)">
+        🎃 SPOOKY SEASON 🎃
+    </text>
+    
+    <text x="400" y="130" font-family="'Segoe UI', Helvetica, Arial, sans-serif" font-size="20" font-weight="600" fill="#ffffff" text-anchor="middle">
+        Happy Halloween from UK Transport Hub
+    </text>
+
+    <!-- Subtext -->
+    <text x="400" y="160" font-family="'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" fill="#b2bec3" text-anchor="middle">
+        Watch out for ghouls, ghosts, and delayed buses on your routes!
+    </text>
+</svg>

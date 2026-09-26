@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% set home_target = "driver_dashboard" %}
+{% set is_transport_hub = True %}
+{% set page_title = "UK Transport Hub" %}
+
+{% block content %}
+
+
+
+<div class="article-container">
+
+    <a href="/driver-information" class="back-link">← Back to Articles</a>
+    
+    <div class="article-nav">
+        {% if prev_url %}
+            <a class="nav-prev" href="{{ prev_url }}">← Previous</a>
+        {% endif %}
+        {% if next_url %}
+            <a class="nav-next" href="{{ next_url }}">Next →</a>
+        {% endif %}
+    </div>  
+
+    <p class="article-date">
+        Published: {{ published }}
+        {% if updated %}
+            • Last updated: {{ updated }}
+        {% endif %}
+    </p>
+
+    <!-- MAIN HEADER ICON (dynamic) -->
+    <div class="section-header">
+        <img src="/static/assets/Blue_Bus.png" 
+             class="article-header-image" 
+             alt="Article Icon">
+        <h1>Welcome to the Drivers Hub</h1>
+    </div>
+
+    <h2>1. Why the Drivers Hub Exists</h2>
+    <p>
+        The Drivers Hub is your central space for everything you need as a professional
+        bus or coach driver. It brings together tools, updates, resources, and support
+        into one organised platform designed to make your working life easier.
+    </p>
+	<p>
+        Drivers often deal with scattered information, outdated documents, and multiple
+        systems. The Hub brings everything together into one reliable place, helping you
+        find what you need quickly and easily.
+    </p>
+
+    <!-- SECTION ICON (stays exactly where YOU want it) -->
+    <div class="section-header">
+        <img src="/static/assets/Document_corner.png" 
+             alt="Document Icon" 
+             class="what-icon">
+        <h2>2. What You Can Do Here</h2>
+    </div>
+
+    <p>Read articles written specifically for drivers, covering safety, updates, and industry topics.</p>
+    <p>Access helpful resources such as guides, forms, and practical information.</p>
+    <p>Stay informed with new content added regularly.</p>
+    <p>Look forward to upcoming features like messaging, profiles, and downloadable tools.</p>
+
+    <h2>3. Who the Hub Is For</h2>
+    <p>
+        The Drivers Hub is designed for bus and coach drivers across the UK. Whether
+        you're new to the industry or have years of experience, the Hub provides a
+        professional space built around your day‑to‑day needs.
+    </p>
+
+    <h2>4. What’s Coming Next</h2>
+    <p>
+        More features will be added over time, including driver profiles, messaging,
+        downloadable documents, and expanded article categories to support you even
+        further.
+    </p>
+
+    <!-- FINAL SECTION ICON (stays exactly where YOU want it) -->
+    <div class="section-header">
+        <img src="/static/assets/Thoughts.png" class="thinking-icon">
+        <h2>5. Final Thoughts</h2>
+    </div>
+
+    <p>
+        The Drivers Hub is here to support you, keep you informed, and make your working
+        life smoother. Explore the platform, read the articles, and keep an eye out for
+        new updates as the Hub continues to grow.
+    </p>
+
+{% endblock %}

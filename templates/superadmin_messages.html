@@ -1,0 +1,200 @@
+{% extends "base.html" %}
+{% set admin = admin %}
+{% set superadmin = superadmin %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='system_chat.css') }}">
+
+<a href="javascript:history.back()" class="back-btn">← Back</a>
+
+<h2>
+    Platform Messages —
+
+    {% if target == 'all' %}
+        Admin to All
+
+    {% elif target == 'driver' %}
+        Admin to Drivers
+
+    {% elif target == 'enthusiast' %}
+        Admin to Enthusiasts
+
+    {% elif user %}
+        {% if user.level == 2 %}
+            SuperAdmin to Admin {{ user.first_name }} {{ user.last_name }}
+        {% else %}
+            Admin to {{ user.first_name }} {{ user.last_name }}
+        {% endif %}
+
+    {% else %}
+        {{ target|capitalize }}
+
+    {% endif %}
+</h2>
+
+<h2>Select User to Chat With</h2>
+
+<!-- SUPERADMIN CATEGORY DROPDOWN -->
+{% if current_user.level == 1 %}
+    <select id="category_select" onchange="openCategory()" style="width: 200px;">
+        <option value="">-- Select Category --</option>
+        <option value="user" {% if target in ['user', 'admin'] %}selected{% endif %}>User</option>
+        <option value="enthusiast" {% if target == 'enthusiast' %}selected{% endif %}>Enthusiast</option>
+        <option value="driver" {% if target == 'driver' %}selected{% endif %}>Driver</option>
+        <option value="admin" {% if target == 'admin' %}selected{% endif %}>Admin</option>
+        <option value="all" {% if target == 'all' %}selected{% endif %}>All</option>
+    </select>
+{% endif %}
+
+<!-- SECOND DROPDOWN: ONLY FOR USER + ADMIN -->
+{% if target in ['user', 'admin'] and user is none %}
+    <br><br>
+
+    <label for="userSelect">Select Admin/User:</label>
+    <select id="userSelect"
+            onchange="window.location.href='/superadmin/messages/' + this.value;"
+            style="width: 200px;">
+        <option value="">-- Select User --</option>
+
+        {% for u in users %}
+            <option value="{{ u.id }}">
+                {{ u.first_name }} {{ u.last_name }}
+            </option>
+        {% endfor %}
+    </select>
+{% endif %}
+
+<div class="chat-outer">
+    <div class="chat-container">
+
+        <!-- Messages -->
+        <div class="messages-container">
+            {% for msg in messages %}
+                <div class="chat-message
+                    {% if msg.sender.level in [1,2] %}
+                        admin-msg
+                    {% else %}
+                        user-msg
+                    {% endif %}
+                ">
+                    <div class="msg-header">
+                        {% if msg.sender.id == current_user.id %}
+                            {% if user and user.level == 2 %}
+                                SuperAdmin
+                            {% else %}
+                                Admin
+                            {% endif %}
+                        {% else %}
+                            {% if msg.sender.level == 1 %}
+                                SuperAdmin
+                            {% elif msg.sender.level == 2 %}
+                                Admin
+                            {% else %}
+                                {{ msg.sender.first_name }} {{ msg.sender.last_name }}
+                            {% endif %}
+                        {% endif %}
+                        <span class="timestamp">{{ msg.created_at.strftime("%d/%m/%Y %H:%M") }}</span>
+                    </div>
+
+                    <div class="msg-body">{{ msg.body }}</div>
+
+                    <!-- READ/UNREAD INDICATOR -->
+                    <div class="msg-indicator">
+                        {% if admin and superadmin and msg.sender_id in [admin.id, superadmin.id] %}
+                            Message Sent
+                        {% else %}
+                            {% if not msg.read %}
+                                <button class="mark-read-btn" onclick="markRead({{ msg.id }})">Mark as Read</button>
+                            {% else %}
+                                Message Read
+                            {% endif %}
+                        {% endif %}
+                    </div>
+
+                </div>
+            {% endfor %}
+        </div> <!-- END messages-container -->
+
+        <!-- Compose Message -->
+        <div class="input-container">
+            <label for="subject_select">Subject</label>
+            <select id="subject_select">
+                <option value="">-- Select Subject --</option>
+                <option value="Suspension Notice">Suspension Notice</option>
+                <option value="Role Change">Role Change</option>
+                <option value="System Update">System Update</option>
+                <option value="Weekly Takings Issue">Weekly Takings Issue</option>
+                <option value="Driver Conduct">Driver Conduct</option>
+                <option value="General Message">General Message</option>
+                <option value="Takings Query">Takings Query</option>
+                <option value="System Help">System Help</option>
+                <option value="Report an Issue">Report an Issue</option>
+                <option value="Drivers Log">Drivers Log</option>
+                <option value="Bus & Coach Enthusiast">Bus & Coach Enthusiast</option>
+                <option value="Other">Other (Custom)</option>
+            </select>
+
+            <div id="custom_subject_container" style="display:none;">
+                <label for="custom_subject">Custom Subject</label>
+                <input type="text" id="custom_subject" placeholder="Enter custom subject">
+            </div>
+
+            <label for="chat_body">Message</label>
+            <textarea id="chat_body" placeholder="Type your message..."></textarea>
+
+            <button onclick="sendChat({{ user.id if user else 'null' }})">Send</button>
+        </div> <!-- END input-container -->
+
+    </div> <!-- END chat-container -->
+</div> <!-- END chat-outer -->
+
+<script>
+document.getElementById("subject_select").addEventListener("change", function() {
+    const customBox = document.getElementById("custom_subject_container");
+    customBox.style.display = (this.value === "Other") ? "block" : "none";
+});
+
+function sendChat(receiver_id) {
+    const body = document.getElementById("chat_body").value;
+    const subjectSelect = document.getElementById("subject_select").value;
+    const customSubject = document.getElementById("custom_subject").value;
+
+    if (!body.trim()) {
+        alert("Please enter a message.");
+        return;
+    }
+
+    const finalSubject = subjectSelect === "Other" ? customSubject : subjectSelect;
+
+    fetch("/send_chat_message", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+            body: body,
+            receiver_id: receiver_id,
+            target: "{{ target }}",
+            title: finalSubject
+        })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById("chat_body").value = "";
+            document.getElementById("subject_select").selectedIndex = 0;
+            document.getElementById("custom_subject").value = "";
+
+            location.reload();
+        } else {
+            alert(data.error || "Failed to send message.");
+        }
+    });
+}
+
+function openCategory() {
+    const cat = document.getElementById("category_select").value;
+    if (cat) {
+        window.location.href = "/superadmin/messages/" + cat;
+    }
+}
+</script>
+{% endblock %}

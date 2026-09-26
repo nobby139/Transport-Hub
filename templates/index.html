@@ -1,0 +1,446 @@
+{% extends "base.html" %}
+{% set page_title = "UK Transport Hub" %}
+{% set is_drivers_hub = False %}
+
+{% block content %}
+
+<section class="welcome-section">
+    <h2>Welcome to Transport Hub</h2>
+    <p>Your gateway to the world of buses, coaches, and the people who drive and love them.</p>
+
+    <p>
+        Get started by creating an account or logging in.  
+        You can choose your roles (Driver and/or Enthusiast) during registration.
+    </p>
+</section>
+
+<section class="start-section">
+    <div class="button-group">
+        <a class="btn" href="/create_account">Create Account</a>
+        <a class="btn" href="/login">Login</a>
+    </div>
+</section>
+
+<section class="useful-links" style="margin-top: 30px;">
+    <h2>Useful Tools for Drivers</h2>
+
+
+	<div class="dashboard-grid">
+
+		<a class="dash-card" href="https://bustimes.org" target="_blank">
+			<h3>BusTimes.org</h3>
+			<p>Live bus tracking and real-time vehicle locations.</p>
+		</a>
+
+		<a class="dash-card" href="https://www.trafficengland.com/" target="_blank">
+			<h3>Traffic Updates</h3>
+			<p>Live congestion reports and travel delays.</p>
+		</a>
+
+		<a class="dash-card" href="https://one.network" target="_blank">
+			<h3>Road Closures</h3>
+			<p>Live roadworks and closure information.</p>
+		</a>
+
+		<a class="dash-card" href="https://www.gov.uk/guidance/the-highway-code" target="_blank">
+			<h3>The Highway Code</h3>
+			<p>Official rules of the road for all UK road users.</p>
+		</a>
+
+	</div>
+
+<!-- ========================================== -->
+<!-- ADD THE BUS DRIVER SCENARIO SECTION HERE   -->
+<!-- ========================================== -->
+<section class="scenario-section">
+    <div class="scenario-container-inner">
+        <h2 class="text-center mb-2" style="color: #1E88E5; font-weight: 700;">Operational Realities: Navigating Urban Congestion</h2>
+        <p class="text-center text-muted mb-5">An insight into the everyday scheduling challenges faced by public service vehicle drivers.</p>
+
+        <!-- Step 1: Driver at the Stop -->
+        <div class="scenario-row">
+            <div class="scenario-avatar">
+                <i class="fas fa-bus-alt"></i>
+                <p>Bus Driver</p>
+            </div>
+            <div class="speech-bubble left-tail">
+                <p style="margin: 0;">Holding position at a designated stop with the indicator active, waiting for a safe gap in traffic to merge back into the flow from a constrained bus bay or tight junction.</p>
+            </div>
+        </div>
+
+        <!-- Step 2: Passenger Reaction (Reversed) -->
+        <div class="scenario-row reverse">
+            <div class="scenario-avatar">
+                <i class="fas fa-users"></i>
+                <p>Passengers</p>
+            </div>
+            <div class="speech-bubble right-tail" style="background-color: #fffdf4;">
+                <p style="margin: 0;"><em>"Why is this service running behind schedule? We are losing time!"</em></p>
+            </div>
+        </div>
+
+        <!-- Step 3: Professional Context / Reality Check -->
+        <div class="scenario-row">
+            <div class="scenario-avatar">
+                <i class="fas fa-clipboard-user" style="color: #2e7d32;"></i>
+                <p>The Reality</p>
+            </div>
+            <div class="speech-bubble left-tail" style="background-color: #f1f8e9; border-color: #c8e6c9;">
+                <p style="margin: 0;"><strong>Driver Response:</strong> "Timetable adherence relies heavily on cooperation from other road users. When private vehicles and cyclists do not yield space for large vehicles to pull away from stops or navigate restricted lanes, cumulative delays become unavoidable across the entire route."</p>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- ========================================== -->
+
+    </div>
+<!-- END OF PREVIOUS SECTION -->
+</section>
+
+<section class="petition-section">
+    <h2>Support Cooler, Safer Buses in Hot Weather</h2>
+
+    <p>
+        Extreme heat affects everyone onboard — passengers, children, elderly travellers, 
+        and drivers working long shifts. Many buses and coaches still operate without 
+        adequate cooling or ventilation, creating uncomfortable and potentially unsafe 
+        conditions during hot weather.
+    </p>
+
+    <p>
+        A public petition is calling for improved cooling systems on public service 
+        vehicles to ensure safer, healthier travel for all. You can read and sign the 
+        petition below.
+    </p>
+
+    <a class="petition-btn" href="https://petition.parliament.uk/petitions/771285" target="_blank">
+        View & Sign the Petition
+    </a>
+</section>
+
+
+
+<!-- ============================
+     SCROLLABLE RULE NUMBER CONTAINER
+     ============================ -->
+<div class="rule-container">
+
+	<h2>Most common Highway Codes for large vehicles</h2>                                      <h2>
+	***Rule Numbers***</h2>
+	<p class="quirky-sub">
+		The rules every car driver *thinks* they know — but large vehicles prove otherwise.
+		Pick a topic below and see the most common mistakes people make around buses, coaches, and HGVs.
+	</p>
+	<h3>**Please see below container for each fully written rule**</h3>
+
+
+    <ul>
+        <li><a href="javascript:void(0)" onclick="toggleRule('rule1')" class="rule-link">Parking Too Close Together — Rules 243, 242, 248</a></li>
+        <li><a href="javascript:void(0)" onclick="toggleRule('rule2')" class="rule-link">Pulling Out in Front of a Bus — Rules 170, 169, 126</a></li>
+        <li><a href="javascript:void(0)" onclick="toggleRule('rule3')" class="rule-link">Not Understanding Mirror Reach — Rules 163, 67</a></li>
+        <li><a href="javascript:void(0)" onclick="toggleRule('rule4')" class="rule-link">Bus & HGV Blind Spots — Rules 160, 163</a></li>
+        <li><a href="javascript:void(0)" onclick="toggleRule('rule5')" class="rule-link">Cutting Across a Bus at a Roundabout — Rules 186, 187</a></li>
+        <li><a href="javascript:void(0)" onclick="toggleRule('rule6')" class="rule-link">Overtaking a Bus Signalling to Pull Out — Rules 163, 38</a></li>
+        <li><a href="javascript:void(0)" onclick="toggleRule('rule7')" class="rule-link">Stopping Too Close Behind a Bus — Rules 151, 126</a></li>
+        <li><a href="javascript:void(0)" onclick="toggleRule('rule8')" class="rule-link">Not Realising Wide Turns — Rules 182, 187</a></li>
+        <li><a href="javascript:void(0)" onclick="toggleRule('rule9')" class="rule-link">Cutting In Front at Stops or Laybys — Rules 151, 169</a></li>
+        <li><a href="javascript:void(0)" onclick="toggleRule('rule10')" class="rule-link">Not Understanding Bus Acceleration Delay — Rules 126, 151, 169, 170</a></li>
+        <li><a href="javascript:void(0)" onclick="toggleRule('rule11')" class="rule-link">Forcing a Bus to Stop in a Narrow Road — Rules 170, 169, 242</a></li>
+        <li><a href="javascript:void(0)" onclick="toggleRule('rule12')" class="rule-link">Cyclists Continuing on Narrow Roads — Rules 66, 72, 169</a></li>
+        <li><a href="javascript:void(0)" onclick="toggleRule('rule13')" class="rule-link">Farm Trailer Impacting Bus — Rules 215, 221, 154</a></li>
+    </ul>
+
+</div>
+
+<script>
+function toggleRule(id) {
+    // Close all rule dropdowns
+    document.querySelectorAll('.rule-dropdown').forEach(box => {
+        box.style.display = 'none';
+    });
+
+    // Open the selected one
+    const selected = document.getElementById(id);
+    selected.style.display = 'block';
+}
+</script>
+
+
+<!-- ============================
+     DROPDOWN WRITE-UP CONTAINERS
+     ============================ -->
+
+<div id="rule1" class="rule-dropdown" style="display:none;">
+    <h3>1. Parking Too Close Together (Creates a Tight Chicane)</h3>
+    <p>When cars park on both sides of a narrow road, they unintentionally create a tight chicane...</p>
+    <ul>
+        <li>Leave at least <strong>1 metre</strong> between parked cars on opposite sides of the road.</li>
+        <li>Never park directly opposite another vehicle on a narrow street.</li>
+        <li>Always consider whether a fire engine could get through.</li>
+    </ul>
+</div>
+
+<div id="rule2" class="rule-dropdown" style="display:none;">
+    <h3>2. Pulling Out in Front of a Bus or Large Vehicle</h3>
+    <p>Many drivers underestimate how long it takes a heavy vehicle to stop...</p>
+    <h4>Stopping Distances for Large Vehicles (Dry / Wet / Snow/Ice)</h4>
+    <table class="table table-bordered" style="max-width: 850px;">
+        {{ stopping_distance_table|safe }}
+    </table>
+    <ul>
+        <li>Never pull out unless you can reach full speed safely.</li>
+        <li>Large vehicles need significantly more stopping distance.</li>
+        <li>Passengers can be thrown forward if forced to brake suddenly.</li>
+    </ul>
+</div>
+
+<div id="rule3" class="rule-dropdown" style="display:none;">
+    <h3>3. Not Understanding Mirror Reach</h3>
+    <p>Bus and large vehicle mirrors extend far beyond the body of the vehicle...</p>
+    <ul>
+        <li>Always give buses and large vehicles extra side clearance.</li>
+        <li>Never squeeze past a bus at a stop.</li>
+        <li>Mirror arms can extend 30–50cm beyond the vehicle body.</li>
+    </ul>
+</div>
+
+<div id="rule4" class="rule-dropdown" style="display:none;">
+    <h3>4. Sitting in a Bus or HGV Blind Spot (The “No‑See Zone”)</h3>
+    <p>Large vehicles have significant blind spots along the sides, behind, and close to the front...</p>
+    <ul>
+        <li>Avoid driving directly alongside a bus or HGV.</li>
+        <li>Never sit close behind a large vehicle.</li>
+        <li>If you cannot see the driver’s mirrors, they cannot see you.</li>
+    </ul>
+</div>
+
+<div id="rule5" class="rule-dropdown" style="display:none;">
+    <h3>5. Cutting Across a Bus or Large Vehicle at a Roundabout</h3>
+    <p>Buses and HGVs need far more time and space to slow down...</p>
+    <ul>
+        <li>Never assume a large vehicle can slow down quickly.</li>
+        <li>Give buses and HGVs priority when they are already on the roundabout.</li>
+        <li>Wait for a clear gap before entering.</li>
+    </ul>
+</div>
+
+<div id="rule6" class="rule-dropdown" style="display:none;">
+    <h3>6. Overtaking a Bus or Large Vehicle While It’s Signalling to Pull Out</h3>
+    <p>When a bus signals to pull out from a stop, drivers must give way...</p>
+    <ul>
+        <li>Always allow a bus or large vehicle to pull out when it signals.</li>
+        <li>Do not accelerate to block or overtake.</li>
+        <li>Large vehicles rejoin traffic frequently — be patient.</li>
+    </ul>
+</div>
+
+<div id="rule7" class="rule-dropdown" style="display:none;">
+    <h3>7. Stopping Too Close Behind a Bus or Large Vehicle at a Stop</h3>
+    <p>Stopping too close behind a bus traps it at the stop...</p>
+    <ul>
+        <li>Leave at least a full car length behind a stopped bus or HGV.</li>
+        <li>Allow large vehicles space to angle out safely.</li>
+        <li>Do not block bus stops or laybys.</li>
+    </ul>
+</div>
+
+<div id="rule8" class="rule-dropdown" style="display:none;">
+    <h3>8. Not Realising How Wide a Bus or Large Vehicle Turns</h3>
+    <p>Buses and HGVs make wide turns. The rear end can swing out significantly...</p>
+    <ul>
+        <li>Give large vehicles extra space at junctions and corners.</li>
+        <li>Never stop alongside a bus or HGV that is signalling to turn.</li>
+        <li>Stay well back and allow the manoeuvre to complete.</li>
+    </ul>
+</div>
+
+<div id="rule9" class="rule-dropdown" style="display:none;">
+    <h3>9. Cutting In Front of a Bus or Large Vehicle at a Stop or Layby</h3>
+    <p>Some drivers accelerate to get ahead and then brake sharply...</p>
+    <ul>
+        <li>Never accelerate to get in front of a bus approaching a stop.</li>
+        <li>Allow large vehicles space to slow down and position safely.</li>
+        <li>Buses may have standing passengers who can be thrown forward.</li>
+    </ul>
+</div>
+
+<div id="rule10" class="rule-dropdown" style="display:none;">
+    <h3>10. Not Understanding Bus Acceleration Delay</h3>
+    <p>
+        Buses and large vehicles do not accelerate as quickly as cars. Their size, weight, and gearing mean they take 
+        longer to build speed, especially when pulling away from stops, junctions, or roundabouts. Many drivers misjudge 
+        this delay and attempt risky manoeuvres around a bus that is still gathering speed.
+    </p>
+    <ul>
+        <li>Large vehicles take longer to accelerate from a standstill.</li>
+        <li>Never assume a bus can match your speed immediately after pulling out.</li>
+        <li>Allow extra space and time when following a bus leaving a stop or junction.</li>
+    </ul>
+</div>
+
+<div id="rule11" class="rule-dropdown" style="display:none;">
+    <h3>11. Being Forced to Stop by a Driver Who Failed to Give Way</h3>
+    <p>A van continued driving into a narrow section even though the bus was already committed...</p>
+    <ul>
+        <li>Never expect a bus or large vehicle to drive onto the pavement.</li>
+        <li>Wait at the wider point and allow the larger vehicle to pass.</li>
+        <li>Large vehicles cannot reverse easily once committed.</li>
+    </ul>
+</div>
+
+<div id="rule12" class="rule-dropdown" style="display:none;">
+	<h3>12. Cyclists Continuing on Narrow Roads</h3>
+	<p>Cyclists may legally use narrow roads, but the Highway Code expects all road users — including cyclists — to avoid creating unsafe situations. On roads where large vehicles cannot pass safely, cyclists should allow following traffic to overtake when it is safe to do so. This helps prevent pressure, close passes, and unsafe manoeuvres.</p>
+
+	<ul>
+		<li>Large vehicles including buses, HGV's, agricultural machinery, and trailers often require more space to pass safely.</li>
+		<li>When a road becomes too narrow for safe overtaking, all road users should adjust their position or stop when appropriate.</li>
+		<li>Allowing following traffic to pass when safe helps reduce risk and prevents unsafe overtaking attempts.</li>
+	</ul>
+</div>
+
+<div id="rule13" class="rule-dropdown" style="display:none;">
+    <h3>13. Farm Trailer Impacting the Front of the Bus</h3>
+    <p>
+        In this incident, a farm trailer detached and swung into the front corner of the bus.
+        The angle of the trailer and the narrow road layout made it impossible for the bus to avoid the impact.
+        These images help illustrate how agricultural machinery can behave unpredictably on rural roads.
+    </p>
+
+    <p style="color:#555; font-size:0.9rem; margin-bottom:15px;">
+        Click any image to open it in a new window.
+    </p>
+
+
+    <!-- INCIDENT IMAGE CARDS FOR RULE 13 -->
+    <div class="card-grid" style="
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 20px;
+        margin-top: 20px;
+    ">
+
+        <!-- CARD 1 -->
+        <div class="incident-card" style="
+            background: #fff;
+            border-left: 4px solid #1E88E5;
+            padding: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            text-align: center;
+        " onclick="window.open('{{ url_for('static', filename='assets/accident_images/extended_rear_view.jpg') }}','_blank')">
+            <img src="{{ url_for('static', filename='assets/accident_images/extended_rear_view.jpg') }}"
+                 alt="Bus and JCB at incident scene"
+                 style="width:100%; max-width:150px; border-radius:4px;">
+            <h5 style="margin-top:10px;">Scene Overview</h5>
+            <p style="font-size:0.85rem; color:#555;">Initial view showing bus and JCB position.</p>
+        </div>
+
+        <!-- CARD 2 -->
+        <div class="incident-card" style="
+            background: #fff;
+            border-left: 4px solid #1E88E5;
+            padding: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            text-align: center;
+        " onclick="window.open('{{ url_for('static', filename='assets/accident_images/rear_view.jpg') }}','_blank')">
+            <img src="{{ url_for('static', filename='assets/accident_images/rear_view.jpg') }}"
+                 alt="Trailer misaligned between bus and JCB"
+                 style="width:100%; max-width:150px; border-radius:4px;">
+            <h5 style="margin-top:10px;">Trailer Position</h5>
+            <p style="font-size:0.85rem; color:#555;">Shows trailer angle after detachment.</p>
+        </div>
+
+        <!-- CARD 3 -->
+        <div class="incident-card" style="
+            background: #fff;
+            border-left: 4px solid #1E88E5;
+            padding: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            text-align: center;
+        " onclick="window.open('{{ url_for('static', filename='assets/accident_images/front_view.jpg') }}','_blank')">
+            <img src="{{ url_for('static', filename='assets/accident_images/front_view.jpg') }}"
+                 alt="Front damage to bus"
+                 style="width:100%; max-width:150px; border-radius:4px;">
+            <h5 style="margin-top:10px;">Front Damage</h5>
+            <p style="font-size:0.85rem; color:#555;">Impact area at driver’s corner.</p>
+        </div>
+
+        <!-- CARD 4 -->
+        <div class="incident-card" style="
+            background: #fff;
+            border-left: 4px solid #1E88E5;
+            padding: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            text-align: center;
+        " onclick="window.open('{{ url_for('static', filename='assets/accident_images/side_view.jpg') }}','_blank')">
+            <img src="{{ url_for('static', filename='assets/accident_images/side_view.jpg') }}"
+                 alt="Side view of trailer"
+                 style="width:100%; max-width:150px; border-radius:4px;">
+            <h5 style="margin-top:10px;">Side View</h5>
+            <p style="font-size:0.85rem; color:#555;">Trailer and JCB alignment after impact.</p>
+        </div>
+
+        <!-- CARD 5 -->
+        <div class="incident-card" style="
+            background: #fff;
+            border-left: 4px solid #1E88E5;
+            padding: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            text-align: center;
+        " onclick="window.open('{{ url_for('static', filename='assets/accident_images/inside_cab.jpg') }}','_blank')">
+            <img src="{{ url_for('static', filename='assets/accident_images/inside_cab.jpg') }}"
+                 alt="Inside cab"
+                 style="width:100%; max-width:150px; border-radius:4px;">
+            <h5 style="margin-top:10px;">Driver’s Cab</h5>
+            <p style="font-size:0.85rem; color:#555;">Interior view showing cab damage.</p>
+        </div>
+
+        <!-- CARD 6 -->
+        <div class="incident-card" style="
+            background: #fff;
+            border-left: 4px solid #1E88E5;
+            padding: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            text-align: center;
+        " onclick="window.open('{{ url_for('static', filename='assets/accident_images/bus_damage.jpg') }}','_blank')">
+            <img src="{{ url_for('static', filename='assets/accident_images/bus_damage.jpg') }}"
+                 alt="Close-up of bus damage"
+                 style="width:100%; max-width:150px; border-radius:4px;">
+            <h5 style="margin-top:10px;">Close‑Up Damage</h5>
+            <p style="font-size:0.85rem; color:#555;">Detailed view of structural impact.</p>
+        </div>
+		
+		</div> <!-- IMPORTANT: This closes the grid container -->
+		
+		<!-- IMPORTANT NOTICE #1 (only shows when Rule 13 is open) -->
+		<div class="important-notice" style="margin-top: 25px; font-size: 0.95rem; color: #555;">
+			<strong>Important Notice:</strong> The incidents and images shown on this website are provided strictly for 
+			road‑safety awareness and public education. They do not assign blame, responsibility, or liability to any 
+			individual, company, or organisation. All photographs are used only to illustrate general types of situations 
+			drivers may encounter on public roads, including interactions with agricultural machinery, trailers, and 
+			other large vehicles.
+
+			These examples are not intended to influence, comment on, or interfere with any ongoing insurance or legal 
+			processes. Any active claims relating to these incidents remain separate and independent from the content 
+			displayed here.
+		</div>
+	</div>
+
+	<!-- IMPORTANT NOTICE #2 (global site-wide notice) -->
+	<div class="legal-note" style="margin-top: 20px; font-size: 0.95rem; color: #555;">
+		<strong>Important Notice:</strong> All road‑safety examples shown on Transport Hub are provided solely for public education.
+		They do not assign blame, responsibility, or liability to any individual, company, or organisation. Images and descriptions
+		illustrate general types of situations drivers may encounter on public roads. They are not intended to influence, comment on,
+		or interfere with any ongoing insurance or legal processes. Any active claims remain entirely separate from the content
+		displayed here.
+	</div>
+
+{% endblock %}
+
+

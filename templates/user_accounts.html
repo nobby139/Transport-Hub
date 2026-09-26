@@ -1,0 +1,575 @@
+{% extends "base.html" %}
+{% set page_title = "UK Transport Hub" %}
+{% set home_target = "home" %}
+{% set is_drivers_hub = False %}
+
+{% block content %}
+<style>
+/* ============================
+   USER CONTROLS (TOP SECTION)
+   ============================ */
+.user-controls {
+    text-align: center;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.user-controls select,
+.user-controls input,
+.user-controls button {
+    margin: 8px;
+}
+
+.user-controls h3,
+.user-controls p,
+.user-controls label {
+    text-align: center;
+}
+
+#newUserEmail {
+    width: 80%;
+    padding: 10px;
+    font-size: 16px;
+    margin-bottom: 10px;
+}
+
+
+/* ============================
+   USER LIST CONTAINER
+   ============================ */
+.user-list-container {
+    width: 70%;
+    margin: 20px auto;
+    max-height: 350px;
+    overflow-y: auto;
+
+    background: #ffffff;
+    border: 1px solid #d0d0d0;
+    border-radius: 10px;
+
+    padding: 0; /* header + rows handle spacing */
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+#userSearch {
+    width: 95%;
+    padding: 10px;
+    margin: 15px auto;
+    display: block;
+
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 15px;
+}
+
+
+/* ============================
+   HEADER ROW
+   ============================ */
+.user-header {
+    display: grid;
+    grid-template-columns: 1fr 1.3fr 1fr 1.2fr;
+
+    padding: 14px 16px;
+    font-weight: 600;
+    font-size: 15px;
+
+    background: #f2f2f2;
+    border-bottom: 2px solid #bcbcbc;
+    border-radius: 10px 10px 0 0;
+}
+
+.user-header span {
+    white-space: nowrap;
+}
+
+
+/* ============================
+   USER ROWS
+   ============================ */
+.user-row {
+    display: grid;
+    grid-template-columns: 1fr 1.3fr 1fr 1.2fr;
+
+    padding: 14px 16px;
+    border-bottom: 1px solid #e0e0e0;
+
+    background: #fff;
+    transition: background 0.15s ease;
+}
+
+.user-row:hover {
+    background: #f9f9f9;
+}
+
+.user-row span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 18px;
+}
+
+
+/* ============================
+   ROLE TAGS (INSIDE ONE CELL)
+   ============================ */
+.roles-cell {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.role-tag {
+    padding: 4px 8px;
+    background: #f7f7f7;
+    border: 1px solid #cfcfcf;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+/* ============================
+   USER STATS BAR (ONE ROW)
+   ============================ */
+.stats-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    background: #f7f7f7;
+    padding: 15px 20px;
+    margin: 20px auto;
+    width: 95%;
+
+    border: 1px solid #d0d0d0;
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    min-width: 110px;
+}
+
+.stat-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #555;
+}
+
+.stat-value {
+    font-size: 22px;
+    font-weight: 700;
+    color: #1e88e5;
+    margin-top: 4px;
+}
+
+</style>
+
+<a href="javascript:history.back()" class="back-btn">← Back</a>
+
+<h2>User Accounts</h2>
+<!-- ============================
+     USER STATISTICS OVERVIEW
+     ============================ -->
+<div class="stats-bar">
+
+    <div class="stat-item">
+        <span class="stat-label">Total Users</span>
+        <span class="stat-value">{{ total_users }}</span>
+    </div>
+    
+	<!-- SUPERADMIN ONLY VISITOR CARDS -->
+    {% if current_user.role_superadmin %}
+    <div class="stat-item visitor-card-admin">
+        <span class="stat-label">Home Page Visitors</span>
+        <span class="stat-value">{{ home_visit_count }}</span>
+    </div>
+
+    <div class="stat-item visitor-card-admin">
+        <span class="stat-label">Total Page Views</span>
+        <span class="stat-value">{{ total_page_views }}</span>
+    </div>
+    {% endif %}
+
+    <div class="stat-item">
+        <span class="stat-label">Enthusiasts</span>
+        <span class="stat-value">{{ enthusiast_count }}</span>
+    </div>
+
+    <div class="stat-item">
+        <span class="stat-label">Drivers</span>
+        <span class="stat-value">{{ driver_count }}</span>
+    </div>
+    
+    <div class="stat-item">
+        <span class="stat-label">Admins</span>
+        <span class="stat-value">{{ admin_count }}</span>
+    </div>
+
+    <div class="stat-item">
+        <span class="stat-label">Suspended</span>
+        <span class="stat-value">{{ suspended_count }}</span>
+    </div>
+
+    <div class="stat-item">
+        <span class="stat-label">Suspension Lifted</span>
+        <span class="stat-value">{{ lifted_count }}</span>
+    </div>
+
+    <div class="stat-item">
+        <span class="stat-label">Deleted</span>
+        <span class="stat-value">{{ deleted_count }}</span>
+    </div>
+
+</div>
+
+
+
+<!-- Add / Change Role -->
+<div class="user-controls add-user-section">
+	<h3>Selected User Role</h3>
+	<p id="selectedUserLabel">No user selected</p>
+
+	<select id="selectedRole">
+		<option value="Enthusiast">Enthusiast</option>
+		<option value="Driver">Driver</option>
+		<!-- Admin only visible if current user is Superadmin -->
+		{% if current_user.role_superadmin %}
+			<option value="Admin">Admin</option>
+		{% endif %}
+		<!-- Superadmin intentionally excluded -->
+	</select>
+
+
+
+
+	<label for="changeType">Change Type</label>
+	<select id="changeType" onchange="toggleReasonDropdowns()">
+		<option value="none">Select...</option>
+		<option value="upgrade">Upgrade</option>
+		<option value="downgrade">Downgrade</option>
+		<option value="suspend">Suspend</option>
+		<option value="lift">Lift Suspension</option>
+		<option value="delete">Delete</option>
+	</select>
+
+
+	<div id="upgradeBlock" style="display:none; text-align:center;">
+		<label for="upgradeReason" id="upgradeLabel">Upgrade Reason</label><br>
+		<select id="upgradeReason">
+			<option value="">Select reason...</option>
+			<option value="Role expansion">Role expansion</option>
+			<option value="Project requirement">Project requirement</option>
+			<option value="Increased responsibility">Increased responsibility</option>
+			<option value="System update">System update</option>
+		</select>
+	</div>
+
+
+	<div id="downgradeBlock" style="display:none; text-align:center;">
+		<label for="downgradeReason" id="downgradeLabel">Downgrade Reason</label><br>
+		<select id="downgradeReason">
+			<option value="">Select reason...</option>
+			<option value="Reduced activity">Reduced activity</option>
+			<option value="Incorrect admin usage">Incorrect admin usage</option>
+			<option value="Admin responsibilities not met">Admin responsibilities not met</option>
+			<option value="Security concerns">Security concerns</option>
+			<option value="Policy alignment">Policy alignment</option>
+		</select>
+	</div>
+	
+	<div id="suspendBlock" style="display:none; text-align:center;">
+		<label for="suspendReason">Suspend Reason</label><br>
+		<select id="suspendReason">
+			<option value="">Select reason...</option>
+			<option value="Misconduct">Misconduct</option>
+			<option value="Temporary restriction">Temporary restriction</option>
+			<option value="Investigation">Investigation</option>
+			<option value="Behaviour concern">Behaviour concern</option>
+		</select>
+
+		<br><br>
+
+		<label for="suspendLength">Suspend Length</label><br>
+		<select id="suspendLength">
+			<option value="">Select length...</option>
+			<option value="1">1 Day</option>
+			<option value="7">1 Week</option>
+			<option value="30">1 Month</option>
+		</select>
+	</div>
+	
+	<div id="deleteBlock" style="display:none; text-align:center;">
+		<label for="deleteReason">Delete Reason</label><br>
+		<select id="deleteReason">
+			<option value="">Select reason...</option>
+			<option value="Requested by user">Requested by user</option>
+			<option value="Violation of rules">Violation of rules</option>
+			<option value="Inactive account">Inactive account</option>
+			<option value="Security concern">Security concern</option>
+		</select>
+	</div>
+
+
+
+    <button onclick="applyRoleChange()">Apply Role</button>
+</div>
+
+<hr>
+
+    <div class="add-new-user">
+        <h3>Add New User</h3>
+        <input type="email" id="newUserEmail" placeholder="Enter email address">
+        <button onclick="createNewUser()">Add User</button>
+    </div>
+</div>
+
+
+<!-- User List -->
+<div class="user-list-container">
+
+    <select id="userFilter">
+        <option value="">Filter by...</option>
+    </select>
+
+    <input type="text" id="userSearch" placeholder="Search users...">
+
+    <div class="user-header">
+        <span>Name</span>
+        <span>Email</span>
+        <span>Company</span>
+        <span>Roles</span>
+    </div>
+
+    <div id="userList">
+        {% for u in users|sort(attribute='last_name') %}
+        <div class="user-row"
+             data-name="{{ u.first_name }} {{ u.last_name }}"
+             data-email="{{ u.email }}"
+             data-company="{{ u.company }}"
+             data-region="{{ u.region }}"
+             data-depot="{{ u.depot }}"
+             data-outstation="{{ u.outstation }}"
+             data-roles="
+                {% if u.role_driver %}driver {% endif %}
+                {% if u.role_enthusiast %}enthusiast {% endif %}
+                {% if u.role_admin %}admin {% endif %}
+                {% if u.role_superadmin %}superadmin{% endif %}
+             "
+             onclick="selectUser('{{ u.id }}',
+                                 '{{ u.first_name }} {{ u.last_name }}',
+                                 '{{ u.email }}',
+                                 '{{ u.company }}',
+                                 '{{ u.role }}')">
+
+            <span>{{ u.first_name }} {{ u.last_name }}</span>
+            <span>{{ u.email }}</span>
+            <span>{{ u.company }}</span>
+
+            <span class="roles-cell">
+                {% if u.role_driver %}Driver {% endif %}
+                {% if u.role_enthusiast %}Enthusiast {% endif %}
+                {% if u.role_admin %}Admin {% endif %}
+                {% if u.role_superadmin %}Superadmin {% endif %}
+            </span>
+
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+
+
+
+
+
+
+<script>
+let selectedUserId = null;
+
+/* -------------------------
+   SELECT USER
+------------------------- */
+function selectUser(id, name, email, company, role) {
+    selectedUserId = id;
+    document.getElementById("selectedUserLabel").innerText =
+        name + " (" + email + ") - " + company + " [" + role + "]";
+}
+
+/* -------------------------
+   SHOW / HIDE REASON LISTS
+------------------------- */
+function toggleReasonDropdowns() {
+    let type = document.getElementById("changeType").value;
+
+    document.getElementById("upgradeBlock").style.display = "none";
+    document.getElementById("downgradeBlock").style.display = "none";
+    document.getElementById("suspendBlock").style.display = "none";
+    document.getElementById("deleteBlock").style.display = "none";
+
+    if (type === "upgrade") {
+        document.getElementById("upgradeBlock").style.display = "block";
+    }
+    if (type === "downgrade") {
+        document.getElementById("downgradeBlock").style.display = "block";
+    }
+    if (type === "suspend") {
+        document.getElementById("suspendBlock").style.display = "block";
+    }
+    if (type === "delete") {
+        document.getElementById("deleteBlock").style.display = "block";
+    }
+}
+
+/* -------------------------
+   APPLY ROLE CHANGE
+------------------------- */
+function applyRoleChange() {
+    if (!selectedUserId) {
+        alert("Please select a user first.");
+        return;
+    }
+
+    let changeType = document.getElementById("changeType").value;
+    let newRole = document.getElementById("selectedRole").value;
+
+    let reason = null;
+    let length = null;
+
+    if (changeType === "upgrade") {
+        reason = document.getElementById("upgradeReason").value;
+        if (!reason) return alert("Please select an upgrade reason.");
+    }
+
+    if (changeType === "downgrade") {
+        reason = document.getElementById("downgradeReason").value;
+        if (!reason) return alert("Please select a downgrade reason.");
+    }
+
+    if (changeType === "suspend") {
+        reason = document.getElementById("suspendReason").value;
+        length = document.getElementById("suspendLength").value;
+        if (!reason || !length) return alert("Please select suspend reason and length.");
+    }
+	
+	if (changeType === "lift") {
+		reason = "Suspension lifted";
+		length = null;
+	}
+
+
+    if (changeType === "delete") {
+        reason = document.getElementById("deleteReason").value;
+        if (!reason) return alert("Please select a delete reason.");
+    }
+
+    fetch('/set_role', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            user_id: selectedUserId,
+            role: newRole,
+            change_type: changeType,
+            reason: reason,
+            suspend_length: length
+        })
+    }).then(() => location.reload());
+}
+
+/* -------------------------
+   CREATE NEW USER
+------------------------- */
+function createNewUser() {
+    let email = document.getElementById("newUserEmail").value;
+
+    if (!email) {
+        alert("Please enter an email address.");
+        return;
+    }
+
+    fetch('/create_user_by_email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email })
+    }).then(() => {
+        location.reload();
+    });
+}
+
+/* -------------------------
+   POPULATE DROPDOWN
+------------------------- */
+function populateDropdown() {
+    const rows = document.querySelectorAll(".user-row");
+    const dropdown = document.getElementById("userFilter");
+
+    const values = new Set();
+
+    rows.forEach(row => {
+        if (row.dataset.company) values.add(row.dataset.company);
+        if (row.dataset.region) values.add(row.dataset.region);
+        if (row.dataset.depot) values.add(row.dataset.depot);
+        if (row.dataset.outstation) values.add(row.dataset.outstation);
+
+        row.dataset.roles.split(" ").forEach(role => {
+            if (role.trim() !== "") values.add(role.trim());
+        });
+    });
+
+    values.forEach(value => {
+        const option = document.createElement("option");
+        option.value = value.toLowerCase();
+        option.textContent = value;
+        dropdown.appendChild(option);
+    });
+}
+
+populateDropdown();
+
+/* -------------------------
+   ADVANCED SEARCH FILTER
+------------------------- */
+function applyFilters() {
+    const search = document.getElementById("userSearch").value.toLowerCase();
+    const filter = document.getElementById("userFilter").value.toLowerCase();
+    const rows = document.querySelectorAll(".user-row");
+
+    rows.forEach(row => {
+        const name = row.dataset.name.toLowerCase();
+        const email = row.dataset.email.toLowerCase();
+        const company = row.dataset.company.toLowerCase();
+        const region = row.dataset.region.toLowerCase();
+        const depot = row.dataset.depot.toLowerCase();
+        const outstation = row.dataset.outstation.toLowerCase();
+        const roles = row.dataset.roles.toLowerCase();
+
+        const matchesSearch =
+            name.includes(search) ||
+            email.includes(search) ||
+            company.includes(search) ||
+            region.includes(search) ||
+            depot.includes(search) ||
+            outstation.includes(search) ||
+            roles.includes(search);
+
+        const matchesDropdown =
+            filter === "" ||
+            company.includes(filter) ||
+            region.includes(filter) ||
+            depot.includes(filter) ||
+            outstation.includes(filter) ||
+            roles.includes(filter);
+
+        row.style.display = (matchesSearch && matchesDropdown) ? "grid" : "none";
+    });
+}
+
+document.getElementById("userSearch").addEventListener("input", applyFilters);
+document.getElementById("userFilter").addEventListener("change", applyFilters);
+
+</script>
+{% endblock %}
+

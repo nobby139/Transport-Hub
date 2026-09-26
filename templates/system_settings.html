@@ -1,0 +1,241 @@
+{% extends "base.html" %}
+{% set page_title = "UK Transport Hub" %}
+{% set home_target = "home" %}
+{% set is_drivers_hub = False %}
+
+{% block content %}
+<a href="javascript:history.back()" class="back-btn">← Back</a>
+<div class="admin-container">
+
+    <h2>System Settings</h2>
+    <p>Configure global system behaviour for the entire Transport Hub platform.</p>
+
+    <form method="POST" action="/settings/system/save">
+
+        <!-- SESSION TIMEOUT -->
+		<label>Timeout (minutes):</label>
+
+		{% if current_user.role_superadmin %}
+		<input type="number" name="session_timeout" value="{{ settings.session_timeout }}">
+		{% else %}
+		<p>{{ settings.session_timeout }} minutes</p>
+		{% endif %}
+
+
+        <!-- SUPERADMIN PROTECTION -->
+		{% if current_user.role_superadmin %}
+		<div class="settings-section">
+			<h3>Superadmin Protection</h3>
+			<p>Prevents accidental suspension or role downgrade of the superadmin.</p>
+			<label>
+				<input type="checkbox" name="superadmin_protection"
+					   {% if settings.superadmin_protection %}checked{% endif %}>
+				Enable Superadmin Protection
+			</label>
+		</div>
+		{% endif %}
+
+
+        <!-- DEFAULT SUSPENSION LENGTH -->
+        <div class="settings-section">
+            <h3>Default Suspension Length</h3>
+            <p>The default number of days applied when an admin suspends a user.</p>
+			<label>Days:</label>
+
+			{% if current_user.role_superadmin %}
+			<input type="number" name="default_suspension_length" value="{{ settings.default_suspension_length }}">
+			{% else %}
+			<p>{{ settings.default_suspension_length }} days</p>
+			{% endif %}
+        </div>
+
+        <!-- LOG RETENTION -->
+        <div class="settings-section">
+            <h3>Log Retention Period</h3>
+            <p>How long system logs are kept before automatic archiving.</p>
+			<label>Retention (days):</label>
+
+			{% if current_user.role_superadmin %}
+			<input type="number" name="log_retention" value="{{ settings.log_retention }}">
+			{% else %}
+			<p>{{ settings.log_retention }} days</p>
+			{% endif %}
+        </div>
+
+        <!-- MODULE TOGGLES -->
+        <div class="settings-section">
+            <h3>Module Toggles</h3>
+            <p>Enable or disable entire modules globally.</p>
+
+			{% if current_user.role_superadmin %}
+				<label><input type="checkbox" name="module_takings" {% if settings.module_takings %}checked{% endif %}> Takings</label><br>
+				<label><input type="checkbox" name="module_incidents" {% if settings.module_incidents %}checked{% endif %}> Incidents</label><br>
+				<label><input type="checkbox" name="module_logs" {% if settings.module_logs %}checked{% endif %}> Logs</label><br>
+				<label><input type="checkbox" name="module_user_management" {% if settings.module_user_management %}checked{% endif %}> User Management</label><br>
+				<label><input type="checkbox" name="module_company_management" {% if settings.module_company_management %}checked{% endif %}> Company Management</label><br>
+				<label><input type="checkbox" name="module_outstations" {% if settings.module_outstations %}checked{% endif %}> Outstations</label><br>
+				<label><input type="checkbox" name="module_regions" {% if settings.module_regions %}checked{% endif %}> Regions</label><br>
+			{% else %}
+				<p>Takings: {{ settings.module_takings }}</p>
+				<p>Incidents: {{ settings.module_incidents }}</p>
+				<p>Logs: {{ settings.module_logs }}</p>
+				<p>User Management: {{ settings.module_user_management }}</p>
+				<p>Company Management: {{ settings.module_company_management }}</p>
+				<p>Outstations: {{ settings.module_outstations }}</p>
+				<p>Regions: {{ settings.module_regions }}</p>
+			{% endif %}
+        </div>
+
+		<!-- SYSTEM-WIDE NOTIFICATIONS -->
+		<div class="settings-section">
+			<h3>System-wide Notifications</h3>
+			<p>Control global notification behaviour.</p>
+
+			{% if current_user.role_superadmin %}
+
+				<!-- Editable for superadmin -->
+				<label><input type="checkbox" name="notify_email"
+					{% if settings.notify_email %}checked{% endif %}> Email Alerts</label><br>
+
+				<label><input type="checkbox" name="notify_suspension"
+					{% if settings.notify_suspension %}checked{% endif %}> Suspension Alerts</label><br>
+
+				<label><input type="checkbox" name="notify_incident"
+					{% if settings.notify_incident %}checked{% endif %}> Incident Alerts</label><br>
+
+				<label><input type="checkbox" name="notify_admin_action"
+					{% if settings.notify_admin_action %}checked{% endif %}> Admin Action Alerts</label><br>
+
+			{% else %}
+
+				<!-- READ‑ONLY for admin, driver, enthusiast -->
+				<p>Email Alerts: {{ settings.notify_email }}</p>
+				<p>Suspension Alerts: {{ settings.notify_suspension }}</p>
+				<p>Incident Alerts: {{ settings.notify_incident }}</p>
+				<p>Admin Action Alerts: {{ settings.notify_admin_action }}</p>
+
+			{% endif %}
+		</div>
+
+
+		<!-- DEFAULT DEPOT / COMPANY / REGION -->
+		<div class="settings-section">
+			<h3>Default Assignment</h3>
+			<p>Defaults applied when creating new users.</p>
+
+			<label>Default Company:</label>
+			{% if current_user.role_superadmin %}
+				<input type="text" name="default_company" value="{{ settings.default_company }}"><br>
+			{% else %}
+				<p>{{ settings.default_company }}</p>
+			{% endif %}
+
+			<label>Default Region:</label>
+			{% if current_user.role_superadmin %}
+				<input type="text" name="default_region" value="{{ settings.default_region }}"><br>
+			{% else %}
+				<p>{{ settings.default_region }}</p>
+			{% endif %}
+
+			<label>Default Depot:</label>
+			{% if current_user.role_superadmin %}
+				<input type="text" name="default_depot" value="{{ settings.default_depot }}"><br>
+			{% else %}
+				<p>{{ settings.default_depot }}</p>
+			{% endif %}
+		</div>
+
+
+		<!-- THEME / UI OPTIONS -->
+		<div class="settings-section">
+			<h3>Theme / UI Options</h3>
+			<p>Appearance settings for the entire system.</p>
+
+			<label>Theme:</label>
+			<p>{{ settings.theme }}</p>
+		</div>
+
+
+        {% if current_user.role_superadmin %}
+		<button type="submit" class="btn-save">Save Settings</button>
+		{% endif %}
+
+
+    </form>
+
+</div>
+
+<style>
+
+    .admin-container {
+        width: 900px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    h2 {
+        margin-bottom: 10px;
+        font-size: 26px;
+        color: #1E88E5;
+        border-bottom: 2px solid #1E88E5;
+        padding-bottom: 5px;
+    }
+
+    .settings-section {
+        background: #f5f5f5;
+        border: 1px solid #ddd;
+        padding: 15px;
+        margin-bottom: 20px;
+        border-radius: 4px;
+    }
+
+    .settings-section h3 {
+        margin-top: 0;
+        color: #1E88E5;
+        font-size: 20px;
+        margin-bottom: 5px;
+    }
+
+    .settings-section p {
+        margin: 0 0 10px 0;
+        color: #555;
+    }
+
+    .settings-section label {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 15px;
+    }
+
+    input[type="number"],
+    input[type="text"],
+    select {
+        width: 250px;
+        padding: 6px;
+        margin-top: 3px;
+        margin-bottom: 10px;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+        font-size: 15px;
+    }
+
+    input[type="checkbox"] {
+        margin-right: 6px;
+    }
+
+    .btn-save {
+        background: #1E88E5;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        font-size: 16px;
+        cursor: pointer;
+    }
+
+    .btn-save:hover {
+        background: #1669b2;
+    }
+
+</style>
+{% endblock %}

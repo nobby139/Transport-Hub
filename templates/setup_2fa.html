@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+    .setup-container {
+        max-width: 500px;
+        margin: 40px auto;
+        padding: 30px;
+        background: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        text-align: center;
+    }
+    .qr-box {
+        margin: 20px 0;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 6px;
+        border: 1px solid #e9ecef;
+        display: inline-block;
+    }
+    .form-control {
+        width: 100%;
+        padding: 10px;
+        font-size: 1.2rem;
+        text-align: center;
+        letter-spacing: 4px;
+        margin-bottom: 15px;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+    }
+    .btn-verify {
+        width: 100%;
+        padding: 10px;
+        font-weight: bold;
+        background: #0d6efd;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    .btn-verify:hover { background: #0b5ed7; }
+</style>
+
+<div class="setup-container">
+    <h2>🔐 Enable Two-Factor Authentication</h2>
+    <p>Scan the QR code below using <strong>Google Authenticator</strong> or <strong>Microsoft Authenticator</strong>.</p>
+
+    <div class="qr-box">
+        <img src="data:image/png;base64,{{ qr_code }}" alt="2FA QR Code" style="max-width: 200px; height: auto;">
+    </div>
+
+    <p style="font-size: 0.9rem; color: #6c757d;">
+        Or enter this secret key manually: <code>{{ secret }}</code>
+    </p>
+
+    <form method="POST" style="margin-top: 20px;">
+        <div class="form-group">
+            <input type="text" name="token" class="form-control" placeholder="Enter 6-digit code" maxlength="6" autocomplete="off" required>
+        </div>
+        <button type="submit" class="btn-verify">Verify and Enable</button>
+    </form>
+</div>
+
+{% endblock %}

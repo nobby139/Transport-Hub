@@ -1,0 +1,418 @@
+{% extends "base.html" %}
+{% set page_title = "UK Transport Hub" %}
+{% set home_target = "home" %}
+{% set is_drivers_hub = False %}
+
+{% block content %}
+
+<style>
+    .form-card {
+        max-width: 400px;
+        margin: 0 auto;
+        padding: 20px;
+        text-align: center;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-bottom: 15px;
+        width: 100%;
+    }
+
+    .form-group label {
+        display: block;
+        text-align: left;
+        width: 100%;
+        max-width: 300px;
+        margin: 0 auto 5px auto;
+        font-weight: 600;
+    }
+
+    .form-card input[type="text"],
+    .form-card input[type="email"],
+    .form-card input[type="password"],
+    .form-card input[type="date"],
+    .form-card select {
+        width: 100%;
+        max-width: 300px;
+        padding: 8px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+    }
+
+    .checkbox-row {
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        justify-content: center; /* FIX: keeps roles centered */
+    }
+
+    .btn {
+        margin-top: 10px;
+        width: 200px;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        text-align: center;
+    }
+
+    #company_section,
+    #region_section,
+    #depot_section,
+    #outstation_section {
+        display: none;
+    }
+
+    .delete-photo-btn {
+        background: #C62828;
+        color: #fff;
+        padding: 10px 18px;
+        border: none;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        width: 200px;
+        margin-top: 10px;
+    }
+
+    .delete-photo-btn:hover {
+        background: #8E0000;
+    }
+</style>
+
+<h2>Edit Your Account</h2>
+
+<form id="editForm" class="form-card" method="POST" action="/edit_profile">
+
+    <!-- PROFILE PHOTO SECTION -->
+    <div class="form-group" style="margin-top: 20px; text-align:center;">
+
+        <label>Your Profile Photo</label>
+
+        {% if user.profile_photo %}
+            <img src="{{ user.profile_photo }}"
+                 alt="Profile Photo"
+                 style="width:150px; height:150px; object-fit:cover; border-radius:8px; margin-bottom:10px;">
+        {% else %}
+            <p>No photo uploaded.</p>
+        {% endif %}
+
+        <!-- Upload New Photo -->
+        <input type="file" id="photo" name="photo" accept="image/*" style="margin-top:10px;">
+
+        <!-- DELETE PHOTO BUTTON -->
+        <button formaction="{{ url_for('delete_profile_photo') }}"
+                formmethod="POST"
+                class="delete-photo-btn">
+            Delete Photo
+        </button>
+
+    </div>
+	
+    <!-- BASIC DETAILS -->
+    <div class="form-group">
+        <label for="first_name">First Name</label>
+        <input type="text" id="first_name" name="first_name" value="{{ user.first_name }}" required>
+    </div>
+
+    <div class="form-group">
+        <label for="last_name">Last Name</label>
+        <input type="text" id="last_name" name="last_name" value="{{ user.last_name }}" required>
+    </div>
+
+    <div class="form-group">
+        <label for="username">Username (optional)</label>
+        <input type="text" id="username" name="username" value="{{ user.username }}">
+    </div>
+
+    <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" value="{{ user.email }}" required>
+    </div>
+
+    <div class="form-group">
+        <label for="date_of_birth">Date of Birth</label>
+        <input type="date" id="date_of_birth" name="date_of_birth" value="{{ user.date_of_birth }}" required>
+    </div>
+
+	<!-- ROLE LEVEL -->
+	<h3>Select Your Role</h3>
+
+	<div style="display:flex; align-items:center; gap:30px; margin-bottom:15px;">
+
+		<label style="display:flex; align-items:center; gap:8px;">
+			<input type="checkbox" name="role_driver" value="1" id="role_driver">
+			Driver Access
+		</label>
+
+		<label style="display:flex; align-items:center; gap:8px;">
+			<input type="checkbox" name="role_enthusiast" value="1" id="role_enthusiast">
+			Enthusiast Access
+		</label>
+
+	</div>
+
+	<!-- TRANSPORT HUB (Driver Only) -->
+	<div id="company_section" style="display:none; margin-top:15px;">
+		<div class="form-group">
+			<label>Select Your Company</label>
+			<select id="company_select" name="company"></select>
+		</div>
+	</div>
+
+	<div id="region_section" style="display:none; margin-top:15px;">
+		<div class="form-group">
+			<label>Select Your Region</label>
+			<select id="region_select" name="region"></select>
+		</div>
+	</div>
+
+	<div id="depot_section" style="display:none; margin-top:15px;">
+		<div class="form-group">
+			<label>Select Your Depot</label>
+			<select id="depot_select" name="depot"></select>
+		</div>
+	</div>
+
+	<div id="outstation_section" style="display:none; margin-top:15px;">
+		<div class="form-group">
+			<label>Select Your Outstation</label>
+			<select id="outstation_select" name="outstation"></select>
+		</div>
+	</div>
+
+	<!-- Hidden final fields -->
+	<input type="hidden" id="final_role_driver" name="final_role_driver" value="0">
+	<input type="hidden" id="final_role_enthusiast" name="final_role_enthusiast" value="0">
+
+	<input type="hidden" id="final_company" name="final_company" value="None">
+	<input type="hidden" id="final_region" name="final_region" value="None">
+	<input type="hidden" id="final_depot" name="final_depot" value="None">
+	<input type="hidden" id="final_outstation" name="final_outstation" value="None">
+
+	<input type="hidden" id="final_level" name="level" value="4">
+
+
+	<button type="submit" class="btn btn-primary">Save Changes</button>
+
+<script>
+function toggleCompanyFields() {
+    const driverChecked = document.getElementById('role_driver').checked;
+
+    // Show/hide company fields
+    document.getElementById('company_section').style.display = driverChecked ? 'block' : 'none';
+    document.getElementById('region_section').style.display = driverChecked ? 'block' : 'none';
+    document.getElementById('depot_section').style.display = driverChecked ? 'block' : 'none';
+    document.getElementById('outstation_section').style.display = driverChecked ? 'block' : 'none';
+
+    // Update hidden level field
+    document.getElementById('final_level').value = driverChecked ? '3' : '4';
+}
+</script>
+
+<!-- JS FILES -->
+
+<script src="{{ url_for('static', filename='js/companyRegions.js') }}"></script>
+<script src="{{ url_for('static', filename='js/edit_account.js') }}"></script>
+
+
+<script>
+console.log("SCRIPT START");
+console.log("EDIT PROFILE INLINE SCRIPT LOADED");
+
+document.addEventListener("DOMContentLoaded", () => {
+    /* -------------------------------
+       ELEMENT REFERENCES
+    -------------------------------- */
+    const roleDriver = document.getElementById("role_driver");
+    const roleEnthusiast = document.getElementById("role_enthusiast");
+
+    const companySelect = document.getElementById("company_select");
+    const regionSelect = document.getElementById("region_select");
+    const depotSelect = document.getElementById("depot_select");
+    const outstationSelect = document.getElementById("outstation_select");
+
+    const finalCompany = document.getElementById("final_company");
+    const finalRegion = document.getElementById("final_region");
+    const finalDepot = document.getElementById("final_depot");
+    const finalOutstation = document.getElementById("final_outstation");
+    const finalLevel = document.getElementById("final_level");
+
+    const companySection = document.getElementById("company_section");
+    const regionSection = document.getElementById("region_section");
+    const depotSection = document.getElementById("depot_section");
+    const outstationSection = document.getElementById("outstation_section");
+
+    /* -------------------------------
+       LOAD COMPANIES
+    -------------------------------- */
+    function loadCompanies() {
+        companySelect.innerHTML = `
+            <option value="">-- Select Company --</option>
+            <option value="Other">Other (add your Company)</option>
+        `;
+        if (typeof companyRegions !== "undefined") {
+            Object.keys(companyRegions).forEach(company => {
+                const opt = document.createElement("option");
+                opt.value = company;
+                opt.textContent = company;
+                companySelect.appendChild(opt);
+            });
+        } else {
+            console.error("companyRegions is not defined. Check script order.");
+        }
+
+        if (finalCompany.value && finalCompany.value !== "None") {
+            companySelect.value = finalCompany.value;
+            companySelect.dispatchEvent(new Event("change"));
+        }
+    }
+
+    /* -------------------------------
+       REGION SELECTION
+    -------------------------------- */
+	regionSelect.addEventListener("change", () => {
+		const company = companySelect.value;
+		const region = regionSelect.value;
+		finalRegion.value = region;
+
+		if (region === "" || region === "Other") {
+			depotSection.style.display = "none";
+			outstationSection.style.display = "none";
+			return;
+		}
+
+		const companyData = companyRegions[company];
+		if (!companyData || !companyData.regions || !companyData.regions[region]) {
+			console.warn("Region not found for company:", company, region);
+			depotSection.style.display = "none";
+			outstationSection.style.display = "none";
+			return;
+		}
+
+		const regionData = companyData.regions[region];
+		loadDepots(regionData.depots);
+		loadOutstations(regionData.outstations);
+
+		// Only trigger once when initialising
+		if (finalRegion.value && finalRegion.value !== "None") {
+			regionSelect.value = finalRegion.value;
+			if (!regionSelect.dataset.initialised) {
+				regionSelect.dataset.initialised = "true";
+				regionSelect.dispatchEvent(new Event("change"));
+			}
+		}
+	});   // <-- this closing brace/paren was missing
+
+	
+    /* -------------------------------
+       LOAD DEPOTS
+    -------------------------------- */
+    function loadDepots(depots) {
+        depotSelect.innerHTML = `
+            <option value="">-- Select Depot --</option>
+            <option value="Other">Other (add your Depot)</option>
+        `;
+        depots.forEach(depot => {
+            const opt = document.createElement("option");
+            opt.value = depot;
+            opt.textContent = depot;
+            depotSelect.appendChild(opt);
+        });
+        depotSection.style.display = "block";
+
+        depotSelect.addEventListener("change", () => {
+            finalDepot.value = depotSelect.value;
+        });
+
+        if (finalDepot.value && finalDepot.value !== "None") {
+            depotSelect.value = finalDepot.value;
+        }
+    }
+
+    /* -------------------------------
+       LOAD OUTSTATIONS
+    -------------------------------- */
+    function loadOutstations(outstations) {
+        outstationSelect.innerHTML = `
+            <option value="None">None</option>
+            <option value="Other">Other (add your Outstation)</option>
+        `;
+        if (outstations && outstations.length > 0) {
+            outstations.forEach(out => {
+                const opt = document.createElement("option");
+                opt.value = out;
+                opt.textContent = out;
+                outstationSelect.appendChild(opt);
+            });
+        }
+        outstationSection.style.display = "block";
+
+        outstationSelect.addEventListener("change", () => {
+            finalOutstation.value = outstationSelect.value;
+        });
+
+        if (finalOutstation.value && finalOutstation.value !== "None") {
+            outstationSelect.value = finalOutstation.value;
+        }
+    }
+	
+	/* -------------------------------
+	   FORM SUBMISSION
+	-------------------------------- */
+	document.getElementById("editForm").addEventListener("submit", async (e) => {
+		e.preventDefault();
+
+		const payload = {
+			first_name: document.getElementById("first_name").value.trim(),
+			last_name: document.getElementById("last_name").value.trim(),
+			username: document.getElementById("username").value.trim(),
+			email: document.getElementById("email").value.trim(),
+			date_of_birth: document.getElementById("date_of_birth").value,
+			role_driver: roleDriver.checked ? 1 : 0,
+			role_enthusiast: roleEnthusiast.checked ? 1 : 0,
+			company: finalCompany.value,
+			region: finalRegion.value,
+			depot: finalDepot.value,
+			outstation: finalOutstation.value,
+			level: finalLevel.value
+		};
+
+		console.log("Submitting with:", payload);
+
+		const res = await fetch("/edit_profile", {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify(payload)
+		});
+
+		const data = await res.json();
+		console.log("Response:", data);
+
+		if (!res.ok) {
+			// If you don’t want inline error messages, just log it:
+			console.error(data.message || "Update failed.");
+			return;
+		}
+
+		// Redirect straight away without showing success div
+		setTimeout(() => window.location.href = "/profile", 1000);
+	});
+
+
+
+    /* -------------------------------
+       INITIALISE DROPDOWNS
+    -------------------------------- */
+    loadCompanies();
+});
+</script>
+
+{% endblock %}
+
+
+
+

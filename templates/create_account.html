@@ -1,0 +1,445 @@
+{% extends "base.html" %}
+{% set page_title = "UK Transport Hub" %}
+{% set home_target = "home" %}
+{% set is_drivers_hub = False %}
+
+{% block content %}
+
+<style>
+    .form-card {
+        max-width: 400px;
+        margin: 0 auto;
+        padding: 20px;
+        text-align: center; /* headings + button centered */
+    }
+
+    /* Each field block behaves consistently */
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        align-items: center;     /* keeps inputs centred */
+        margin-bottom: 15px;
+        width: 100%;
+    }
+
+    /* Labels always appear above inputs */
+    .form-group label,
+    .form-card > label {
+        display: block;
+        text-align: left;
+        width: 100%;
+        max-width: 300px;
+        margin: 0 auto 5px auto;
+        font-weight: 600;
+    }
+
+    /* Inputs styled consistently */
+    .form-card input[type="text"],
+    .form-card input[type="email"],
+    .form-card input[type="password"],
+    .form-card input[type="date"],
+    .form-card select {
+        width: 100%;
+        max-width: 300px;
+        padding: 8px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+    }
+
+    .checkbox-row {
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .btn {
+        margin-top: 10px;
+        width: 200px;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        text-align: center;
+    }
+
+    .error-text {
+        color: red;
+        margin-top: 10px;
+    }
+
+    .success-text {
+        color: green;
+        margin-top: 10px;
+    }
+	
+	#company_section,
+	#region_section,
+	#depot_section,
+	#outstation_section {
+		display: none;
+	}
+
+</style>
+
+<h2>Create Your Account</h2>
+
+<div id="error" style="color:red;"></div>
+<div id="success" style="color:green;"></div>
+
+<form id="createForm" class="form-card" method="POST" action="/create_profile">
+
+    <!-- BASIC DETAILS -->
+    <div class="form-group">
+        <label for="first_name">First Name</label>
+        <input type="text" id="first_name" name="first_name" required>
+    </div>
+
+    <div class="form-group">
+        <label for="last_name">Last Name</label>
+        <input type="text" id="last_name" name="last_name" required>
+    </div>
+
+    <div class="form-group">
+        <label for="username">Username (optional)</label>
+        <input type="text" id="username" name="username" placeholder="Choose a username">
+    </div>
+
+    <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" required>
+    </div>
+
+    <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" required>
+    </div>
+
+    <div class="form-group">
+        <label for="date_of_birth">Date of Birth</label>
+        <input type="date" id="date_of_birth" name="date_of_birth" required>
+    </div>
+
+	<!-- ROLE LEVEL -->
+	<h3>Select Your Role</h3>
+
+	<div style="display:flex; align-items:center; gap:30px; margin-bottom:15px;">
+
+		<label style="display:flex; align-items:center; gap:8px;">
+			<input type="checkbox" name="role_driver" value="1" id="role_driver">
+			Driver Access
+		</label>
+
+		<label style="display:flex; align-items:center; gap:8px;">
+			<input type="checkbox" name="role_enthusiast" value="1" id="role_enthusiast">
+			Enthusiast Access
+		</label>
+
+	</div>
+
+	<!-- TRANSPORT HUB (Driver Only) -->
+	<div id="company_section" style="display:none; margin-top:15px;">
+		<div class="form-group">
+			<label>Select Your Company</label>
+			<select id="company_select" name="company"></select>
+		</div>
+	</div>
+
+	<div id="region_section" style="display:none; margin-top:15px;">
+		<div class="form-group">
+			<label>Select Your Region</label>
+			<select id="region_select" name="region"></select>
+		</div>
+	</div>
+
+	<div id="depot_section" style="display:none; margin-top:15px;">
+		<div class="form-group">
+			<label>Select Your Depot</label>
+			<select id="depot_select" name="depot"></select>
+		</div>
+	</div>
+
+	<div id="outstation_section" style="display:none; margin-top:15px;">
+		<div class="form-group">
+			<label>Select Your Outstation</label>
+			<select id="outstation_select" name="outstation"></select>
+		</div>
+	</div>
+
+	<!-- Hidden final fields -->
+	<input type="hidden" id="final_role_driver" name="final_role_driver" value="0">
+	<input type="hidden" id="final_role_enthusiast" name="final_role_enthusiast" value="0">
+
+	<input type="hidden" id="final_company" name="final_company" value="None">
+	<input type="hidden" id="final_region" name="final_region" value="None">
+	<input type="hidden" id="final_depot" name="final_depot" value="None">
+	<input type="hidden" id="final_outstation" name="final_outstation" value="None">
+
+	<input type="hidden" id="final_level" name="level" value="4">
+
+
+	<button type="submit" class="btn btn-primary">Save Changes</button>
+
+<script>
+function toggleCompanyFields() {
+    const driverChecked = document.getElementById('role_driver').checked;
+
+    // Show/hide company fields
+    document.getElementById('company_section').style.display = driverChecked ? 'block' : 'none';
+    document.getElementById('region_section').style.display = driverChecked ? 'block' : 'none';
+    document.getElementById('depot_section').style.display = driverChecked ? 'block' : 'none';
+    document.getElementById('outstation_section').style.display = driverChecked ? 'block' : 'none';
+
+    // Update hidden level field
+    document.getElementById('final_level').value = driverChecked ? '3' : '4';
+}
+</script>
+
+<!-- JS FILES -->
+
+<script src="{{ url_for('static', filename='js/companyRegions.js') }}"></script>
+<script src="{{ url_for('static', filename='js/create_account.js') }}"></script>
+
+<script>
+console.log("SCRIPT START");
+console.log("CREATE PAGE JS LOADED");
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    /* -------------------------------
+       ELEMENT REFERENCES
+    -------------------------------- */
+    const roleDriver = document.getElementById("role_driver");
+    const roleEnthusiast = document.getElementById("role_enthusiast");
+
+    const companySection = document.getElementById("company_section");
+    const regionSection = document.getElementById("region_section");
+    const depotSection = document.getElementById("depot_section");
+    const outstationSection = document.getElementById("outstation_section");
+
+    const companySelect = document.getElementById("company_select");
+    const regionSelect = document.getElementById("region_select");
+    const depotSelect = document.getElementById("depot_select");
+    const outstationSelect = document.getElementById("outstation_select");
+
+    const finalCompany = document.getElementById("final_company");
+    const finalRegion = document.getElementById("final_region");
+    const finalDepot = document.getElementById("final_depot");
+    const finalOutstation = document.getElementById("final_outstation");
+
+    const finalLevel = document.getElementById("final_level");
+
+    /* -------------------------------
+       CLEAN ROLE VISIBILITY LOGIC
+    -------------------------------- */
+	function updateRoleVisibility() {
+
+		// Independent role flags
+		final_role_driver.value = roleDriver.checked ? 1 : 0;
+		final_role_enthusiast.value = roleEnthusiast.checked ? 1 : 0;
+
+		// LEVEL LOGIC
+		if (roleDriver.checked) {
+			finalLevel.value = "3";   // Driver (even if enthusiast also ticked)
+		} else {
+			finalLevel.value = "4";   // Enthusiast only
+		}
+
+		// VISIBILITY LOGIC
+		if (roleDriver.checked) {
+
+			companySection.style.display = "block";
+			regionSection.style.display = "block";
+			depotSection.style.display = "block";
+			outstationSection.style.display = "block";
+
+			// ❗ DO NOT call loadCompanies() here
+
+		} else {
+
+			companySection.style.display = "none";
+			regionSection.style.display = "none";
+			depotSection.style.display = "none";
+			outstationSection.style.display = "none";
+
+			finalCompany.value = "None";
+			finalRegion.value = "None";
+			finalDepot.value = "None";
+			finalOutstation.value = "None";
+		}
+	}
+
+	roleDriver.addEventListener("change", updateRoleVisibility);
+	roleEnthusiast.addEventListener("change", updateRoleVisibility);
+
+	updateRoleVisibility();
+
+
+
+
+    /* -------------------------------
+       COMPANY SELECTION
+    -------------------------------- */
+    companySelect.addEventListener("change", () => {
+        const company = companySelect.value;
+        finalCompany.value = company;
+
+        const companyData = companyRegions[company];
+
+        if (!companyData) {
+            regionSection.style.display = "none";
+            depotSection.style.display = "none";
+            outstationSection.style.display = "none";
+            return;
+        }
+
+        // Reset region dropdown
+        regionSelect.innerHTML = `
+            <option value="">-- Select Region --</option>
+            <option value="Other">Other (add your Region)</option>
+        `;
+
+        if (companyData.regions) {
+            Object.keys(companyData.regions).forEach(region => {
+                const opt = document.createElement("option");
+                opt.value = region;
+                opt.textContent = region;
+                regionSelect.appendChild(opt);
+            });
+
+            regionSection.style.display = "block";
+            depotSection.style.display = "none";
+            outstationSection.style.display = "none";
+
+        } else if (companyData.main) {
+            finalRegion.value = "None";
+            regionSection.style.display = "none";
+
+            loadDepots(companyData.main.depots);
+            loadOutstations(companyData.main.outstations);
+        }
+    });
+
+
+	/* -------------------------------
+	   REGION SELECTION
+	-------------------------------- */
+	regionSelect.addEventListener("change", () => {
+		const company = companySelect.value;
+		const region = regionSelect.value.trim();
+
+		finalRegion.value = region;
+
+		if (region === "" || region === "Other") {
+			depotSection.style.display = "none";
+			outstationSection.style.display = "none";
+			return;
+		}
+
+		const companyData = companyRegions[company];
+
+		if (!companyData || !companyData.regions) {
+			depotSection.style.display = "none";
+			outstationSection.style.display = "none";
+			return;
+		}
+
+		const regionData = companyData.regions[region];
+
+		if (!regionData) {
+			console.warn("Region not found:", region);
+			depotSection.style.display = "none";
+			outstationSection.style.display = "none";
+			return;
+		}
+
+		loadDepots(regionData.depots);
+		loadOutstations(regionData.outstations);
+	});
+
+    /* -----------------------------------------
+	   ERROR MESSAGES
+	----------------------------------------- */   
+	document.getElementById("createForm").addEventListener("submit", async (e) => {
+		e.preventDefault();
+
+		const error = document.getElementById("error");   // or "errorMsg" if you rename HTML
+		const success = document.getElementById("success"); // or "successMsg" if you rename HTML
+
+		error.textContent = "";
+		success.textContent = "";
+		…
+	});
+
+
+	/* -------------------------------
+	   FORM SUBMISSION
+	-------------------------------- */
+	document.getElementById("createForm").addEventListener("submit", async (e) => {
+		e.preventDefault();
+
+		const error = document.getElementById("error");
+		const success = document.getElementById("success");
+
+		error.textContent = "";
+		success.textContent = "";
+
+		const dob = document.getElementById("date_of_birth").value;
+		const birthDate = new Date(dob);
+		const today = new Date();
+		let age = today.getFullYear() - birthDate.getFullYear();
+		const m = today.getMonth() - birthDate.getMonth();
+		if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
+
+		if (roleDriver.checked && age < 18) {
+			error.textContent = "You must be 18 or older to register as a driver.";
+			return;
+		}
+
+		if (roleEnthusiast.checked && age < 16) {
+			error.textContent = "You must be 16 or older to register as an enthusiast.";
+			return;
+		}
+
+		const payload = {
+			first_name: document.getElementById("first_name").value.trim(),
+			last_name: document.getElementById("last_name").value.trim(),
+			username: document.getElementById("username").value.trim(),
+			email: document.getElementById("email").value.trim(),
+			password: document.getElementById("password").value.trim(),
+			date_of_birth: dob,
+			role_driver: roleDriver.checked ? 1 : 0,
+			role_enthusiast: roleEnthusiast.checked ? 1 : 0,
+			company: finalCompany.value,
+			region: finalRegion.value,
+			depot: finalDepot.value,
+			outstation: finalOutstation.value,
+			level: finalLevel.value   // ← important
+		};
+
+
+		const res = await fetch("/api/register", {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify(payload)
+		});
+
+		const data = await res.json();
+
+		if (!res.ok) {
+			error.textContent = data.message || "Registration failed.";
+			return;
+		}
+
+		success.textContent = "Account created successfully!";
+		setTimeout(() => window.location.href = "/login", 1500);
+	});
+
+	console.log("SCRIPT END");
+
+});
+</script>
+
+{% endblock %}
+
+
+

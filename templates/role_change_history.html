@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% set page_title = "UK Transport Hub" %}
+{% set home_target = "home" %}
+{% set is_drivers_hub = False %}
+
+{% block content %}
+<a href="javascript:history.back()" class="back-btn">← Back</a>
+
+<h2>Role Change Logs</h2>
+
+<div class="history-controls">
+    <input type="text" id="historySearch" placeholder="Search logs by name, admin, or type...">
+</div>
+
+<div class="history-container">
+
+    <div class="history-header">
+        <span>Date</span>
+        <span>User</span>
+        <span>Admin</span>
+        <span>Change Type</span>
+        <span>Old Role</span>
+        <span>New Role</span>
+        <span>Reason</span>
+        <span>Extra Info</span>
+    </div>
+
+	<div id="historyList">
+		{% for h in logs %}
+		<div class="history-row">
+			<span>{{ h.timestamp.strftime('%d %b %Y %H:%M') }}</span>
+
+			<!-- USER NAME (unchanged) -->
+			<span>{{ h.user.first_name }} {{ h.user.last_name }}</span>
+
+			<!-- ADMIN DISPLAY (role instead of real name) -->
+			<span>
+				{% if h.admin.level == 1 %}
+					Superadmin
+				{% elif h.admin.level == 2 %}
+					Admin
+				{% elif h.admin.level == 3 %}
+					Enthusiast
+				{% elif h.admin.level == 4 %}
+					Driver
+				{% else %}
+					Unknown
+				{% endif %}
+			</span>
+
+			<span>{{ h.change_type }}</span>
+			<span>{{ h.old_role }}</span>
+			<span>{{ h.new_role }}</span>
+			<span>{{ h.reason }}</span>
+			<span>{{ h.extra_info }}</span>
+		</div>
+		{% endfor %}
+	</div>
+
+
+</div>
+
+<style>
+.history-controls {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+#historySearch {
+    width: 80%;
+    padding: 10px;
+    font-size: 16px;
+}
+
+.history-container {
+    width: 95%;
+    margin: 0 auto;
+    max-height: 500px;
+    overflow-y: auto;
+    background: #ffffff;
+    border: 1px solid #d0d0d0;
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+.history-header {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    padding: 14px 16px;
+    font-weight: 600;
+    background: #f2f2f2;
+    border-bottom: 2px solid #bcbcbc;
+}
+
+.history-row {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    padding: 14px 16px;
+    border-bottom: 1px solid #e0e0e0;
+    font-size: 15px;
+}
+
+.history-row:hover {
+    background: #f9f9f9;
+}
+</style>
+
+<script>
+document.getElementById("historySearch").addEventListener("input", function() {
+    let filter = this.value.toLowerCase();
+    let rows = document.querySelectorAll(".history-row");
+
+    rows.forEach(row => {
+        let text = row.innerText.toLowerCase();
+        row.style.display = text.includes(filter) ? "" : "none";
+    });
+});
+</script>
+{% endblock %}

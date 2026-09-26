@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block content %}
+<p>enthusiast: {{ enthusiast }}</p>
+
+<h2>Delete Account</h2>
+
+<p>Select what you want to delete:</p>
+
+<form action="/confirm-delete" method="POST">
+
+    {% if current_user.level == 3 %}
+    <label>
+        <input type="checkbox" name="delete_driver">
+        Delete Driver Account
+    </label><br>
+    {% endif %}
+
+    {% if current_user.level == 4 %}
+    <label>
+        <input type="checkbox" name="delete_enthusiast">
+        Delete Enthusiast Account
+    </label><br>
+    {% endif %}
+
+    {% if current_user.level in [3, 4] %}
+    <label>
+        <input type="checkbox" name="delete_both">
+        Delete BOTH Accounts
+    </label><br>
+    {% endif %}
+
+    <br>
+    <button type="submit">Confirm Delete</button>
+    <a href="{{ url_for(home_target) }}">Cancel</a>
+
+</form>
+
+{% endblock %}

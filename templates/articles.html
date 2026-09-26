@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% set home_target = "driver_dashboard" %}
+{% set is_UK_transport_hub = True %}
+{% set page_title = "UK Transport Hub" %}
+
+{% block content %}
+
+<a href="javascript:history.back()" class="back-btn">← Back</a>
+
+<style>
+
+/* ====================================================
+   DRIVER INFORMATION — BLUE CARDS
+==================================================== */
+
+.container {
+    max-width: 900px;
+    margin: 40px auto;
+    text-align: center;
+    color: #000;
+}
+
+/* 3‑column responsive grid */
+.dash-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    column-gap: 19px;
+    row-gap: 25px;
+    margin-top: 30px;
+    justify-items: center;
+}
+
+/* BLUE cards with thin blue left border */
+.dash-card {
+    background: #0A2A66;                 /* Transport Hub deep blue */
+    border-left: 5px solid #1E88E5;      /* Thin lighter blue line */
+    border-radius: 10px;
+    padding: 20px;
+    width: 100%;
+    max-width: 250px;
+    text-decoration: none;
+    color: #ffffff;                      /* White text on blue */
+    text-align: center;
+    box-shadow: 0 0 10px rgba(0,0,0,0.15);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dash-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0 15px rgba(0,0,0,0.25);
+    background: #1E3A8A;                /* Slightly lighter blue on hover */
+}
+
+.dash-card h3 {
+    margin-bottom: 10px;
+    font-size: 20px;
+    color: #ffffff;
+}
+
+.dash-card p {
+    font-size: 14px;
+    opacity: 0.95;
+    color: #e8e8e8;
+}
+
+/* Responsive breakpoints */
+@media (max-width: 900px) {
+    .dash-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .dash-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+</style>
+
+<H2>Drivers Information</h2>
+
+<div class="container">
+
+    <div class="dash-grid">
+
+        <a class="dash-card" href="/articles/1">
+            <h3>Welcome to the Drivers Hub</h3>
+            <p>Getting started with the Drivers Hub.</p>
+        </a>
+
+        <a class="dash-card" href="/articles/2">
+            <h3>Making the Most of the Drivers Hub</h3>
+            <p>Your rights and protections as a driver.</p>
+        </a>
+
+        <a class="dash-card" href="/articles/3">
+            <h3>Passenger Safety & Accessibility</h3>
+            <p>Practical safety advice for bus and coach drivers.</p>
+        </a>
+
+        <a class="dash-card" href="/articles/4">
+            <h3>Driver Support & Wellbeing</h3>
+            <p>Guidance to help you manage stress, fatigue, and everyday challenges on the road.</p>
+        </a>
+
+        <a class="dash-card" href="/articles/5">
+            <h3>Dealing With Difficult Passengers</h3>
+            <p>Techniques to stay calm, set boundaries, and manage difficult situations on board.</p>
+        </a>
+
+        <a class="dash-card" href="/articles/6">
+            <h3>Driver Fatigue & Alertness</h3>
+            <p>Understanding fatigue risks and keeping yourself alert and safe.</p>
+        </a>
+
+        <a class="dash-card" href="/articles/7">
+            <h3>Managing Stress on the Road</h3>
+            <p>Practical ways to stay calm, focused, and in control during challenging shifts.</p>
+        </a>
+
+        <a class="dash-card" href="/articles/8">
+            <h3>Staying Safe on the Road</h3>
+            <p>Quick safety tips and practical guidance for everyday driving.</p>
+        </a>
+
+        <a class="dash-card" href="/articles/9">
+            <h3>Professionalism on the Road</h3>
+            <p>Customer service guidance for drivers.</p>
+        </a>
+
+        <a class="dash-card" href="/articles/10">
+            <h3>Respect and Teamwork on the Road</h3>
+            <p>How teamwork and mutual respect support drivers and passengers.</p>
+        </a>
+
+        <a class="dash-card disabled-link">
+            <h3>More Articles Coming Soon</h3>
+            <p>New content will be added here.</p>
+        </a>
+
+    </div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="breadcrumbs">
+    <a href="{{ url_for('enthusiast_hub') }}">Enthusiast Hub</a> >
+    <a href="{{ url_for('enthusiast_gallery') }}">Gallery</a> >
+    <span>Photo Details</span>
+</div>
+
+
+<h2>Photo Details</h2>
+
+<div style="display: flex; gap: 30px; align-items: flex-start;">
+
+    <!-- PHOTO ON LEFT -->
+    <div style="flex: 1;">
+        <img src="{{ url_for('static', filename='enthusiast_photos/' ~ photo.filename) }}"
+             class="full-photo">
+    </div>
+
+    <!-- INFO PANEL ON RIGHT -->
+    <div style="flex: 1;">
+
+        <div class="info-panel">
+            <h3>{{ enthusiast.username }}</h3>
+
+            <p><strong>Uploaded:</strong> {{ photo.uploaded_at.strftime('%d-%m-%y %H:%M') }}</p>
+            <p><strong>Spotted At:</strong> {{ enthusiast.spotted_at.strftime('%d-%m-%y %H:%M') }}</p>
+
+            <p><strong>Operator:</strong> {{ enthusiast.operator }}</p>
+            <p><strong>Vehicle Number:</strong> {{ enthusiast.vehicle_number }}</p>
+            <p><strong>Make/Model:</strong> {{ enthusiast.make_model }}</p>
+            <p><strong>Route Number:</strong> {{ enthusiast.route_number }}</p>
+            <p><strong>Route Start / Destination:</strong> {{ enthusiast.route_destination }}</p>
+            <p><strong>Notes:</strong> {{ enthusiast.notes }}</p>
+        </div>
+
+        <!-- BUTTONS -->
+        <div style="margin-top: 25px;">
+            <a href="{{ url_for('enthusiast_gallery') }}" class="btn">Back to Gallery</a>
+
+            {% if prev_photo %}
+                <a href="{{ url_for('enthusiast_photo_details', photo_id=prev_photo.id) }}" class="btn">
+                    Previous
+                </a>
+            {% endif %}
+
+            {% if next_photo %}
+                <a href="{{ url_for('enthusiast_photo_details', photo_id=next_photo.id) }}" class="btn">
+                    Next
+                </a>
+            {% endif %}
+
+            <!-- EDIT / DELETE BUTTONS -->
+            <a href="{{ url_for('edit_enthusiast_record', enthusiast_id=enthusiast.id) }}" class="btn">
+                Edit Entry
+            </a>
+
+            <a href="{{ url_for('delete_enthusiast_record', enthusiast_id=enthusiast.id) }}"
+               class="btn"
+               style="background-color:#c62828;">
+               Delete Entry
+            </a>
+        </div>
+
+    </div>
+
+</div>
+
+
+<style>
+.full-photo {
+    width: 100%;
+    max-width: 800px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+/* INFO PANEL */
+.info-panel {
+    background: #f7f9fc;
+    border: 2px solid #1E88E5;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0px 2px 6px rgba(0,0,0,0.1);
+}
+
+.info-panel p {
+    margin: 6px 0;
+}
+
+/* BUTTONS */
+.btn {
+    background-color: #1E88E5; /* Transport Hub blue */
+    color: white;
+    padding: 10px 18px;
+    border-radius: 6px;
+    text-decoration: none;
+    margin-right: 10px;
+}
+.btn:hover {
+    background-color: #1565C0;
+}
+
+
+.breadcrumbs {
+    margin-bottom: 20px;
+    font-size: 16px;
+}
+.breadcrumbs a {
+    color: #1E88E5;
+    text-decoration: none;
+}
+.breadcrumbs a:hover {
+    text-decoration: underline;
+}
+.breadcrumbs span {
+    color: #333;
+}
+</style>
+
+{% endblock %}

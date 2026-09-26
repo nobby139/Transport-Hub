@@ -1,0 +1,73 @@
+<!-- DEPOT SELECT DROPDOWN -->
+<label for="depotSelect" id="depotLabel">Select Depot:</label>
+<select id="depotSelect">
+    <option value="">-- Select Depot --</option>
+</select>
+
+<button id="finishBtn">Finish</button>
+
+<script src="../js/companyRegions.js"></script>
+<script>
+    const selectedCompany = localStorage.getItem("selectedCompany");
+    const selectedRegion = localStorage.getItem("selectedRegion");
+
+    const depotSelect = document.getElementById("depotSelect");
+    const depotLabel = document.getElementById("depotLabel");
+
+    function loadDepots() {
+        if (!selectedCompany || !selectedRegion) {
+            alert("Missing company or region selection.");
+            return;
+        }
+
+        const companyData = companyRegions[selectedCompany];
+
+        let depots = [];
+
+        // Company WITH regions
+        if (selectedRegion !== "main" && companyData.regions) {
+            const regionData = companyData.regions[selectedRegion];
+
+            if (!regionData || !regionData.depots) {
+                alert("Region not found for this company.");
+                return;
+            }
+
+            depots = regionData.depots;
+        }
+
+        // Company WITHOUT regions (main)
+        else if (selectedRegion === "main" && companyData.main) {
+            depots = companyData.main.depots;
+        }
+
+        // Populate dropdown
+        depots.forEach(depot => {
+            const option = document.createElement("option");
+            option.value = depot;
+            option.textContent = depot;
+            depotSelect.appendChild(option);
+        });
+
+        depotLabel.style.display = "block";
+        depotSelect.style.display = "block";
+    }
+
+    document.getElementById("finishBtn").addEventListener("click", () => {
+        const selectedDepot = depotSelect.value;
+
+        if (!selectedDepot) {
+            alert("Please select a depot.");
+            return;
+        }
+
+        localStorage.setItem("selectedDepot", selectedDepot);
+
+        // Redirect wherever your system needs to go next
+        window.location.href = "outstationSelect.html";
+
+    });
+
+    loadDepots();
+</script>
+

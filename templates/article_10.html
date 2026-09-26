@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+{% set home_target = "driver_dashboard" %}
+{% set is_transport_hub = True %}
+{% set page_title = "UK Transport Hub" %}
+
+{% block content %}
+
+
+
+<div class="article-container">
+
+    <!-- Back to articles list -->
+    <a href="/driver-information" class="back-link">← Back to Articles</a>
+
+    <!-- Previous / Next navigation -->
+    <div class="article-nav">
+        {% if prev_url %}
+            <a class="nav-prev" href="{{ prev_url }}">← Previous</a>
+        {% endif %}
+        {% if next_url %}
+            <a class="nav-next" href="{{ next_url }}">Next →</a>
+        {% endif %}
+    </div>
+
+    <!-- Published / updated dates -->
+    <p class="article-date">
+        Published: {{ published }}
+        {% if updated %}
+            • Last updated: {{ updated }}
+        {% endif %}
+    </p>
+
+<h1 class="article-title"></h1>
+
+<div class="article-content">
+
+    <!-- ICON + MAIN HEADER -->
+    <div class="section-header">
+        <img src="/static/assets/Respect_Teamwork.png" class="article-header-image" alt="Article Icon">
+        <h2>Respect and Teamwork on the Road</h2>
+    </div>
+
+
+        <p>
+            Transport is a team effort. Even when you’re alone in the cab, you’re part of a wider operation
+            that includes controllers, engineers, cleaners, supervisors, and other drivers. Respect and teamwork
+            keep services running smoothly, reduce stress, and create a safer, more professional environment for
+            everyone.
+        </p>
+
+        <p>
+            How you treat colleagues and passengers shapes the culture around you. A respectful, supportive
+            approach builds trust, improves communication, and makes difficult days easier to handle.
+        </p>
+
+        <h2>Respecting Colleagues and the Job</h2>
+        <p>
+            Respect starts with recognising that everyone has a role to play. From depot staff to controllers,
+            each person is working under their own pressures and responsibilities.
+        </p>
+        <ul>
+            <li>Be polite and professional with colleagues, even when you disagree.</li>
+            <li>Avoid blame and gossip — focus on solutions, not fault‑finding.</li>
+            <li>Follow company procedures and local rules consistently.</li>
+            <li>Look after shared spaces: cabs, mess rooms, and facilities.</li>
+            <li>Treat new starters with patience and support, not judgement.</li>
+        </ul>
+
+        <h2>Working as a Team on the Network</h2>
+        <p>
+            Good teamwork keeps the service moving, especially when things go wrong. Clear communication and
+            cooperation between drivers and control can prevent small issues becoming major disruptions.
+        </p>
+        <ul>
+            <li>Give clear, accurate information when speaking to control or supervisors.</li>
+            <li>Follow instructions carefully and ask if something is unclear.</li>
+            <li>Share useful information with other drivers about diversions or hazards.</li>
+            <li>Offer practical help when colleagues are under pressure, if it’s safe to do so.</li>
+            <li>Respect handover times and pass on key information about the vehicle or route.</li>
+        </ul>
+
+    <!-- ICON + MID SECTION -->
+    <div class="section-header">
+        <img src="/static/assets/Supporting_Each_Other.png" class="article-header-image" alt="Article Icon">
+        <h2>Supporting Each Other on Difficult Days</h2>
+	</div>
+        
+        <p>
+            Every driver has tough shifts — delays, incidents, difficult passengers, or personal stress. A strong
+            team culture means no one feels like they’re dealing with everything alone.
+        </p>
+        <ul>
+            <li>Check in on colleagues who’ve had a bad shift or serious incident.</li>
+            <li>Listen without judgement if someone needs to talk.</li>
+            <li>Encourage others to use support services if they’re struggling.</li>
+            <li>Share tips and experience with less‑experienced drivers.</li>
+            <li>Celebrate small wins: a smooth shift, good feedback, or a tricky situation handled well.</li>
+        </ul>
+
+        <h2>Respecting Passengers While Keeping Boundaries</h2>
+        <p>
+            Respect doesn’t mean saying yes to everything. It means treating passengers fairly and calmly, while
+            keeping clear boundaries and following company policy.
+        </p>
+        <ul>
+            <li>Speak to passengers in a calm, neutral tone — especially when they’re frustrated.</li>
+            <li>Avoid taking comments personally; focus on the issue, not the emotion.</li>
+            <li>Be clear about what you can and cannot do within the rules.</li>
+            <li>Treat all passengers equally, regardless of background or attitude.</li>
+            <li>Use discretion where appropriate, but never compromise safety or legality.</li>
+        </ul>
+
+        <h2>Professional Communication in the Team</h2>
+        <p>
+            Clear, respectful communication is at the heart of good teamwork. The way you speak on the radio,
+            in the depot, or in messages can either build trust or create tension.
+        </p>
+        <ul>
+            <li>Keep radio and phone communication brief, clear, and professional.</li>
+            <li>Avoid sarcasm or jokes that could be misunderstood.</li>
+            <li>Raise concerns through the proper channels, not in public arguments.</li>
+            <li>Give feedback constructively, focusing on behaviour, not personality.</li>
+            <li>Be open to feedback yourself, and see it as a chance to improve.</li>
+        </ul>
+
+        <h2>Looking After Yourself and the Team</h2>
+        <p>
+            Respect and teamwork also mean recognising your own limits. A tired, stressed, or distracted driver
+            is more likely to make mistakes, which affects everyone around them.
+        </p>
+        <ul>
+            <li>Use breaks properly — step away from the cab and reset.</li>
+            <li>Ask for support if workload or stress is becoming too much.</li>
+            <li>Be honest about fitness to work, especially after difficult incidents.</li>
+            <li>Encourage a culture where it’s okay to say you’re struggling.</li>
+            <li>Lead by example: calm, consistent, and professional.</li>
+        </ul>
+
+    <!-- ICON + FINAL SECTION -->
+    <div class="section-header">
+        <img src="/static/assets/Building_Culture.png" class="article-header-image" alt="Article Icon">
+		<h2>Building a Culture You’d Want to Work In</h2>
+    </div>
+
+        <p>
+            Respect and teamwork aren’t just policies — they’re daily choices. The way you speak, listen, and
+            respond to others shapes the environment you work in. By supporting colleagues, communicating
+            clearly, and treating people fairly, you help build a culture that you’d be proud to be part of.
+        </p>
+        <p>
+            When drivers look out for each other, share information, and act with respect, the whole operation
+            benefits — from the depot to the road to the passengers on board.
+        </p>
+
+{% endblock %}

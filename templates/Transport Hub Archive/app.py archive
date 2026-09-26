@@ -1,0 +1,88 @@
+# ---------------------------------------------------------
+# REGISTER DRIVER
+# ---------------------------------------------------------
+
+@app.post("/api/register/driver")
+def api_register_driver():
+    data = request.get_json()
+
+    first_name = data.get("first_name")
+    last_name = data.get("last_name")
+    email = data.get("email")
+    password = generate_password_hash(data.get("password"))
+    date_of_birth = data.get("date_of_birth")
+
+    joined_date = datetime.today().strftime("%Y-%m-%d")
+
+    selected_company = data.get("company_id")
+    custom_company = data.get("new_company")
+
+    if not all([first_name, last_name, email, password, date_of_birth]):
+        return jsonify({"message": "Missing required fields"}), 400
+
+    existing = User.query.filter_by(email=email, role="driver").first()
+    if existing:
+        return jsonify({"message": "Email already registered"}), 400
+
+    company_name = custom_company.strip() if custom_company else selected_company
+
+    user = User(
+        username=f"{first_name} {last_name}",
+        first_name=first_name,
+        last_name=last_name,
+        email=email,
+        password=password,
+        date_of_birth=date_of_birth,
+        joined_date=joined_date,
+        company=company_name,
+        role="driver"
+    )
+
+    db.session.add(user)
+    db.session.commit()
+
+    return jsonify({"message": "Driver account created successfully"}), 200
+
+
+# ---------------------------------------------------------
+# REGISTER ENTHUSIAST
+# ---------------------------------------------------------
+
+@app.post("/api/register/enthusiast")
+def register_enthusiast():
+    data = request.json
+
+    first_name = data["first_name"]
+    last_name = data["last_name"]
+    email = data["email"]
+    password = generate_password_hash(data["password"])
+    dob = data["date_of_birth"]
+
+    joined_date = datetime.today().strftime("%Y-%m-%d")
+    dob_date = datetime.strptime(dob, "%Y-%m-%d")
+    today = datetime.today()
+    age = today.year - dob_date.year - ((today.month, today.day) < (dob_date.month, dob_date.day))
+
+    existing_enthusiast = User.query.filter_by(email=email, role="enthusiast").first()
+    if existing_enthusiast:
+        return jsonify({"message": "You already have an enthusiast account."})
+
+    try:
+        user = User(
+            first_name=first_name,
+            last_name=last_name,
+            email=email,
+            password=password,
+            role="enthusiast",
+            date_of_birth=dob,
+            joined_date=joined_date,
+            company=None
+        )
+
+        db.session.add(user)
+        db.session.commit()
+
+    except Exception as e:
+        return jsonify({"message": "Database error", "error": str(e)})
+
+    return jsonify({"message": "Enthusiast account created successfully"})

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Password reset</title>
+    <style>
+        body { font-family: Arial, sans-serif; background:#f4f4f4; padding:20px; }
+        .card {
+            max-width: 500px;
+            margin: auto;
+            background: #ffffff;
+            border-radius: 8px;
+            padding: 20px 25px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        h1 { font-size: 20px; margin-bottom: 10px; }
+        p { font-size: 14px; line-height: 1.5; color:#333; }
+        a.button {
+            display:inline-block;
+            margin-top:15px;
+            padding:10px 18px;
+            background:#0078ff;
+            color:#ffffff !important;
+            text-decoration:none;
+            border-radius:4px;
+            font-size:14px;
+        }
+        .small { font-size:12px; color:#777; margin-top:15px; }
+    </style>
+</head>
+<body>
+<div class="card">
+    <h1>Reset your password</h1>
+    <p>You requested to reset your password for Drivers Hub.</p>
+    <p>Click the button below to set a new password:</p>
+
+    <p>
+        <a href="{{ reset_link }}" class="button">Reset password</a>
+    </p>
+
+    <p>If the button doesn’t work, copy and paste this link into your browser:</p>
+    <p>{{ reset_link }}</p>
+
+    <p class="small">
+        This link will expire in {{ expires_minutes }} minutes.  
+        If you didn’t request this, you can safely ignore this email.
+    </p>
+</div>
+</body>
+</html>

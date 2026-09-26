@@ -1,0 +1,819 @@
+{% extends "base.html" %}
+{% set home_target = "driver_dashboard" %}
+{% set is_UK_transport_hub = True %}
+{% set page_title = "UK Transport Hub" %}
+
+{% block content %}
+
+
+
+<style>
+
+.bus-row {
+        display: grid;
+        grid-template-columns: 80px 30px 30px 1fr 1fr 110px 110px auto;
+        gap: 8px;
+        align-items: center;
+        padding: 10px;
+        margin-bottom: 8px;
+        background: #f7f7f7;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+    }
+
+    .bus-row label {
+        font-weight: bold;
+        margin: 0;
+        font-size: 14px;
+    }
+
+    .bus-row input {
+        width: 100%;
+    }
+	.delete-btn {
+        background: #000;
+        color: #fff;
+        border: none;
+        font-size: 12px;
+        padding: 2px 8px;
+        border-radius: 4px;
+        cursor: pointer;
+
+        /* ⭐ Fixes the length so it hugs the text ⭐ */
+        width: fit-content;
+        min-width: fit-content;
+        max-width: fit-content;
+        white-space: nowrap;
+    }
+	
+    .ndw-row {
+        display: grid;
+        grid-template-columns: 160px 40px 40px 200px 120px 120px auto;
+        gap: 10px;
+        align-items: center;
+        padding: 10px;
+        margin-bottom: 8px;
+        background: #f7f7f7;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+    }
+
+    .ndw-row label {
+        font-weight: bold;
+        margin: 0;
+    }
+
+    .ndw-row select,
+    .ndw-row input {
+        width: 100%;
+    }
+
+    .move-btn {
+        padding: 2px 6px;
+        font-size: 14px;
+        cursor: pointer;
+    }
+	
+	.delete-btn {
+		background: #000;
+		color: #fff;
+		border: none;
+		font-size: 12px;
+		padding: 2px 8px;
+		border-radius: 4px;
+		cursor: pointer;
+	}
+
+
+	.delete-ndw-btn {
+		background: #000;
+		color: #fff;
+		border: none;
+		font-size: 12px;
+		padding: 2px 6px;
+		border-radius: 4px;
+		cursor: pointer;
+
+		/* ⭐ THIS IS WHAT FIXES THE LENGTH ⭐ */
+		width: fit-content;
+		min-width: fit-content;
+		max-width: fit-content;
+		white-space: nowrap;
+	}
+
+
+</style>
+<a href="javascript:history.back()" class="back-btn">← Back</a>
+<a class="nav-btn" href="{{ url_for(home_target) }}">
+    <img src="{{ url_for('static', filename='assets/home.png') }}" class="nav-icon">
+</a>
+
+
+<h2>Drivers Log</h2>
+
+<div style="margin-bottom: 20px;">
+    <a href="/weekly_view" class="btn" style="margin-right: 10px;">Weekly Table</a>
+    <a href="/monthly-view" class="btn" style="margin-right: 10px;">Monthly Table</a>
+</div>
+
+<form action="/duty-hours-checker" method="POST" class="form-card">
+
+	<h3>Duty Information</h3>
+
+	<!-- ⭐ UNLIMITED DUTY CODES ⭐ -->
+	<div id="dutycode-container"></div>
+
+	<button type="button" class="btn" onclick="addDutyCodeRow()">Add Duty Code</button>
+
+	<script>
+		let dutyCodeCount = 0;
+
+		function addDutyCodeRow(value = "") {
+			dutyCodeCount++;
+
+			const container = document.getElementById("dutycode-container");
+
+			const row = document.createElement("div");
+			row.classList.add("dutycode-row");
+
+			row.innerHTML = `
+				<label>Duty Number / Code ${dutyCodeCount}</label>
+				<input type="text" name="dutycode${dutyCodeCount}" value="${value}" required>
+
+				<button type="button" class="delete-dutycode-btn" onclick="deleteDutyCodeRow(this)">Delete</button>
+			`;
+
+			container.appendChild(row);
+		}
+
+		function deleteDutyCodeRow(button) {
+			const row = button.closest(".dutycode-row");
+			if (!row) return;
+
+			row.remove();
+			renumberDutyCodeRows();
+		}
+
+		function renumberDutyCodeRows() {
+			const rows = document.querySelectorAll("#dutycode-container .dutycode-row");
+			dutyCodeCount = 0;
+
+			rows.forEach((row, index) => {
+				const newIndex = index + 1;
+				dutyCodeCount = newIndex;
+
+				const label = row.querySelector("label");
+				const input = row.querySelector("input");
+
+				label.textContent = `Duty Number / Code ${newIndex}`;
+				input.name = `dutycode${newIndex}`;
+			});
+		}
+
+		{% if results and results.duty_codes %}
+			{% for d in results.duty_codes %}
+				addDutyCodeRow("{{ d }}");
+			{% endfor %}
+		{% endif %}
+	</script>
+
+	<!-- ⭐ ORIGINAL CONTENT BELOW — UNCHANGED ⭐ -->
+
+	<h3>Duty Number / Code</h3>
+
+	<input type="text" name="duty_number"
+		   placeholder="Enter duty number"
+		   value="{{ results.duty_number if results else '' }}"
+		   required>
+
+
+	<label>Date of Duty</label>
+	<input type="date" name="duty_date"
+		   value="{{ results.raw_date if results else '' }}" required>
+
+	<hr>
+
+	<h3>Vehicle Type</h3>
+
+	<label>
+		<input type="radio" name="vehicle_type" value="bus"
+			   {% if results and results.vehicle_type == 'bus' %}checked{% endif %}>
+		Bus
+	</label>
+
+	<label>
+		<input type="radio" name="vehicle_type" value="coach"
+			   {% if results and results.vehicle_type == 'coach' %}checked{% endif %}>
+		Coach
+	</label>
+
+	<hr>
+
+<h3>Vehicle Changes (Multi-Bus Support)</h3>
+
+    <div id="bus-container">
+        <!-- Rows will be populated dynamically -->
+    </div>
+
+    <button type="button" class="btn" onclick="addBusRow()" style="margin-top: 10px;">Add Another Bus</button>
+
+    <script>
+        let busCount = 0;
+
+        function addBusRow(busNo = "", regPlate = "", timeFrom = "", timeTo = "") {
+            busCount++;
+
+            const container = document.getElementById("bus-container");
+
+            const row = document.createElement("div");
+            row.classList.add("bus-row");
+
+            row.innerHTML = `
+                <label>Bus ${busCount}</label>
+
+                <button type="button" class="move-btn" onclick="moveBusUp(${busCount})">▲</button>
+                <button type="button" class="move-btn" onclick="moveBusDown(${busCount})">▼</button>
+
+                <input type="text" name="bus_no[]" placeholder="Bus No. (Optional)" value="${busNo}">
+                <input type="text" name="reg_plate[]" placeholder="Reg Plate" value="${regPlate}" required>
+                <input type="time" name="time_from[]" value="${timeFrom}" required>
+                <input type="time" name="time_to[]" value="${timeTo}" required>
+
+                <button type="button" class="delete-btn" onclick="deleteBusRow(this)">Delete</button>
+            `;
+
+            container.appendChild(row);
+        }
+
+        function deleteBusRow(button) {
+            const rows = document.querySelectorAll("#bus-container .bus-row");
+            if (rows.length <= 1) {
+                alert("You must have at least one bus entry.");
+                return;
+            }
+
+            const row = button.closest(".bus-row");
+            if (!row) return;
+
+            row.remove();
+            renumberBusRows();
+        }
+
+        function renumberBusRows() {
+            const rows = document.querySelectorAll("#bus-container .bus-row");
+            busCount = 0;
+
+            rows.forEach((row, index) => {
+                const newIndex = index + 1;
+                busCount = newIndex;
+
+                const label = row.querySelector("label");
+                if (label) label.textContent = `Bus ${newIndex}`;
+
+                const upBtn = row.querySelector('.move-btn:nth-of-type(1)');
+                const downBtn = row.querySelector('.move-btn:nth-of-type(2)');
+                if (upBtn) upBtn.setAttribute("onclick", `moveBusUp(${newIndex})`);
+                if (downBtn) downBtn.setAttribute("onclick", `moveBusDown(${newIndex})`);
+            });
+        }
+
+        function moveBusUp(index) {
+            const rows = document.querySelectorAll("#bus-container .bus-row");
+            if (index <= 1) return;
+
+            const current = rows[index - 1];
+            const above = rows[index - 2];
+
+            above.before(current);
+            renumberBusRows();
+        }
+
+        function moveBusDown(index) {
+            const rows = document.querySelectorAll("#bus-container .bus-row");
+            if (index >= rows.length) return;
+
+            const current = rows[index - 1];
+            const below = rows[index];
+
+            below.after(current);
+            renumberBusRows();
+        }
+
+        {% if results and results.buses and results.buses | length > 0 %}
+            {% for b in results.buses %}
+                addBusRow("{{ b.bus_no }}", "{{ b.reg_plate }}", "{{ b.time_from }}", "{{ b.time_to }}");
+            {% endfor %}
+        {% else %}
+            addBusRow();
+        {% endif %}
+    </script>
+     
+	 <hr>
+	<h3>Delay / Incident Reasons</h3>
+
+	<label>
+		<input type="checkbox" name="traffic_delay"
+			   {% if results and results.traffic_delay == 'Yes' %}checked{% endif %}>
+		Traffic Delay
+	</label>
+
+	<input type="number" name="traffic_delay_minutes" min="0"
+		   placeholder="Minutes lost"
+		   value="{{ results.traffic_delay_minutes if results else '' }}"
+		   style="margin-left: 10px; width: 120px;">
+
+	<br>
+
+	<label>
+		<input type="checkbox" name="incident_delay"
+			   {% if results and results.incident_delay == 'Yes' %}checked{% endif %}>
+		Incident Delay
+	</label>
+
+	<input type="number" name="incident_delay_minutes" min="0"
+		   placeholder="Minutes lost"
+		   value="{{ results.incident_delay_minutes if results else '' }}"
+		   style="margin-left: 10px; width: 120px;">
+
+	<hr>
+
+	<h3>Passenger Issues</h3>
+
+	<div id="issue-container"></div>
+
+	<button type="button" class="btn" onclick="addIssueRow()">Add Passenger Issue</button>
+
+	<script>
+		let issueCount = 0;
+
+		const commonIssueOptions = `
+			<option value="">Select Issue</option>
+			<option value="Abuse">Abuse</option>
+			<option value="Fare Dispute">Fare Dispute</option>
+			<option value="Out of Service">Out of Service</option>
+			<option value="Drunk Passenger">Drunk Passenger</option>
+			<option value="Medical Incident">Medical Incident</option>
+			<option value="Lost Property">Lost Property</option>
+			<option value="Accessibility Issue">Accessibility Issue</option>
+			<option value="Behaviour Problem">Behaviour Problem</option>
+			<option value="Vulnerable Passenger">Vulnerable Passenger</option>
+			<option value="Other">Other (manual entry)</option>
+		`;
+
+		function isCommonIssue(type) {
+			const common = [
+				"Abuse",
+				"Fare Dispute",
+				"Out of Service",
+				"Drunk Passenger",
+				"Medical Incident",
+				"Lost Property",
+				"Accessibility Issue",
+				"Behaviour Problem",
+				"Vulnerable Passenger"
+			];
+			return common.includes(type);
+		}
+
+		function addIssueRow(type = "", delay = "0", notes = "") {
+			issueCount++;
+
+			const container = document.getElementById("issue-container");
+
+			const row = document.createElement("div");
+			row.classList.add("issue-row");
+
+			row.innerHTML = `
+				<label>Issue ${issueCount} Type</label>
+
+				<!-- ⭐ Move Up / Move Down -->
+				<button type="button" class="move-btn" onclick="moveIssueUp(${issueCount})">▲</button>
+				<button type="button" class="move-btn" onclick="moveIssueDown(${issueCount})">▼</button>
+
+				<select name="issue${issueCount}_type" onchange="toggleManualIssue(${issueCount})">
+					${commonIssueOptions}
+				</select>
+
+				<input type="text"
+					   name="issue${issueCount}_type_manual"
+					   id="issue${issueCount}_manual"
+					   placeholder="Enter issue type"
+					   style="display:none; margin-top:5px;">
+
+				<label>Delay Minutes</label>
+				<input type="number" name="issue${issueCount}_delay" min="0" value="${delay}">
+
+				<label>Notes</label>
+				<textarea name="issue${issueCount}_notes" rows="2">${notes}</textarea>
+
+				<button type="button" class="delete-btn" onclick="deleteIssueRow(this)">Delete</button>
+
+			`;
+
+			container.appendChild(row);
+
+			const dropdown = row.querySelector(`select[name="issue${issueCount}_type"]`);
+			const manual = row.querySelector(`#issue${issueCount}_manual`);
+
+			if (isCommonIssue(type)) {
+				dropdown.value = type;
+			} else if (type) {
+				dropdown.value = "Other";
+				manual.style.display = "block";
+				manual.value = type;
+			}
+		}
+
+		function deleteIssueRow(button) {
+			const row = button.closest(".issue-row");
+			if (!row) return;
+
+			row.remove();
+			renumberIssueRows();
+		}
+
+		function renumberIssueRows() {
+			const rows = document.querySelectorAll("#issue-container .issue-row");
+			issueCount = 0;
+
+			rows.forEach((row, index) => {
+				const newIndex = index + 1;
+				issueCount = newIndex;
+
+				const labels = row.querySelectorAll("label");
+				const selects = row.querySelectorAll("select");
+				const inputs = row.querySelectorAll("input");
+				const textareas = row.querySelectorAll("textarea");
+
+				if (labels[0]) labels[0].textContent = `Issue ${newIndex} Type`;
+
+				if (selects[0]) selects[0].name = `issue${newIndex}_type`;
+
+				if (inputs[0]) {
+					inputs[0].name = `issue${newIndex}_type_manual`;
+					inputs[0].id = `issue${newIndex}_manual`;
+				}
+
+				if (inputs[1]) inputs[1].name = `issue${newIndex}_delay`;
+				if (textareas[0]) textareas[0].name = `issue${newIndex}_notes`;
+
+				const dropdown = selects[0];
+				dropdown.setAttribute("onchange", `toggleManualIssue(${newIndex})`);
+			});
+		}
+
+		function toggleManualIssue(i) {
+			const dropdown = document.querySelector(`select[name="issue${i}_type"]`);
+			const manual = document.getElementById(`issue${i}_manual`);
+
+			if (dropdown.value === "Other") {
+				manual.style.display = "block";
+			} else {
+				manual.style.display = "none";
+				manual.value = "";
+			}
+		}
+
+		/* ⭐⭐⭐ MOVE UP / DOWN FUNCTIONS ⭐⭐⭐ */
+
+		function moveIssueUp(index) {
+			const rows = document.querySelectorAll("#issue-container .issue-row");
+			if (index <= 1) return;
+
+			const current = rows[index - 1];
+			const above = rows[index - 2];
+
+			above.before(current);
+			renumberIssueRows();
+		}
+
+		function moveIssueDown(index) {
+			const rows = document.querySelectorAll("#issue-container .issue-row");
+			if (index >= rows.length) return;
+
+			const current = rows[index - 1];
+			const below = rows[index];
+
+			below.after(current);
+			renumberIssueRows();
+		}
+
+		{% if results and results.passenger_issue %}
+			{% for i in results.passenger_issue %}
+				addIssueRow("{{ i.type }}", "{{ i.delay }}", `{{ i.notes }}`);
+			{% endfor %}
+		{% endif %}
+	</script>
+
+
+
+    <hr>
+
+    <h3>Outstation Allowance</h3>
+
+    <label>Outstation Allowance (minutes)</label>
+    <input type="number" name="outstation_allowance" min="0"
+           value="{{ results.outstation_allowance if results else '0' }}">
+
+    <hr>
+
+    <h3>Basic Duty Times</h3>
+
+    <label>Start Time</label>
+    <input type="time" name="start_time"
+           value="{{ results.start_time if results else '' }}" required>
+
+    <label>Scheduled Finish Time</label>
+    <input type="time" name="finish_time"
+           value="{{ results.finish_time if results else '' }}" required>
+
+    <label>Actual Finish Time (optional)</label>
+    <input type="time" name="actual_finish_time"
+           value="{{ results.actual_finish_time if results else '' }}">
+
+	<hr>
+
+	<h3>Breaks</h3>
+
+	<div id="break-container"></div>
+
+	<button type="button" class="btn" onclick="addBreakRow()">Add Break</button>
+
+	<script>
+		let breakCount = 0;
+
+		function addBreakRow(start = "", end = "", lost = "0") {
+			breakCount++;
+
+			const container = document.getElementById("break-container");
+
+			const row = document.createElement("div");
+			row.classList.add("break-row");
+
+			row.innerHTML = `
+				<label>Break ${breakCount} Start</label>
+
+				<!-- ⭐ Move Up / Move Down -->
+				<button type="button" class="move-btn" onclick="moveBreakUp(${breakCount})">▲</button>
+				<button type="button" class="move-btn" onclick="moveBreakDown(${breakCount})">▼</button>
+
+				<input type="time" name="break${breakCount}_start" value="${start}">
+
+				<label>Break ${breakCount} End</label>
+				<input type="time" name="break${breakCount}_end" value="${end}">
+
+				<label>Lost Minutes</label>
+				<input type="number" name="break${breakCount}_lost" min="0" value="${lost}">
+
+				<button type="button" class="delete-btn" onclick="deleteBreakRow(this)">Delete</button>
+
+			`;
+
+			container.appendChild(row);
+		}
+
+		function deleteBreakRow(button) {
+			const row = button.closest(".break-row");
+			if (!row) return;
+
+			row.remove();
+			renumberBreakRows();
+		}
+
+		function renumberBreakRows() {
+			const rows = document.querySelectorAll("#break-container .break-row");
+			breakCount = 0;
+
+			rows.forEach((row, index) => {
+				const newIndex = index + 1;
+				breakCount = newIndex;
+
+				const labels = row.querySelectorAll("label");
+				const inputs = row.querySelectorAll("input");
+
+				if (labels[0]) labels[0].textContent = `Break ${newIndex} Start`;
+				if (labels[1]) labels[1].textContent = `Break ${newIndex} End`;
+				if (labels[2]) labels[2].textContent = `Lost Minutes`;
+
+				if (inputs[0]) inputs[0].name = `break${newIndex}_start`;
+				if (inputs[1]) inputs[1].name = `break${newIndex}_end`;
+				if (inputs[2]) inputs[2].name = `break${newIndex}_lost`;
+			});
+		}
+
+		/* ⭐⭐⭐ MOVE UP / DOWN FUNCTIONS ⭐⭐⭐ */
+
+		function moveBreakUp(index) {
+			const rows = document.querySelectorAll("#break-container .break-row");
+			if (index <= 1) return;
+
+			const current = rows[index - 1];
+			const above = rows[index - 2];
+
+			above.before(current);
+			renumberBreakRows();
+		}
+
+		function moveBreakDown(index) {
+			const rows = document.querySelectorAll("#break-container .break-row");
+			if (index >= rows.length) return;
+
+			const current = rows[index - 1];
+			const below = rows[index];
+
+			below.after(current);
+			renumberBreakRows();
+		}
+
+		{% if results and results.breaks %}
+			{% for b in results.breaks %}
+				addBreakRow("{{ b.start }}", "{{ b.end }}", "{{ b.lost }}");
+			{% endfor %}
+		{% endif %}
+	</script>
+
+
+
+	<hr>
+
+	<!-- ⭐⭐⭐ NDW SECTION WITH MOVE UP / DOWN ⭐⭐⭐ -->
+
+	<h3>Non‑Driving Work (NDW)</h3>
+
+	<div id="ndw-container"></div>
+
+	<button type="button" class="btn" onclick="addNDWRow()">Add NDW Task</button>
+
+	<script>
+		let ndwCount = 0;
+
+		const commonNDWOptions = `
+			<option value="">Select NDW Task</option>
+			<option value="Vehicle Checks">Vehicle Checks</option>
+			<option value="Lay Over">Lay Over</option>
+			<option value="Passengers Boarding & Alighting">Passengers Boarding & Alighting</option>
+			<option value="Breakdown">Breakdown</option>
+			<option value="Paperwork">Paperwork</option>
+			<option value="Route Planning">Route Planning</option>
+			<option value="Fueling">Fueling</option>
+			<option value="Cleaning">Cleaning</option>
+			<option value="Depot Tasks">Depot Tasks</option>
+			<option value="Start-of-Duty Belongings">Start-of-Duty Belongings</option>
+			<option value="End-of-Duty Belongings">End-of-Duty Belongings</option>
+			<option value="Bus Swap">Bus Swap</option>
+			<option value="Other">Other (manual entry)</option>
+		`;
+
+		function addNDWRow(task = "", start = "", end = "") {
+			ndwCount++;
+
+			const container = document.getElementById("ndw-container");
+
+			const row = document.createElement("div");
+			row.classList.add("ndw-row");
+
+			row.innerHTML = `
+				<label>NDW ${ndwCount}</label>
+
+				<button type="button" class="move-btn" onclick="moveNDWUp(${ndwCount})">▲</button>
+				<button type="button" class="move-btn" onclick="moveNDWDown(${ndwCount})">▼</button>
+
+				<select name="ndw${ndwCount}_task" onchange="toggleManualNDW(${ndwCount})">
+					${commonNDWOptions}
+				</select>
+
+				<input type="time" name="ndw${ndwCount}_start" value="${start}">
+				<input type="time" name="ndw${ndwCount}_end" value="${end}">
+
+				<button type="button" class="delete-ndw-btn" onclick="deleteNDWRow(this)">Delete</button>
+
+				<input type="text"
+					   name="ndw${ndwCount}_task_manual"
+					   id="ndw${ndwCount}_manual"
+					   placeholder="Enter custom NDW task"
+					   style="display:none; grid-column: 1 / span 7; margin-top: 5px;">
+			`;
+
+			container.appendChild(row);
+
+			const dropdown = row.querySelector(`select[name="ndw${ndwCount}_task"]`);
+			const manual = row.querySelector(`#ndw${ndwCount}_manual`);
+
+			if (task) {
+				const commonTasks = [
+					"Vehicle Checks",
+					"Lay Over",
+					"Passengers Boarding & Alighting",
+					"Breakdown",
+					"Paperwork",
+					"Route Planning",
+					"Fueling",
+					"Cleaning",
+					"Depot Tasks",
+					"Start-of-Duty Belongings",
+					"End-of-Duty Belongings",
+					"Bus Swap"
+				];
+
+				if (commonTasks.includes(task)) {
+					dropdown.value = task;
+				} else {
+					dropdown.value = "Other";
+					manual.style.display = "block";
+					manual.value = task;
+				}
+			}
+		}
+
+		function deleteNDWRow(button) {
+			const row = button.closest(".ndw-row");
+			if (!row) return;
+
+			row.remove();
+			renumberNDWRows();
+		}
+
+		function renumberNDWRows() {
+			const rows = document.querySelectorAll("#ndw-container .ndw-row");
+			ndwCount = 0;
+
+			rows.forEach((row, index) => {
+				const newIndex = index + 1;
+				ndwCount = newIndex;
+
+				const labels = row.querySelectorAll("label");
+				const selects = row.querySelectorAll("select");
+				const inputs = row.querySelectorAll("input");
+
+				if (labels[0]) labels[0].textContent = `NDW ${newIndex}`;
+
+				if (selects[0]) selects[0].name = `ndw${newIndex}_task`;
+
+				if (inputs[0]) {
+					inputs[0].name = `ndw${newIndex}_start`;
+				}
+
+				if (inputs[1]) {
+					inputs[1].name = `ndw${newIndex}_end`;
+				}
+
+				if (inputs[2]) {
+					inputs[2].name = `ndw${newIndex}_task_manual`;
+					inputs[2].id = `ndw${newIndex}_manual`;
+				}
+
+				const dropdown = selects[0];
+				dropdown.setAttribute("onchange", `toggleManualNDW(${newIndex})`);
+			});
+		}
+
+		function toggleManualNDW(i) {
+			const dropdown = document.querySelector(`select[name="ndw${i}_task"]`);
+			const manual = document.getElementById(`ndw${i}_manual`);
+
+			if (dropdown.value === "Other") {
+				manual.style.display = "block";
+			} else {
+				manual.style.display = "none";
+				manual.value = "";
+			}
+		}
+
+		function moveNDWUp(index) {
+			const rows = document.querySelectorAll("#ndw-container .ndw-row");
+			if (index <= 1) return;
+
+			const current = rows[index - 1];
+			const above = rows[index - 2];
+
+			above.before(current);
+			renumberNDWRows();
+		}
+
+		function moveNDWDown(index) {
+			const rows = document.querySelectorAll("#ndw-container .ndw-row");
+			if (index >= rows.length) return;
+
+			const current = rows[index - 1];
+			const below = rows[index];
+
+			below.after(current);
+			renumberNDWRows();
+		}
+
+		{% if results and results.ndw_entries %}
+			{% for n in results.ndw_entries %}
+				addNDWRow("{{ n.task }}", "{{ n.start }}", "{{ n.end }}");
+			{% endfor %}
+		{% endif %}
+	</script>
+
+
+	<hr>
+
+	<button type="submit" class="btn">Analyse Duty Hours</button>
+
+	</form>
+
+	{% endblock %}
+

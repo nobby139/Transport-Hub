@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+{% set page_title = "UK Transport Hub" %}
+{% set home_target = "home" %}
+
+{% block content %}
+
+
+<!-- Load system_chat.css -->
+<link rel="stylesheet" href="{{ url_for('static', filename='system_chat.css') }}">
+
+<div class="platform-messages">
+    <a href="javascript:history.back()" class="back-btn">← Back</a>
+</div>
+
+<h2>
+    Platform Messages —
+    {% if user %}
+        {% if user.level == 2 %} User to Admin {% else %} {{ user.first_name }} {{ user.last_name }} to Admin {% endif %}
+    {% else %}
+        Inbox
+    {% endif %}
+</h2>
+
+<div class="chat-outer">
+    <div class="chat-container">
+
+        <div class="unread-indicator">
+            Unread Messages: {{ unread_count|default(0) }}
+        </div>
+
+        {% if current_user.role_admin == 1 or current_user.role_superadmin == 1 %}
+            <div class="user-select-container">
+                <label for="user_select">Select User</label>
+                <select id="user_select" onchange="openUser()">
+                    <option value="">-- Select User --</option>
+                    {% for u in users %}
+                        {% if u.id != current_user.id %}
+                            <option value="{{ u.id }}" {% if user and user.id == u.id %}selected{% endif %}>
+                                {{ u.first_name }} {{ u.last_name }}
+                            </option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+            </div>
+        {% endif %}
+
+        <!-- Messages container -->
+        <div class="messages-container">
+            <label>Messages</label>
+            {% for msg in messages %}
+                {% if msg.sender %}
+                    <div class="chat-message
+                        {% if msg.sender.role_superadmin == 1 %}superadmin-msg
+                        {% elif msg.sender.role_admin == 1 %}admin-msg
+                        {% else %}user-msg{% endif %}
+                        {% if not msg.read %} unread{% endif %}">
+                        
+                        <div class="msg-header">
+                            {% if msg.sender.role_superadmin == 1 %}
+                                {% if current_user.role_admin == 1 or current_user.role_superadmin == 1 %}
+                                    SuperAdmin
+                                {% else %}
+                                    Admin
+                                {% endif %}
+                            {% elif msg.sender.role_admin == 1 %}
+                                Admin
+                            {% else %}
+                                {{ msg.sender.first_name }} {{ msg.sender.last_name }}
+                            {% endif %}
+                            <span class="timestamp">
+                                {{ msg.local_time().strftime("%d/%m/%Y %H:%M") if msg.local_time else msg.created_at.strftime("%d/%m/%Y %H:%M") }}
+                            </span>
+                        </div>
+
+                        <div class="msg-body">
+                            {% if msg.title %}<strong>{{ msg.title }}</strong><br>{% endif %}
+                            {{ msg.body }}
+                        </div>
+
+                        <div class="msg-indicator">
+                            {% if msg.sender_id == current_user.id %}
+                                Message Sent
+                            {% else %}
+                                {% if not msg.read %}
+                                    <button class="mark-read-btn" id="read-btn-{{ msg.id }}" onclick="markRead({{ msg.id }})">Mark as Read</button>
+                                {% else %}
+                                    <span class="read-status">Message Read</span>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="chat-message deleted-user-msg">
+                        <div class="msg-header">
+                            Deleted User
+                            <span class="timestamp">
+                                {{ msg.local_time().strftime("%d/%m/%Y %H:%M") if msg.local_time else msg.created_at.strftime("%d/%m/%Y %H:%M") }}
+                            </span>
+                        </div>
+                        <div class="msg-body">
+                            {% if msg.title %}<strong>{{ msg.title }}</strong><br>{% endif %}
+                            {{ msg.body }}
+                        </div>
+                    </div>
+                {% endif %}
+            {% else %}
+                <p>No messages in this conversation yet.</p>
+            {% endfor %}
+        </div> <!-- END messages-container -->
+
+        {% if user %}
+            <input type="hidden" id="current_user_id" value="{{ user.id }}">
+        {% endif %}
+
+        <!-- Input form container -->
+        <div class="input-container">
+            <label>Compose Message</label>
+
+            <label for="subject_select">Subject</label>
+            <select id="subject_select">
+                <option value="">-- Select Subject --</option>
+                <option value="General Message">General Message</option>
+                <option value="Takings Query">Takings Query</option>
+                <option value="System Help">System Help</option>
+                <option value="Report an Issue">Report an Issue</option>
+                <option value="Drivers Log">Drivers Log</option>
+                <option value="Bus & Coach Enthusiast">Bus & Coach Enthusiast</option>
+                <option value="Other">Other (Custom)</option>
+            </select>
+
+            <div id="custom_subject_container" style="display:none;">
+                <label for="custom_subject">Custom Subject</label>
+                <input type="text" id="custom_subject" placeholder="Enter custom subject">
+            </div>
+
+            <label for="chat_body">Message</label>
+            <textarea id="chat_body" placeholder="Type your message..."></textarea>
+
+            <button onclick="sendChat()">Send</button>
+        </div> <!-- END input-container -->
+
+    </div> <!-- END chat-container -->
+</div> <!-- END chat-outer -->
+
+<script>
+document.getElementById("subject_select")?.addEventListener("change", function() {
+    const customBox = document.getElementById("custom_subject_container");
+    if (customBox) {
+        customBox.style.display = (this.value === "Other") ? "block" : "none";
+    }
+});
+
+function sendChat() {
+    const body = document.getElementById("chat_body").value.trim();
+    if (!body) {
+        alert("Please enter a message body.");
+        return;
+    }
+
+    const subjectSelect = document.getElementById("subject_select").value;
+    const customSubject = document.getElementById("custom_subject").value;
+
+    const receiver_id =
+        document.getElementById("current_user_id")?.value ||
+        document.getElementById("user_select")?.value;
+
+    if (!receiver_id) {
+        alert("Please select a recipient first.");
+        return;
+    }
+
+    const title = subjectSelect === "Other" ? customSubject : subjectSelect;
+
+    fetch("/send_chat_message", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+            body: body,
+            receiver_id: receiver_id,
+            title: title
+        })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById("chat_body").value = "";
+            document.getElementById("subject_select").selectedIndex = 0;
+            if (document.getElementById("custom_subject")) {
+                document.getElementById("custom_subject").value = "";
+            }
+            location.reload();
+        } else {
+            alert(data.error || "Failed to send message.");
+        }
+    });
+}
+
+function markRead(id) {
+    fetch("/mark_message_read/" + id, { method: "POST" })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            const btn = document.getElementById("read-btn-" + id);
+            if (btn) {
+                btn.outerHTML = '<span class="read-status">Message Read</span>';
+            }
+        }
+    });
+}
+
+function openUser() {
+    const id = document.getElementById("user_select").value;
+    if (id) window.location.href = "/messages/" + id;
+}
+</script>
+
+{% endblock %}

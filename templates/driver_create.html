@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="info-section">
+    <h3>Create Driver Account</h3>
+
+    <form method="POST">
+        <label>First Name</label>
+        <input type="text" id="first_name" name="first_name" required>
+
+        <label>Last Name</label>
+        <input type="text" id="last_name" name="last_name" required>
+
+        <label>Email</label>
+        <input type="email" id="driver_email" name="email" required>
+
+        <label>Password</label>
+        <input type="password" id="driver_password" name="password" required>
+
+        <label>Confirm Password</label>
+        <input type="password" id="driver_password2" required>
+
+        <label>Date of Birth</label>
+        <input type="date" id="date_of_birth" name="date_of_birth" required>
+
+        <label>Your Company</label>
+        <select id="company_select" required>
+            <option value="">-- Select Existing Company --</option>
+            <option value="Other">Other (add your Company if not in the list)</option>
+            <option value="Abellio London">Abellio London</option>
+            <option value="Arriva">Arriva</option>
+            <option value="Barnes Coaches">Barnes Coaches</option>
+            <option value="Beeline Coaches">Beeline Coaches</option>
+            <option value="Berrys Coaches">Berrys Coaches</option>
+            <option value="Chandlers">Chandlers</option>
+            <option value="Coachstyle">Coachstyle</option>
+            <option value="Diamond Bus">Diamond Bus</option>
+            <option value="Edwards Coaches">Edwards Coaches</option>
+            <option value="Faresaver">Faresaver</option>
+            <option value="First Bus">First Bus</option>
+            <option value="Go-Ahead Group">Go-Ahead Group</option>
+            <option value="Go South Coast">Go South Coast</option>
+            <option value="Lothian Buses">Lothian Buses</option>
+            <option value="Metroline">Metroline</option>
+            <option value="National Express Bus">National Express Bus</option>
+            <option value="Reading Buses">Reading Buses</option>
+            <option value="Salisbury Reds">Salisbury Reds</option>
+            <option value="South West Coaches">South West Coaches</option>
+            <option value="Stagecoach">Stagecoach</option>
+            <option value="Transdev">Transdev</option>
+            <option value="Uno Bus">Uno Bus</option>
+        </select>
+
+        <input type="text" id="new_company" placeholder="Or add a new company" style="display:none;">
+
+        <button type="button" class="btn" onclick="registerDriver()">Create Account</button>
+    </form>
+</div>
+
+<script>
+document.getElementById("company_select").addEventListener("change", function () {
+    const isOther = this.value === "Other";
+    const newCompanyInput = document.getElementById("new_company");
+    newCompanyInput.style.display = isOther ? "block" : "none";
+    if (!isOther) newCompanyInput.value = "";
+});
+
+async function registerDriver() {
+    const p1 = document.getElementById("driver_password").value;
+    const p2 = document.getElementById("driver_password2").value;
+
+    if (p1 !== p2) {
+        alert("Passwords do not match");
+        return;
+    }
+
+    const selectedCompany = document.getElementById("company_select").value;
+    const customCompany = document.getElementById("new_company").value.trim();
+
+    if (!selectedCompany) {
+        alert("Please select a company or choose 'Other' to add one.");
+        return;
+    }
+
+    if (selectedCompany === "Other" && !customCompany) {
+        alert("Please enter your company name.");
+        return;
+    }
+
+    const response = await fetch("/api/register/driver", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            first_name: document.getElementById("first_name").value,
+            last_name: document.getElementById("last_name").value,
+            email: document.getElementById("driver_email").value,
+            password: p1,
+            date_of_birth: document.getElementById("date_of_birth").value,
+            company_id: selectedCompany !== "Other" ? selectedCompany : null,
+            new_company: selectedCompany === "Other" ? customCompany : null
+        })
+    });
+
+    const result = await response.json();
+    alert(result.message);
+
+    if (result.message.includes("success")) {
+        window.location.href = "/driver_login";
+    }
+}
+</script>
+
+{% endblock %}

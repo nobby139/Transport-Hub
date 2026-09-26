@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UK Transport Hub</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+	
+	{% block extra_css %}{% endblock %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+
+<!-- HEADER -->
+<header class="main-header">
+
+<!-- DEBUG: Auth Status is {{ current_user.is_authenticated }} -->
+	<!-- LEFT SIDE NAV BUTTONS -->
+		<nav class="header-left">
+
+				<!-- MENU ICON (Always visible to everyone) -->
+				<button class="nav-btn" id="menuToggle">
+					<img src="{{ url_for('static', filename='assets/menu.png') }}" class="nav-icon">
+				</button>
+
+				{% if current_user.is_authenticated %}
+
+				<!-- HOME ICON -->
+				<a class="nav-btn" href="
+					{%- if not current_user.is_authenticated -%}
+						{{ url_for('index') }}
+					{%- elif current_user.role_superadmin or current_user.role_admin or current_user.role_driver -%}
+						{{ url_for('driver_dashboard') }}
+					{%- elif current_user.role_enthusiast -%}
+						{{ url_for('enthusiast_dashboard') }}
+					{%- else -%}
+						{{ url_for('index') }}
+					{%- endif -%}
+				">
+					<img src="{{ url_for('static', filename='assets/home.png') }}" class="nav-icon">
+				</a>
+
+				<!-- PROFILE ICON -->
+				<a class="nav-btn" href="/profile">
+					<img src="{{ url_for('static', filename='assets/profile.png') }}" class="nav-icon">
+				</a>
+
+				<!-- SETTINGS ICON -->
+				<a class="nav-btn" href="/settings">
+					<img src="{{ url_for('static', filename='assets/settings.png') }}" class="nav-icon">
+				</a>
+
+				<!-- LOGOUT ICON -->
+				<a class="nav-btn" href="/logout">
+					<img src="{{ url_for('static', filename='assets/logout.png') }}" class="nav-icon">
+				</a>
+				
+			{% endif %}
+
+		</nav>
+
+    <!-- CENTER TITLE -->
+    <div class="header-center">
+        {{ page_title if page_title else "UK Transport Hub" }}
+    </div>
+
+    <!-- RIGHT SIDE LOGO -->
+    <div class="header-right">
+        <img src="{{ url_for('static', filename='assets/logo.png') }}"
+             alt="Transport Hub Logo"
+             class="header-logo">
+    </div>
+
+    <!-- ORANGE WAVES -->
+    <div class="header-waves">
+        <svg viewBox="0 0 1440 80" preserveAspectRatio="none">
+            <path d="M0,40 C300,10 600,70 900,40 C1150,15 1300,60 1440,30"
+                  stroke="#FF7A00" stroke-width="3" fill="none" />
+            <path d="M0,60 C300,30 600,90 900,60 C1150,35 1300,80 1440,50"
+                  stroke="#FF7A00" stroke-width="2" fill="none" opacity="0.8" />
+        </svg>
+    </div>
+
+</header>
+
+<!-- GLOBAL MENU PANEL -->
+<div id="globalMenu" class="global-menu">
+    <div class="global-menu-inner">
+
+        <button class="close-menu" onclick="toggleGlobalMenu(false)">✕</button>
+
+		<h2>Menu</h2>
+		<ul>
+			<li><a href="{{ url_for(home_target) }}">Home</a></li>
+
+			{% if current_user.is_authenticated %}
+				<li><a href="/profile">Profile</a></li>
+				<li><a href="/weekly_view">Duty Reports</a></li>
+				<li><a href="/weekly-takings-view">Takings Reports</a></li>
+				<li><a href="/settings">Settings</a></li>
+			{% endif %}
+
+			<li><a href="/legal">Legal & Disclaimers</a></li>
+			<li><a href="/terms">Terms & Conditions</a></li>
+			<li><a href="/privacy">Privacy Notice</a></li>
+			<li><a href="/about">About Transport Hub</a></li>
+
+			{% if current_user.is_authenticated %}
+				<li><a href="/logout">Logout</a></li>
+				<li><a href="/delete-account-options">Delete Account</a></li>
+			{% endif %}
+		</ul>
+    </div>
+</div>
+
+<!-- FLASH MESSAGES -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div class="flash-container">
+            {% for category, message in messages %}
+                <div class="flash-message {{ category }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
+
+<!-- PAGE CONTENT -->
+<main>
+    {% block content %}{% endblock %}
+</main>
+
+<!-- FOOTER -->
+<footer>
+    © 2026 UK Transport Hub Ltd — All Rights Reserved
+</footer>
+
+<!-- ALL GLOBAL SCRIPTS NOW SAFELY INSIDE THE BLOCK -->
+{% block scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const menu = document.getElementById("globalMenu");
+    if (menu) {
+        menu.style.display = "none";
+    }
+});
+
+function toggleGlobalMenu(show) {
+    const menu = document.getElementById('globalMenu');
+    menu.style.display = show ? 'block' : 'none';
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const toggle = document.getElementById('menuToggle');
+    if (toggle) {
+        toggle.addEventListener('click', () => {
+            const menu = document.getElementById('globalMenu');
+            const visible = menu.style.display === 'block';
+            toggleGlobalMenu(!visible);
+        });
+    }
+});
+</script>
+{% endblock %}
+
+</body>
+</html>

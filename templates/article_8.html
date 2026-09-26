@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% set home_target = "driver_dashboard" %}
+{% set is_UK_transport_hub = True %}
+{% set page_title = "UK Transport Hub" %}
+
+{% block content %}
+
+
+
+<div class="article-container">
+
+    <!-- Back to articles list -->
+    <a href="/driver-information" class="back-link">← Back to Articles</a>
+
+    <!-- Previous / Next navigation -->
+    <div class="article-nav">
+        {% if prev_url %}
+            <a class="nav-prev" href="{{ prev_url }}">← Previous</a>
+        {% endif %}
+        {% if next_url %}
+            <a class="nav-next" href="{{ next_url }}">Next →</a>
+        {% endif %}
+    </div>
+
+    <!-- Published / updated dates -->
+    <p class="article-date">
+        Published: {{ published }}
+        {% if updated %}
+            • Last updated: {{ updated }}
+        {% endif %}
+    </p>
+
+    <h1 class="article-title">Staying Safe on the Road: A Driver’s Practical Guide</h1>
+
+<div class="article-content">
+
+    <!-- ICON + MAIN HEADER -->
+    <div class="section-header">
+        <img src="/static/assets/Staying_Safe.png" class="article-header-image" alt="Article Icon">
+        <h2>Staying Safe on the Road</h2>
+    </div>
+
+    <p>
+        Safety is the foundation of every shift. Whether you’re driving a bus, coach, or minibus,
+        the decisions you make on the road directly affect passengers, colleagues, and yourself.
+        This guide focuses on practical, real‑world safety habits that drivers rely on every day
+        to keep journeys smooth and secure.
+    </p>
+
+    <h2>Pre‑Shift Safety Checks</h2>
+    <p>A safe shift starts before the wheels move. A proper walk‑round and interior check can prevent breakdowns, delays, and dangerous situations.</p>
+    <ul>
+        <li>Exterior walk‑round: tyres, lights, mirrors, bodywork, wheel nuts.</li>
+        <li>Interior inspection: seats, grab rails, flooring, emergency exits.</li>
+        <li>Dashboard warnings: deal with issues before leaving the depot.</li>
+        <li>Clean windscreen and mirrors: visibility is everything.</li>
+        <li>Doors and ramps: ensure smooth, safe operation.</li>
+    </ul>
+
+    <h2>Managing Passenger Safety</h2>
+    <p>Passengers rely on you to keep them safe, even when they don’t realise it. A calm, steady approach reduces incidents and keeps the journey comfortable.</p>
+    <ul>
+        <li>Encourage passengers to move down the bus.</li>
+        <li>Wait until they’re stable before pulling away.</li>
+        <li>Keep an eye on vulnerable passengers.</li>
+        <li>Use the PA or speak clearly when needed.</li>
+        <li>Never move with doors open or obstructed.</li>
+    </ul>
+
+    <!-- ICON + MID SECTION -->
+    <div class="section-header">
+        <img src="/static/assets/Defensive_Driving.png" class="article-header-image" alt="Article Icon">
+        <h2>Defensive Driving</h2>
+    </div>
+
+    <p>Defensive driving protects you from the unexpected and keeps the vehicle running smoothly.</p>
+    <ul>
+        <li>Maintain a safe following distance.</li>
+        <li>Anticipate hazards early.</li>
+        <li>Avoid harsh braking and sudden steering.</li>
+        <li>Keep speed appropriate for conditions.</li>
+        <li>Expect other road users to make mistakes.</li>
+    </ul>
+
+    <h2>Handling Difficult Situations</h2>
+    <p>Every driver faces challenges. Staying calm and following procedure is key.</p>
+    <ul>
+        <li>Aggressive road users: avoid eye contact and don’t engage.</li>
+        <li>Disruptive passengers: follow company policy and prioritise safety.</li>
+        <li>Breakdowns: secure the vehicle, inform control, reassure passengers.</li>
+        <li>Accidents: stay calm, follow procedure, gather details.</li>
+    </ul>
+
+    <!-- ICON + FINAL SECTION -->
+    <div class="section-header">
+        <img src="/static/assets/Fatigue_Risk.png" class="article-header-image" alt="Article Icon">
+        <h2>Fatigue and Wellbeing</h2>
+    </div>
+
+    <p>Fatigue is one of the biggest risks in transport. Looking after yourself is part of the job.</p>
+    <ul>
+        <li>Take breaks properly.</li>
+        <li>Stay hydrated.</li>
+        <li>Eat sensibly before and during shifts.</li>
+        <li>Report fatigue if it affects your driving.</li>
+        <li>Avoid relying on caffeine alone.</li>
+    </ul>
+
+    <h2>Safety as a Mindset</h2>
+    <p>
+        Safety isn’t a box‑ticking exercise — it’s a mindset. By staying alert, following procedures,
+        and using practical judgement, you protect yourself, your passengers, and your vehicle.
+        Every safe journey strengthens your professionalism and keeps the network running smoothly.
+    </p>
+
+{% endblock %}

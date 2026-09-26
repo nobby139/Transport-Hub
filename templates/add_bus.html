@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Duty & Buses - UK Transport Hub</title>
+    <!-- Bootstrap CSS CDN (Match your project's version if local) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+    <div class="container mt-5 mb-5">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Add Weekly Duty Record</h4>
+            </div>
+            <div class="card-body">
+                
+                <!-- Main Form -->
+                <form method="POST" action="{{ url_for('add_duty') }}">
+                    
+                    <!-- Basic Duty Information Section -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <label for="duty_date" class="form-label">Duty Date</label>
+                            <input type="date" class="form-control" id="duty_date" name="duty_date" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="duty_number" class="form-label">Duty No.</label>
+                            <input type="text" class="form-control" id="duty_number" name="duty_number" placeholder="e.g. B22" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="start_of_week" class="form-label">Start of Week</label>
+                            <input type="date" class="form-control" id="start_of_week" name="start_of_week">
+                        </div>
+                    </div>
+
+                    <!-- Dynamic Vehicle & Shift Breakdown Section -->
+                    <div class="card mb-4 border-secondary">
+                        <div class="card-header bg-secondary text-white">
+                            <strong>Vehicle & Shift Breakdown (Multi-Bus Support)</strong>
+                        </div>
+                        <div class="card-body">
+                            <div id="bus-container">
+                                <!-- First Bus Row (Default) -->
+                                <div class="bus-row row g-3 mb-3 align-items-end">
+                                    <div class="col-md-3">
+                                        <label class="form-label">Bus No.</label>
+                                        <input type="text" name="bus_no[]" class="form-control" placeholder="e.g. 402" required>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label">Registration Plate</label>
+                                        <input type="text" name="reg_plate[]" class="form-control" placeholder="e.g. WK19 ABC" required>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label">Time From</label>
+                                        <input type="text" name="time_from[]" class="form-control" placeholder="06:00" required>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label">Time To</label>
+                                        <input type="text" name="time_to[]" class="form-control" placeholder="14:30" required>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <!-- Remove button hidden for the first default row -->
+                                        <button type="button" class="btn btn-danger btn-sm remove-bus-btn w-100" style="display: none;">Remove</button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Button to dynamically add more vehicle rows -->
+                            <button type="button" id="add-bus-btn" class="btn btn-outline-dark btn-sm mt-2">+ Add Another Bus</button>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-success btn-lg">Save Duty Record</button>
+                        <a href="{{ url_for('weekly_view') }}" class="btn btn-secondary">Cancel</a>
+                    </div>
+
+                </form>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript to handle adding/removing dynamic rows -->
+    <script>
+        document.getElementById('add-bus-btn').addEventListener('click', function() {
+            const container = document.getElementById('bus-container');
+            const firstRow = container.querySelector('.bus-row');
+            
+            // Clone the first row template
+            const newRow = firstRow.cloneNode(true);
+            
+            // Clear out user input values in the cloned row
+            newRow.querySelectorAll('input').forEach(input => input.value = '');
+            
+            // Make the remove button visible for the new row
+            const removeBtn = newRow.querySelector('.remove-bus-btn');
+            removeBtn.style.display = 'block';
+            
+            // Add click functionality to delete this specific row
+            removeBtn.addEventListener('click', function() {
+                newRow.remove();
+            });
+            
+            // Append the new row into the container
+            container.appendChild(newRow);
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+{% set home_target = "driver_dashboard" %}
+{% set is_UK_transport_hub = True %}
+{% set page_title = "UK Transport Hub" %}
+
+{% block content %}
+
+
+<div class="article-container">
+
+    <a href="/driver-information" class="back-link">← Back to Articles</a>
+
+    <div class="article-nav">
+        {% if prev_url %}
+            <a class="nav-prev" href="{{ prev_url }}">← Previous</a>
+        {% endif %}
+        {% if next_url %}
+            <a class="nav-next" href="{{ next_url }}">Next →</a>
+        {% endif %}
+    </div>
+
+<p class="article-date">
+    Published: {{ published }}
+    {% if updated %}
+        • Last updated: {{ updated }}
+    {% endif %}
+</p>
+
+	<div class="article-content">
+
+		<!-- ICON + MAIN HEADER -->
+		<div class="section-header">
+			<img src="/static/assets/Driver_Fatigue.png" class="article-header-image" alt="Article Icon">
+			<h2>Driver Fatigue & Alertness</h2>
+		</div>
+
+		<p>
+			Fatigue is one of the biggest risks for professional drivers. Long shifts, early starts, late finishes,
+			and demanding routes can all affect concentration. This article looks at how to recognise tiredness early,
+			manage your energy, and stay alert behind the wheel.
+		</p>
+
+		<h2>1. Why Driver Fatigue Matters</h2>
+		<p>
+			Tiredness reduces reaction times, decision‑making, and awareness. For bus and coach drivers, this can mean:
+		</p>
+		<ul>
+			<li>Missing hazards or signals</li>
+			<li>Late braking or harsh manoeuvres</li>
+			<li>Difficulty judging speed and distance</li>
+			<li>Increased risk of incidents and near‑misses</li>
+		</ul>
+		<p>
+			Managing fatigue is not just about comfort – it’s a core safety responsibility.
+		</p>
+
+		<h2>2. Early Signs of Tiredness</h2>
+		<p>
+			Recognising the early warning signs helps you act before fatigue becomes dangerous. Common signs include:
+		</p>
+		<ul>
+			<li>Heavy eyes or frequent blinking</li>
+			<li>Yawning repeatedly</li>
+			<li>Struggling to concentrate on the road</li>
+			<li>Drifting in lane or misjudging corners</li>
+			<li>Forgetting parts of the journey</li>
+		</ul>
+		<p>
+			If you notice these signs, it’s a signal to take a proper break as soon as it’s safe to do so.
+		</p>
+
+		<!-- ICON + MID SECTION -->
+		<div class="section-header">
+			<img src="/static/assets/Driver_Fatigue.png" class="article-header-image" alt="Article Icon">
+			<h2>3. Sleep and Rest Basics</h2>
+		</div>
+
+		<p>
+			Good sleep is the foundation of alert driving. Wherever possible:
+		</p>
+		<ul>
+			<li>Aim for consistent bedtimes and wake‑up times</li>
+			<li>Keep your sleeping area dark, quiet, and cool</li>
+			<li>Avoid heavy meals and large amounts of caffeine before bed</li>
+			<li>Limit screens shortly before sleeping</li>
+		</ul>
+		<p>
+			Even with shift work, building a regular routine where you can helps your body recover.
+		</p>
+
+		<h2>4. Breaks and On‑Route Fatigue Management</h2>
+		<p>
+			Breaks are not just a legal requirement – they are your chance to reset. During breaks:
+		</p>
+		<ul>
+			<li>Get out of the cab and move around</li>
+			<li>Stretch your legs and shoulders</li>
+			<li>Drink water to stay hydrated</li>
+			<li>Have a light snack if needed</li>
+		</ul>
+		<p>
+			Short, regular breaks are more effective than pushing on while tired.
+		</p>
+
+		<h2>5. Food, Drink, and Energy Levels</h2>
+		<p>
+			What you eat and drink affects how alert you feel:
+		</p>
+		<ul>
+			<li>Choose balanced meals rather than very heavy or greasy food</li>
+			<li>Drink water regularly throughout the day</li>
+			<li>Use caffeine in moderation – it can help short term but is not a fix for lack of sleep</li>
+			<li>Avoid relying on energy drinks as your main source of alertness</li>
+		</ul>
+
+		<h2>6. Caffeine: Helpful or Harmful?</h2>
+		<p>
+			Caffeine can temporarily improve alertness, but:
+		</p>
+		<ul>
+			<li>It does not replace proper sleep</li>
+			<li>Too much can cause jitters or a “crash” later</li>
+			<li>Drinking it too close to rest time can affect sleep quality</li>
+		</ul>
+		<p>
+			Think of caffeine as a short‑term support, not a long‑term solution.
+		</p>
+
+		<h2>7. Planning Your Day</h2>
+		<p>
+			Where possible, plan around your most tiring times:
+		</p>
+		<ul>
+			<li>Be extra cautious on early starts and late finishes</li>
+			<li>Use breaks wisely on long diagrams or dead runs</li>
+			<li>Allow time for rest before and after demanding shifts</li>
+		</ul>
+		<p>
+			Small bits of planning can make a big difference to how you feel on the road.
+		</p>
+
+		<h2>8. When You Feel Too Tired to Drive Safely</h2>
+		<p>
+			If you feel you are no longer safe to drive:
+		</p>
+		<ul>
+			<li>Do not ignore it or “push through”</li>
+			<li>Stop in a safe place as soon as you can</li>
+			<li>Follow your company’s procedures for reporting fatigue</li>
+		</ul>
+		<p>
+			Your safety, and that of your passengers and other road users, always comes first.
+		</p>
+
+		<!-- ICON + FINAL HEADER -->
+		<div class="section-header">
+			<img src="/static/assets/Looking_After_Yourself.png" class="article-header-image" alt="Article Icon">
+			<h2>9. Looking After Yourself Long‑Term</h2>
+		</div>
+
+		<p>
+			Over time, constant tiredness can affect your health, mood, and life outside work. It can help to:
+		</p>
+		<ul>
+			<li>Talk to your GP if you regularly struggle with sleep</li>
+			<li>Discuss patterns or issues with your manager if appropriate</li>
+			<li>Build routines that include rest, hobbies, and time away from driving</li>
+		</ul>
+		<p>
+			A well‑rested driver is safer, more confident, and better able to handle the demands of the job.
+		</p>
+
+		<h2>10. Final Thoughts</h2>
+		<p>
+			Fatigue is a normal part of working life, especially in transport, but it must be managed carefully.
+			By recognising the signs early, planning your rest, and taking breaks seriously, you can protect yourself,
+			your passengers, and your licence.
+		</p>
+		<p>
+			Looking after your alertness is not a luxury – it’s a key part of being a professional driver.
+		</p>
+
+{% endblock %}

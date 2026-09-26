@@ -1,0 +1,27 @@
+/* PROFILE PAGE LABEL */
+.profile-label {
+    text-align: center;
+    font-size: 28px;
+    font-weight: bold;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    color: #1E3A8A; /* Matches your blue theme */
+}
+/* PROFILE PHOTO CIRCLE */
+.profile-photo-circle {
+    width: 180px;
+    height: 180px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 3px solid #ccc;
+    display: block;
+    margin: 0 auto 15px auto;
+}
+
+/* PREVIEW IMAGE (when selecting a new photo) */
+#profile_preview {
+    width: 180px;
+    height: 180px;
+    object-fit: cover;
+    border-radius: 50%;
+}

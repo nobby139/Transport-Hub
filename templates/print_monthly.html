@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+{% set home_target = "driver_dashboard" %}
+{% set is_UK_transport_hub = True %}
+{% set page_title = "UK Transport Hub" %}
+
+{% block content %}
+
+<head>
+    <meta charset="UTF-8">
+    <title>Monthly Duty Records</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        h2 {
+            margin-bottom: 15px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            border: 1px solid black;
+            padding: 6px;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        /* Dark Royal Blue Header */
+        th {
+            background: #0A2A66;
+            color: white;
+            font-weight: bold;
+            white-space: normal;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        /* OSA column */
+        .osa {
+            width: 40px;
+            text-align: center;
+        }
+
+        /* Traffic Light Badges */
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-weight: bold;
+            color: #fff;
+        }
+        .green { background: #4CAF50; }
+        .amber { background: #FFC107; color: #000; }
+        .red { background: #F44336; }
+    </style>
+</head>
+
+<body>
+
+    <h2>Monthly Duty Records</h2>
+
+<table>
+    <tr>
+        <th>Date</th>
+        <th>Duty No.</th>
+        <th class="osa">OSA</th>
+        <th>Vehicle</th>
+        <th>Start</th>
+        <th>Finish</th>
+        <th>Total Duty</th>
+        <th>Driving Time</th>
+        <th>Breaks</th>
+        <th>Passenger Issues</th>
+        <th>Delay Type</th>
+        <th>Duty Status</th>
+        <th>Driving Status</th>
+        <th>Overall Status</th>
+    </tr>
+
+    {% for date, duties in duties_by_date.items() %}
+        {% for d in duties %}
+        <tr>
+            <td>{{ d.duty_date | ukdate }}</td>
+            <td>{{ d.duty_number }}</td>
+
+            <td class="osa">{{ d.outstation_allowance }}</td>
+
+            <td>{{ d.vehicle_type }}</td>
+            <td>{{ d.start_time }}</td>
+            <td>{{ d.finish_time }}</td>
+            <td>{{ d.total_duty }}</td>
+            <td>{{ d.driving_time }}</td>
+
+            <td>{{ d.breaks|length if d.breaks else 0 }}</td>
+
+            <td>{{ d.passenger_issue|length if d.passenger_issue else 0 }}</td>
+
+            <td>
+                {% if d.traffic_delay_minutes > 0 %}
+                    Traffic ({{ d.traffic_delay_minutes }} mins)
+                {% elif d.accident_delay_minutes > 0 %}
+                    Accident ({{ d.accident_delay_minutes }} mins)
+                {% else %}
+                    None
+                {% endif %}
+            </td>
+
+            <td>
+                <span class="status-badge {{ d.duty_status|lower }}">
+                    {{ d.duty_status }}
+                </span>
+            </td>
+
+            <td>
+                <span class="status-badge {{ d.driving_status|lower }}">
+                    {{ d.driving_status }}
+                </span>
+            </td>
+
+            <td>
+                <span class="status-badge {{ d.overall_status|lower }}">
+                    {{ d.overall_status }}
+                </span>
+            </td>
+        </tr>
+        {% endfor %}
+    {% endfor %}
+
+</table>
+
+</body>
+{% endblock %}

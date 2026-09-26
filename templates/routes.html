@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="breadcrumbs">
+    <a href="{{ url_for('enthusiast_hub') }}">Enthusiast Hub</a> >
+    <span>Routes</span>
+</div>
+
+
+<!-- ---------------------------------------------------------
+     ENTHUSIAST ROUTES PAGE
+     --------------------------------------------------------- -->
+
+<h2>Enthusiast Routes Overview</h2>
+
+<table class="routes-table">
+    <tr>
+        <th>Route</th>
+        <th>Origin</th>
+        <th>Destination</th>
+        <th>Operator</th>
+        <th>Spotted At</th>
+        <th>Photos</th>
+        <th>View</th>
+    </tr>
+
+    {% for r in routes %}
+    <tr>
+        <td>{{ r.route_number }}</td>
+        <td>{{ r.route_origin }}</td>
+        <td>{{ r.route_destination }}</td>
+        <td>{{ r.operator }}</td>
+        <td>{{ r.spotted_at.strftime('%Y-%m-%d %H:%M') }}</td>
+        <td>{{ r.photos_uploaded }}</td>
+        <td>
+            <a href="{{ url_for('enthusiast_gallery') }}">Gallery</a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+<style>
+.routes-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.routes-table th, .routes-table td {
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
+}
+.routes-table th {
+    background: #f0f0f0;
+}
+
+.breadcrumbs {
+    margin-bottom: 20px;
+    font-size: 16px;
+}
+.breadcrumbs a {
+    color: #1E88E5;
+    text-decoration: none;
+}
+.breadcrumbs a:hover {
+    text-decoration: underline;
+}
+.breadcrumbs span {
+    color: #333;
+}
+</style>
+
+{% endblock %}

@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% set is_UK_transport_hub = True %}
+{% set page_title = "UK Transport Hub" %}
+
+{% block content %}
+
+<a class="nav-btn" href="{{ return_to }}">Back</a>
+
+<div class="profile-container">
+
+    <h1 class="profile-label">Profile</h1>
+
+    <div class="profile-card">
+
+        <!-- PROFILE PHOTO -->
+		<div class="profile-photo">
+			<p class="profile-photo-label">Profile Photo</p>
+
+			<img id="profile_preview"
+				 src="{{ user.profile_photo if user.profile_photo else url_for('static', filename='assets/default_profile.png') }}"
+				 class="profile-photo-circle"
+				 alt="">
+				 
+		</div>
+
+
+        <!-- UPLOAD NEW PHOTO -->
+        <form action="/upload_profile_photo" method="POST" enctype="multipart/form-data" style="margin-top:15px;">
+            <input type="file" name="photo" accept="image/*" required>
+            <button type="submit" class="profile-btn">Upload New Photo</button>
+        </form>
+
+        <div class="profile-info">
+
+            <!-- FIRST + LAST NAME -->
+            <p><strong>Full Name:</strong> {{ user.first_name }} {{ user.last_name }}</p>
+
+            <p><strong>Username:</strong> {{ user.username }}</p>
+
+            <p><strong>Date of Birth:</strong> 
+                {{ user.date_of_birth.split('-')[2] }}/{{ user.date_of_birth.split('-')[1] }}/{{ user.date_of_birth.split('-')[0] }}
+            </p>
+
+            <p><strong>Age:</strong> {{ user.age }}</p>
+
+            <p><strong>Address:</strong> {{ user.address }}</p>
+
+            <p><strong>Postcode:</strong> {{ user.postcode }}</p>
+
+            <p><strong>Email:</strong> {{ user.email }}</p>
+
+            <p><strong>Phone:</strong> {{ user.phone }}</p>
+
+            <p><strong>Company:</strong> {{ user.company }}</p>
+			
+			<p><strong>Role:</strong>
+				{% if user.level == 3 %}Driver
+				{% elif user.level == 4 %}Enthusiast
+				{% else %}Not set{% endif %}
+			</p>
+
+
+			<p><strong>Region:</strong> 
+				{% if user.region %}
+					{{ user.region }}
+				{% else %}
+					None
+				{% endif %}
+			</p>
+
+			<p><strong>Depot:</strong> 
+				{% if user.depot %}
+					{{ user.depot }}
+				{% else %}
+					None
+				{% endif %}
+			</p>
+
+			<p><strong>Outstation:</strong> 
+				{% if user.outstation %}
+					{{ user.outstation }}
+				{% else %}
+					None
+				{% endif %}
+			</p>
+
+
+            <p><strong>Joined:</strong> 
+                {% if user.joined_date %}
+					{{ user.joined_date.split('-')[2] }}/{{ user.joined_date.split('-')[1] }}/{{ user.joined_date.split('-')[0] }}
+				{% else %}
+					Not set
+				{% endif %}
+            </p>
+
+        </div>
+
+        <div class="profile-buttons">
+                     <a class="profile-edit-btn" href="/edit_profile">Edit Profile</a>
+         </div>
+
+    </div>
+
+{% endblock %}

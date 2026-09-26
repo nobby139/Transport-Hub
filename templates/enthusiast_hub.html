@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+/* Enthusiast Hub table styling */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+  font-size: 18px;
+  text-align: center;
+}
+
+thead {
+  background-color: #0A2A66; /* replace with your banner’s exact blue */
+  color: #ffffff;
+}
+
+
+th, td {
+  padding: 10px;
+  border: 1px solid #ddd;
+}
+
+tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+
+</style>
+
+<a href="javascript:history.back()" class="back-btn">← Back</a>
+
+<section class="section">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <h1 class="page-title">Bus & coach Enthusiast Hub</h1>
+            <p>Bus & Coach enthusiast sightings and records.</p>
+        </div>
+
+        <div>
+            <a href="{{ url_for('add_enthusiast_record') }}" class="btn">Add New Entry</a>
+            <a href="{{ url_for('enthusiast_gallery') }}" class="btn" style="margin-left: 15px;">Gallery</a>
+			<a href="{{ url_for('enthusiast_cleanup') }}"
+			   class="btn"
+			   style="background-color:#c62828; color:white; float:right;"
+			   onclick="return confirm('Delete all entries with no photos?');">
+				Remove Empty Photo Entries
+			</a>
+        </div>
+    </div>
+
+    <div class="table-container">
+        <table class="data-table">
+			<thead>
+				<tr>
+					<th>Username</th>
+					<th>Operator</th>
+					<th>Vehicle No.</th>
+					<th>Registration</th>
+					<th>Make/Model</th>
+					<th>Depot</th>
+					<th>Route/Number</th>
+					<th>Route Destination</th>
+					<th>Notes</th>
+					<th>Entry Created At</th>
+					<th>Spotted At</th>
+					<th>Photos</th>
+				</tr>
+			</thead>
+
+			<tbody>
+				{% for enthusiast in enthusiasts %}
+				<tr>
+					<td>{{ enthusiast.username }}</td>
+					<td>{{ enthusiast.operator }}</td>
+					<td>{{ enthusiast.vehicle_number }}</td>
+					<td>{{ enthusiast.registration }}</td>
+					<td>{{ enthusiast.make_model }}</td>
+					<td>{{ enthusiast.depot }}</td>
+					<td>{{ enthusiast.route_number }}</td>
+					<td>{{ enthusiast.route_destination }}</td>
+					<td>{{ enthusiast.notes }}</td>
+
+					<td>{{ enthusiast.created_at.strftime("%d/%m/%Y %H:%M") if enthusiast.created_at else "" }}</td>
+					<td>{{ enthusiast.spotted_at.strftime("%d/%m/%Y %H:%M") if enthusiast.spotted_at else "" }}</td>
+
+					<td>{{ enthusiast.photos_uploaded }}</td>
+				</tr>
+				{% endfor %}
+			</tbody>
+        </table>
+    </div>
+</section>
+
+{% endblock %}

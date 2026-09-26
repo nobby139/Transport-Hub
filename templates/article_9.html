@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% set home_target = "driver_dashboard" %}
+{% set is_UK_transport_hub = True %}
+{% set page_title = "UKTransport Hub" %}
+
+{% block content %}
+
+
+
+<div class="article-container">
+
+    <!-- Back to articles list -->
+    <a href="/driver-information" class="back-link">← Back to Articles</a>
+
+    <!-- Previous / Next navigation -->
+    <div class="article-nav">
+        {% if prev_url %}
+            <a class="nav-prev" href="{{ prev_url }}">← Previous</a>
+        {% endif %}
+        {% if next_url %}
+            <a class="nav-next" href="{{ next_url }}">Next →</a>
+        {% endif %}
+    </div>
+
+    <!-- Published / updated dates -->
+    <p class="article-date">
+        Published: {{ published }}
+        {% if updated %}
+            • Last updated: {{ updated }}
+        {% endif %}
+    </p>
+
+<h1 class="article-title"></h1>
+
+<div class="article-content">
+
+    <!-- ICON + MAIN HEADER -->
+    <div class="section-header">
+        <img src="/static/assets/Customer_Service.png" class="article-header-image" alt="Article Icon">
+        <h2>Professionalism and Customer Service on the Road</h2>
+    </div>
+
+    <p>
+        Professionalism is more than wearing a uniform — it’s how you represent yourself, your company, 
+        and the service every time you take the wheel. Passengers judge the journey not only by how safely 
+        you drive, but by how you communicate, how you handle situations, and how you make them feel. 
+        Good customer service builds trust, reduces conflict, and keeps the network running smoothly.
+    </p>
+
+
+        <h2>Preparing for a Professional Shift</h2>
+    <p>A professional shift starts before the first passenger steps on board.</p>
+
+    <ul>
+        <li>Uniform and appearance: clean, tidy, and in line with company standards.</li>
+        <li>Timekeeping: arrive early enough to prepare properly.</li>
+        <li>Vehicle presentation: a clean, welcoming interior sets the tone.</li>
+        <li>Positive attitude: calm, approachable, and ready to help.</li>
+    </ul>
+
+    <h2>Communicating with Passengers</h2>
+    <p>Passengers notice the small things. A friendly greeting or a clear announcement can make a big difference to their day.</p>
+
+    <ul>
+        <li>Greet passengers when appropriate. A simple “morning” goes a long way.</li>
+        <li>Use clear, calm communication. Speak steadily and avoid jargon.</li>
+        <li>Listen properly. Let passengers finish before responding.</li>
+        <li>Stay polite under pressure. Don’t mirror frustration or anger.</li>
+    </ul>
+
+    <!-- ICON + MID SECTION -->
+    <div class="section-header">
+        <img src="/static/assets/Cummunicating.png" class="article-header-image" alt="Article Icon">
+        <h2>Providing Clear Information</h2>
+	</div>
+
+    <p>Clear information helps passengers feel safe and reassured, especially when things don’t go to plan.</p>
+
+    <ul>
+        <li>Announce key stops and changes. Keep people informed.</li>
+        <li>Explain delays honestly. Stick to facts, not emotion.</li>
+        <li>Use the PA system professionally. No jokes or personal comments.</li>
+        <li>Repeat important information. Make sure everyone understands.</li>
+    </ul>
+
+    <h2>Handling Difficult Situations</h2>
+    <p>Professionalism is tested most when situations become difficult. How you respond can calm a problem or escalate it.</p>
+
+    <ul>
+        <li>Stay calm with difficult passengers. Don’t argue — follow procedure.</li>
+        <li>Keep boundaries. Be helpful, but don’t promise what you can’t deliver.</li>
+        <li>Use support channels. Contact control or supervisors when needed.</li>
+        <li>Document incidents properly. Clear notes protect you and the company.</li>
+    </ul>
+
+    <!-- ICON + FINAL SECTION -->
+    <div class="section-header">
+        <img src="/static/assets/Respect_Teamwork.png" class="article-header-image" alt="Article Icon">
+		<h2>Respect and Teamwork</h2>
+    </div>
+
+    <p>Respect is at the heart of good customer service — for passengers, colleagues, and yourself.</p>
+
+    <ul>
+        <li>Treat everyone fairly. No assumptions, no favourites.</li>
+        <li>Support colleagues. Share information and help when you can.</li>
+        <li>Look after yourself. Rest, hydration, and breaks keep you professional.</li>
+        <li>Reflect on your shifts. Learn from what went well and what didn’t.</li>
+    </ul>
+
+    <h2>Consistency Builds Trust</h2>
+    <p>
+        Professionalism isn’t about perfection — it’s about consistency. By communicating clearly, staying calm 
+        under pressure, and treating people with respect, you build trust with passengers and colleagues. 
+        Every journey is an opportunity to show reliability, care, and pride in your role. That’s what turns 
+        a good driver into a true professional.
+    </p>
+
+{% endblock %}

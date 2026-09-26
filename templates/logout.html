@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% set page_title = "UK Transport Hub" %}
+{% set home_target = "home" %}
+{% set is_drivers_hub = False %}
+
+{% block content %}
+<style>
+    .logout-box {
+        max-width: 400px;
+        margin: 60px auto;
+        padding: 25px;
+        text-align: center;
+        border-radius: 10px;
+        background: #f5f5f5;
+        border: 1px solid #ddd;
+    }
+
+    .logout-box h2 {
+        margin-bottom: 15px;
+    }
+
+    .logout-box p {
+        margin-bottom: 20px;
+        font-size: 16px;
+    }
+
+    .logout-btn {
+        display: inline-block;
+        padding: 10px 20px;
+        background: #1E88E5;
+        color: white;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: bold;
+    }
+
+    .logout-btn:hover {
+        background: #1565C0;
+    }
+</style>
+
+<div class="logout-box">
+    <h2>You have been logged out</h2>
+    <p>Thank you for using Drivers Hub.</p>
+
+    <a href="/" class="logout-btn">Return to Home</a>
+</div>
+
+{% endblock %}

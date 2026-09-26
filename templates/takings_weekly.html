@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% set home_target = "driver_dashboard" %}
+{% set is_UK_transport_hub = True %}
+{% set page_title = "UK Transport Hub" %}
+
+{% block content %}
+
+
+<style>
+    table.weekly-table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+    }
+
+    table.weekly-table th,
+    table.weekly-table td {
+        padding: 6px 8px;
+        border: 1px solid #ccc;
+        font-size: 14px;
+    }
+
+    table.weekly-table th:nth-child(1),
+    table.weekly-table td:nth-child(1) {
+        width: 120px;
+        text-align: center;
+    }
+
+    table.weekly-table th:nth-child(n+2),
+    table.weekly-table td:nth-child(n+2) {
+        width: 110px;
+        text-align: right;
+    }
+
+    table.weekly-table tfoot th,
+    table.weekly-table tfoot td {
+        background: #f0f0f0;
+        font-weight: bold;
+    }
+</style>
+
+<h2>Weekly Takings Summary</h2>
+
+<div class="week-nav">
+    <a href="{{ url_for('takings_weekly', week_offset=-1) }}" class="btn">Previous Week</a>
+    <span class="week-label">{{ week_label }}</span>
+    <a href="{{ url_for('takings_weekly', week_offset=1) }}" class="btn">Next Week</a>
+</div>
+
+<hr>
+
+<table class="weekly-table">
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Daily Takings</th>
+            <th>Float</th>
+            <th>Net Cash</th>
+            <th>Annulled Tickets</th>
+            <th>Float Remaining</th>
+            <th>Grand Total</th>
+            <th>Earnings</th>
+            <th>Hourly Rate</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% if week_data|length == 0 %}
+        <tr>
+            <td colspan="9" style="text-align:center; padding:10px;">
+                No takings recorded for this week.
+            </td>
+        </tr>
+        {% else %}
+            {% for row in week_data %}
+            <tr>
+                <td>{{ row.date }}</td>
+                <td>£{{ row.total_cash }}</td>
+                <td>£{{ row.float_amount }}</td>
+                <td>£{{ row.net_cash }}</td>
+                <td>£{{ row.annulled_total }}</td>
+                <td>£{{ row.float_remaining }}</td>
+                <td>£{{ row.grand_total }}</td>
+                <td>£{{ row.earnings }}</td>
+                <td>£{{ row.hourly_rate }}</td>
+            </tr>
+            {% endfor %}
+        {% endif %}
+    </tbody>
+
+    <tfoot>
+        <tr>
+            <th>Weekly Totals</th>
+            <td>£{{ weekly_totals.total_cash }}</td>
+            <td>£{{ weekly_totals.float_amount }}</td>
+            <td>£{{ weekly_totals.net_cash }}</td>
+            <td>£{{ weekly_totals.annulled_total }}</td>
+            <td>£{{ weekly_totals.float_remaining }}</td>
+            <td>£{{ weekly_totals.grand_total }}</td>
+            <td>£{{ weekly_totals.earnings }}</td>
+            <td>£{{ weekly_totals.hourly_rate }}</td>
+        </tr>
+    </tfoot>
+</table>
+
+<hr>
+
+{% endblock %}

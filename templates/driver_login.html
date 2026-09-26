@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="info-section">
+    <h3>Driver Login</h3>
+
+    <label>Email</label>
+    <input id="email" type="email" placeholder="(Optional during development)">
+
+    <label>Password</label>
+    <input id="password" type="password" placeholder="(Optional during development)">
+
+    <button class="btn" onclick="loginDriver()">Login</button>
+    <button class="btn" onclick="requestCode()">Login with 4‑digit code</button>
+
+    <a href="/forgot_password" style="display:block;margin-top:15px;text-align:center;">
+        Forgot your password?
+    </a>
+</div>
+
+<script>
+async function loginDriver() {
+
+    // DEVELOPMENT MODE: auto-login with no credentials
+    if (!document.getElementById("email").value) {
+        window.location.href = "/driver_dashboard";
+        return;
+    }
+
+    // REAL LOGIN (when site goes live)
+    const response = await fetch("/api/login/driver", {
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body:JSON.stringify({
+            email: document.getElementById("email").value,
+            password: document.getElementById("password").value
+        })
+    });
+
+    const result = await response.json();
+
+    if (response.ok) {
+        sessionStorage.setItem("enthusiast_access", result.enthusiast_access);
+        window.location.href = "/driver_dashboard";
+    } else {
+        alert(result.message || "Login failed");
+    }
+}
+
+async function requestCode() {
+    const email = document.getElementById("email").value;
+
+    if (!email) {
+        alert("Enter your email first.");
+        return;
+    }
+
+    const response = await fetch("/api/request_login_code", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email })
+    });
+
+    const result = await response.json();
+    alert(result.message);
+
+    window.location.href = "/enter_code/" + email;
+}
+</script>
+
+{% endblock %}

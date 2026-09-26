@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% set home_target = "driver_dashboard" %}
+{% set is_transport_hub = True %}
+{% set page_title = "UK Transport Hub" %}
+
+{% block content %}
+
+
+
+<div class="article-container">
+
+    <a href="/driver-information" class="back-link">← Back to Articles</a>
+	
+<div class="article-nav">
+    {% if prev_url %}
+        <a class="nav-prev" href="{{ prev_url }}">← Previous</a>
+    {% endif %}
+
+    {% if next_url %}
+        <a class="nav-next" href="{{ next_url }}">Next →</a>
+    {% endif %}
+</div>	
+
+<p class="article-date">
+    Published: {{ published }}
+    {% if updated %}
+        • Last updated: {{ updated }}
+    {% endif %}
+</p>
+
+		<!-- ICON + MAIN PAGE HEADER -->
+		<div class="section-header">
+			<img src="/static/assets/Support_&_Wellbeing.png" class="article-header-image" alt="Article Icon">
+			<h1 class="article-title">Driver Support & Wellbeing Overview</h1>
+		</div>
+
+		<div class="article-content">
+
+			<h2>1. Driver Support & Wellbeing<h2>
+		</div>
+		<p>
+			Professional driving can be rewarding, but it also comes with challenges — long 
+			days, busy routes, changing conditions, and constant responsibility for passenger 
+			safety. Looking after your wellbeing is just as important as looking after the 
+			vehicle you drive. This article highlights simple, practical ways to stay healthy, 
+			focused, and supported throughout your working day.
+		</p>
+
+		<h2>2. Staying Comfortable on the Road</h2>
+	
+		
+		<p>
+			Comfort in the cab makes a big difference during a shift, but it’s not always 
+			possible to control the temperature — especially on cold early mornings or during 
+			hot summer days. Heating systems take time to warm up, and cooling a bus in high 
+			temperatures can be difficult. What you can do is make small adjustments that help 
+			where possible:
+		</p>
+
+		<ul>
+			<li>Set the heating or ventilation early in the shift to give it time to take effect.</li>
+			<li>Adjust your seat and mirrors to reduce strain and improve comfort.</li>
+			<li>Keep water with you to stay hydrated, especially in warm weather.</li>
+			<li>Use your breaks to cool down or warm up away from the cab when needed.</li>
+		</ul>
+
+		<p>
+			While perfect temperature control isn’t always achievable, small steps can make 
+			your shift more manageable.
+		</p>
+
+		<!-- ICON + MID HEADER -->
+		<div class="section-header">
+			<img src="/static/assets/Managing_Stress.png" class="article-header-image" alt="Article Icon">
+			<h2>3. Managing Stress and Fatigue</h2>
+		</div>
+
+		<p>
+			Driving requires constant concentration. Fatigue and stress can build up quickly, 
+			especially during peak times or long duties. Helpful habits include:
+		</p>
+
+		<ul>
+			<li>Taking your breaks fully and using them to rest properly.</li>
+			<li>Stepping away from the cab to stretch and reset.</li>
+			<li>Using deep breathing or short mindfulness techniques to stay calm.</li>
+			<li>Reporting fatigue concerns early so they can be managed safely.</li>
+		</ul>
+
+		<h2>4. Staying Connected and Supported</h2>
+		<p>
+			You’re never expected to handle everything alone. Support is available through your 
+			operator, colleagues, and internal systems. If something doesn’t feel right — 
+			whether it’s a safety concern, a difficult situation, or a personal issue — speaking 
+			up early helps prevent problems from growing.
+		</p>
+
+		<h2>5. Healthy Habits for Long-Term Wellbeing</h2>
+		<p>
+			Small daily habits can improve your overall health and energy levels. Consider:
+		</p>
+
+		<ul>
+			<li>Staying hydrated throughout your shift.</li>
+			<li>Choosing balanced meals when possible.</li>
+			<li>Getting enough rest between duties.</li>
+			<li>Keeping active outside of work to support physical health.</li>
+		</ul>
+
+		<!-- ICON + FINAL HEADER -->
+		<div class="section-header">
+			<img src="/static/assets/Thoughts.png" class="article-header-image" alt="Article Icon">
+			<h2>6. Final Thoughts</h2>
+		</div>
+
+		<p>
+			Your wellbeing is essential — not just for your safety, but for your comfort and 
+			confidence on every journey. Taking care of yourself helps you stay focused, 
+			positive, and ready for whatever the day brings. The Drivers Hub will continue to 
+			add more wellbeing resources and support tools to help you along the way.
+		</p>
+
+{% endblock %}

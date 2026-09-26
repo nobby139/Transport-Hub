@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% set home_target = "driver_dashboard" %}
+{% set is_transport_hub = True %}
+{% set page_title = "UK Transport Hub" %}
+
+{% block content %}
+
+
+
+<div class="article-container">
+
+    <a href="/driver-information" class="back-link">← Back to Articles</a>
+
+    <div class="article-nav">
+        {% if prev_url %}
+            <a class="nav-prev" href="{{ prev_url }}">← Previous</a>
+        {% endif %}
+        {% if next_url %}
+            <a class="nav-next" href="{{ next_url }}">Next →</a>
+        {% endif %}
+    </div>
+
+    <p class="article-date">
+        Published: {{ published }}
+        {% if updated %}
+            • Last updated: {{ updated }}
+        {% endif %}
+    </p>
+
+    <div class="article-content">
+
+        <!-- ICON + MAIN HEADER -->
+        <div class="section-header">
+            <img src="/static/assets/Reduce_Stress.png" class="article-header-image" alt="Article Icon">
+            <h2>Managing Stress on the Road</h2>
+        </div>
+
+        <p>
+            Driving a bus or coach means dealing with pressure every day. Traffic, schedules, passengers and
+            unexpected incidents can all build up. Managing stress is not just about feeling better – it is about
+            staying safe, professional and confident behind the wheel.
+        </p>
+
+        <h2>1. What Causes Stress for Drivers</h2>
+        <p>Common sources of stress include:</p>
+        <ul>
+            <li>Traffic delays and pressure to stay on time</li>
+            <li>Difficult passengers, conflict or complaints</li>
+            <li>Fatigue from long shifts, early starts or broken sleep</li>
+            <li>Unexpected incidents such as breakdowns, diversions or emergencies</li>
+            <li>Workload pressure on busy routes and tight turnarounds</li>
+        </ul>
+        <p>
+            Stress is normal, but unmanaged stress can affect your reactions, judgement and customer service.
+        </p>
+
+        <!-- ICON + MID SECTION -->
+        <div class="section-header">
+            <img src="/static/assets/Managing_Stress.png" class="article-header-image" alt="Article Icon">
+            <h2>2. Quick Ways to Reduce Stress During a Shift</h2>
+        </div>
+
+        <p>Small actions during a shift can make a big difference:</p>
+        <ul>
+            <li>Control your breathing with slow, deep breaths to calm your body</li>
+            <li>Use short micro‑breaks, even 20–30 seconds, to reset your focus</li>
+            <li>Stay hydrated to reduce irritability and tiredness</li>
+            <li>Set up your cab properly: seat, mirrors, temperature and visibility</li>
+            <li>Use calm, positive wording with passengers to avoid escalation</li>
+        </ul>
+        <p>
+            These habits help you stay steady and professional, even on difficult days.
+        </p>
+
+        <h2>3. Long‑Term Stress Management</h2>
+        <p>Looking after yourself away from the vehicle is just as important:</p>
+        <ul>
+            <li>Take regular exercise to boost mood and resilience</li>
+            <li>Keep healthy sleep habits and a consistent routine where possible</li>
+            <li>Talk to colleagues or friends instead of bottling things up</li>
+            <li>Use any employer support such as wellbeing services or occupational health</li>
+        </ul>
+        <p>
+            Long‑term self‑care helps you stay safer, healthier and more confident on the road.
+        </p>
+
+        <!-- ICON + FINAL SECTION -->
+        <div class="section-header">
+            <img src="/static/assets/Too_Much_Stress.png" class="article-header-image" alt="Article Icon">
+            <h2>4. Signs Stress Is Becoming Too Much</h2>
+        </div>
+
+        <p>It is important to notice when stress is starting to affect you more seriously:</p>
+        <ul>
+            <li>Constant irritability or feeling on edge</li>
+            <li>Trouble getting to sleep or staying asleep</li>
+            <li>Feeling overwhelmed or unable to switch off</li>
+            <li>Loss of concentration or making more mistakes</li>
+            <li>Physical symptoms such as headaches, muscle tension or stomach issues</li>
+        </ul>
+        <p>
+            If you notice these signs, speak to your manager, occupational health or your GP. Getting support early
+            can make a big difference and is a positive, professional step.
+        </p>
+
+    </div>
+
+{% endblock %}

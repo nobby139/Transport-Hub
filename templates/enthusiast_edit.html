@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+.form-container {
+  max-width: 600px;
+  margin: 40px auto; /* centres on page */
+  background: #fff;
+  padding: 25px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.enthusiast-form label {
+  display: block;
+  margin-bottom: 15px;
+  font-weight: 600;
+}
+
+.enthusiast-form input,
+.enthusiast-form textarea {
+  width: 100%;
+  padding: 8px;
+  margin-top: 6px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.enthusiast-form button {
+  display: block;
+  margin: 20px auto 0;
+}
+
+/* Right‑aligned link container */
+.right-link {
+  text-align: right;
+  margin-top: 20px;
+}
+
+</style>
+
+<h2>Edit Enthusiast Entry</h2>
+
+<div class="form-container">
+
+    <form method="POST">
+
+		<div style="display:flex; align-items:center; margin-bottom:10px;">
+			<label style="width:180px; font-weight:bold;">Operator:</label>
+			<input type="text" name="operator" value="{{ entry.operator }}" class="form-control" style="width:300px;">
+		</div>
+
+		<div style="display:flex; align-items:center; margin-bottom:10px;">
+			<label style="width:180px; font-weight:bold;">Vehicle Number:</label>
+			<input type="text" name="vehicle_number" value="{{ entry.vehicle_number }}" class="form-control" style="width:300px;">
+		</div>
+
+		<div style="display:flex; align-items:center; margin-bottom:10px;">
+			<label style="width:180px; font-weight:bold;">Registration:</label>
+			<input type="text" name="registration" value="{{ entry.registration }}" class="form-control" style="width:300px;">
+		</div>
+
+		<div style="display:flex; align-items:center; margin-bottom:10px;">
+			<label style="width:180px; font-weight:bold;">Make / Model:</label>
+			<input type="text" name="make_model" value="{{ entry.make_model }}" class="form-control" style="width:300px;">
+		</div>
+
+		<div style="display:flex; align-items:center; margin-bottom:10px;">
+			<label style="width:180px; font-weight:bold;">Depot:</label>
+			<input type="text" name="depot" value="{{ entry.depot }}" class="form-control" style="width:300px;">
+		</div>
+
+		<div style="display:flex; align-items:center; margin-bottom:10px;">
+			<label style="width:180px; font-weight:bold;">Route Number:</label>
+			<input type="text" name="route_number" value="{{ entry.route_number }}" class="form-control" style="width:300px;">
+		</div>
+
+		<div style="display:flex; align-items:center; margin-bottom:10px;">
+			<label style="width:180px; font-weight:bold;">Route Start / Destination:</label>
+			<input type="text" name="route_destination" value="{{ entry.route_destination }}" class="form-control" style="width:300px;">
+		</div>
+
+
+		<div style="display:flex; align-items:center; margin-bottom:10px;">
+			<label style="width:180px; font-weight:bold;">Spotted At:</label>
+			<input type="datetime-local" name="spotted_at" value="{{ entry.spotted_at }}" class="form-control" style="width:300px;">
+		</div>
+
+		<div style="display:flex; align-items:center; margin-bottom:10px;">
+			<label style="width:180px; font-weight:bold;">Notes:</label>
+			<textarea name="notes" class="form-control" style="width:300px; height:80px;">{{ entry.notes }}</textarea>
+		</div>
+
+
+        <button type="submit" class="btn">Save Changes</button>
+
+        <a href="{{ url_for('enthusiast_photo_details', photo_id=entry.photos[0].id) }}"
+           class="btn" style="background-color:#757575;">
+            Cancel
+        </a>
+
+    </form>
+
+</div>
+
+{% endblock %}

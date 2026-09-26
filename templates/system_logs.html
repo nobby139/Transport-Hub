@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% set page_title = "UK Transport Hub" %}
+{% set home_target = "home" %}
+
+{% block content %}
+
+
+<link rel="stylesheet" href="{{ url_for('static', filename='system_chat.css') }}">
+
+<style>
+    .log-container {
+        max-width: 1000px;
+        margin: 20px auto;
+        padding: 20px;
+        background: #1e1e1e;
+        color: #00ff66;
+        font-family: 'Courier New', Courier, monospace;
+        border-radius: 8px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+    .log-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #333;
+        padding-bottom: 12px;
+        margin-bottom: 15px;
+    }
+    .log-header h2 {
+        margin: 0;
+        color: #ffffff;
+        font-size: 1.4rem;
+    }
+    .log-body {
+        background: #111;
+        padding: 15px;
+        border-radius: 5px;
+        max-height: 550px;
+        overflow-y: auto;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        font-size: 0.85rem;
+        line-height: 1.4;
+        border: 1px solid #2a2a2a;
+    }
+    .refresh-btn {
+        background: #28a745;
+        color: #fff;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: bold;
+    }
+    .refresh-btn:hover {
+        background: #218838;
+    }
+</style>
+
+<div class="platform-messages">
+    <a href="javascript:history.back()" class="back-btn">← Back</a>
+</div>
+
+<div class="log-container">
+    <div class="log-header">
+        <h2>🖥️ System & Application Logs</h2>
+        <button class="refresh-btn" onclick="location.reload();">Refresh Logs</button>
+    </div>
+
+	<div class="log-body" id="logBox">
+		{% for line in logs %}
+			<div class="log-line">{{ line }}</div>
+		{% endfor %}
+	</div>
+</div>
+
+<script>
+    // Auto-scroll log box to bottom on page load
+    const logBox = document.getElementById("logBox");
+    if (logBox) {
+        logBox.scrollTop = logBox.scrollHeight;
+    }
+</script>
+
+{% endblock %}

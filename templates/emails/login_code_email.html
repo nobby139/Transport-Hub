@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% set page_title = "Login Code" %}
+{% set home_target = "home" %}
+{% set is_drivers_hub = False %}
+
+{% block content %}
+
+<h2>Your Login Code</h2>
+
+<p>Hello,</p>
+
+<p>Your 4‑digit login code for Transport Hub is:</p>
+
+<div style="
+    font-size: 32px;
+    letter-spacing: 8px;
+    font-weight: bold;
+    text-align: center;
+    margin: 20px 0;
+    color: #0078ff;
+">
+    {{ code }}
+</div>
+
+<p style="font-size: 12px; color: #777; margin-top: 15px;">
+    This code expires in {{ expires_minutes }} minutes.<br>
+    If you didn’t try to sign in, you can safely ignore this email.
+</p>
+
+{% endblock %}

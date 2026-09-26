@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<body>
+<h2>Test Driver Registration</h2>
+
+<button onclick="send()">Send Test Request</button>
+
+<script>
+function send() {
+    fetch("http://127.0.0.1:5000/api/register/driver", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+            name: "Chris Tester",
+            email: "test@example.com",
+            password: "123",
+            new_company: "Faresaver"
+        })
+    })
+    .then(r => r.text())
+    .then(alert)
+    .catch(err => alert('Error: ' + err));
+}
+</script>
+
+</body>
+</html>

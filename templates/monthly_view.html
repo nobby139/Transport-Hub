@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+{% set home_target = "driver_dashboard" %}
+{% set is_UK_transport_hub = True %}
+{% set page_title = "UK Transport Hub" %}
+
+{% block content %}
+
+
+
+
+<!-- HEADER BAR -->
+<div class="monthly-header"
+     style="padding: 15px; border-radius: 6px; margin-bottom: 20px; display:flex; justify-content:space-between; align-items:center;">
+
+    <h1 style="margin: 0; font-size: 26px;">
+        Monthly View – {{ month_name }} {{ year_label }}
+    </h1>
+
+    <form method="GET" action="/monthly-view" style="margin:0;">
+        <input type="hidden" name="month" value="{{ month }}">
+        <select name="year" onchange="this.form.submit()" class="form-select d-inline-block w-auto">
+            {% for y in range(2025, 2050) %}
+                <option value="{{ y }}" {% if y == year %}selected{% endif %}>
+                    {{ y }}
+                </option>
+            {% endfor %}
+        </select>
+    </form>
+</div>
+
+<!-- NAV -->
+<div style="margin-bottom: 20px; display:flex; justify-content:space-between; align-items:center;">
+
+    <!-- LEFT BUTTONS -->
+    <div>
+        <a href="/weekly_view" class="btn btn-primary">↻ Refresh / Sort by Date</a>
+        <a href="/print-monthly" class="btn btn-primary">🖨 Print</a>
+        <a href="/weekly_view" class="btn btn-primary">Weekly</a>
+        <a href="/monthly-view" class="btn btn-primary">Monthly</a>
+    </div>
+
+    <!-- RIGHT SIDE: BIN + TEXT + PREVIOUS + NEXT -->
+    <div style="display:flex; align-items:center; gap:10px;">
+
+        <!-- BIN ICON -->
+		<button type="submit"
+				style="background:#ccc; color:#000; border:1px solid #999; padding:4px 10px; border-radius:4px; cursor:pointer; display:flex; align-items:center; gap:6px;"
+				onclick="return confirm('Delete all selected duties?');">
+			<img src="/static/assets/trash_can.png" alt="Delete" style="height:30px; width:auto;">
+			<span style="font-size:1rem;">Delete Selected</span>
+		</button>
+
+
+
+
+
+        <!-- PREVIOUS -->
+        <a href="/monthly-view?month={{ prev_month }}&year={{ prev_year }}" class="btn btn-primary">← Previous</a>
+
+        <!-- NEXT -->
+        <a href="/monthly-view?month={{ next_month }}&year={{ next_year }}" class="btn btn-primary">Next →</a>
+    </div>
+
+</div>
+
+
+
+<!-- SCROLL CONTAINER (keeps sticky header working) -->
+
+
+<table class="weekly-table">
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Duty No.</th>
+            <th>OSA</th>
+			<th>Vehicles</th>
+            <th>Start</th>
+            <th>Finish</th>
+            <th>Actual Finish</th>
+            <th>Total Duty</th>
+            <th>Driving Time</th>
+            <th>Break Total</th>
+            <th>Pass Issue Total</th>
+            <th>NDW Total</th>
+            <th>Delay Type</th>
+            <th>Duty Status</th>
+            <th>Driving Status</th>
+            <th>Overall Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+
+	<tbody>
+		{% for d in duties %}
+			<tr>
+				<td>{{ d.date_uk }}</td>
+				<td>{{ d.duty_number }}</td>
+				<td>{{ 'None' if d.qsa in [0, '0', None] else d.qsa }}</td>
+                <td>
+					<details>
+						<summary style="cursor: pointer; color: #0056b3; font-weight: 600; white-space: nowrap; text-transform: capitalize;">
+							{{ d.vehicle_type }} 
+							{% if d.buses %}
+								<span style="font-size: 0.75rem; color: #555; font-weight: normal;">({{ d.buses|length }} vehicle{% if d.buses|length > 1 %}s{% endif %})</span>
+							{% endif %}
+						</summary>
+
+						{% if d.buses %}
+							<div style="margin-top: 6px; padding: 6px; background: #f8f9fa; border: 1px solid #ddd; border-radius: 4px; font-size: 0.8rem; line-height: 1.3;">
+								{% for bus in d.buses %}
+									<div style="white-space: nowrap; margin-bottom: 3px;">
+										{% if bus.bus_no %}<strong>No. {{ bus.bus_no }}:</strong> {% endif %}
+										<span>{{ bus.reg_plate }}</span>
+										<span style="color: #666;">({{ bus.time_from }} - {{ bus.time_to }})</span>
+									</div>
+								{% endfor %}
+							</div>
+						{% endif %}
+					</details>
+				</td>
+				<td>{{ d.start_time }}</td>
+				<td>{{ d.finish_time }}</td>
+				<td>{{ d.actual_finish_time or '—' }}</td>
+				<td>{{ d.total_duty }}</td>
+				<td>{{ d.driving_time }}</td>
+				<td>{{ 'None' if d.total_breaks == '00:00' else d.total_breaks }}</td>
+				<td>{{ 'None' if d.total_passenger_issue == '00:00' else d.total_passenger_issue }}</td>
+				<td>{{ 'None' if d.total_ndw == '00:00' else d.total_ndw }}</td>
+				<td>{{ d.delay_type or 'None' }}</td>
+
+				<td><span class="status-badge {{ d.duty_status|lower }}">{{ d.duty_status }}</span></td>
+				<td><span class="status-badge {{ d.driving_status|lower }}">{{ d.driving_status }}</span></td>
+				<td><span class="status-badge {{ d.overall_status|lower }}">{{ d.overall_status }}</span></td>
+
+				<td>
+					<a href="/analyse-summary/{{ d.id }}?return_to=monthly"
+					   class="btn btn-primary"
+					   style="padding:4px 8px; font-size:0.6rem; display:inline-block;">
+						View Summary
+					</a>
+
+					<input type="checkbox" name="selected_ids" value="{{ d.id }}" style="margin-right:6px;">
+				</td>
+			</tr>
+		{% endfor %}
+	</tbody>
+
+</table>
+
+</div>
+
+<!-- MONTHLY TOTALS -->
+<h2 style="margin-top: 40px;">Monthly Totals</h2>
+
+<table class="weekly-table">
+    <thead>
+        <tr>
+            <th>Total Duty</th>
+            <th>Driving Time</th>
+            <th>Break Total</th>
+            <th>Pass Issue Total</th>
+            <th>NDW Total</th>
+            <th>Total Delay</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr>
+            <td>{{ monthly_totals.duty }}</td>
+            <td>{{ monthly_totals.driving }}</td>
+            <td>{{ monthly_totals.breaks }}</td>
+            <td>{{ monthly_totals.issue }}</td>
+            <td>{{ monthly_totals.ndw }}</td>
+            <td>{{ monthly_totals.delay }}</td>
+        </tr>
+    </tbody>
+</table>
+
+{% endblock %}

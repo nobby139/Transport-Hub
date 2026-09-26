@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transport Hub – Home</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<!-- HEADER -->
+<header class="main-header">
+    <div class="header-left">
+        <h1>Transport Hub</h1>
+    </div>
+
+    <div class="header-right">
+        <img src="{{ url_for('static', filename='assets/logo.png') }}" 
+             alt="Transport Hub Logo" 
+             class="header-logo">
+    </div>
+
+    <!-- ORANGE WAVES -->
+    <div class="header-waves">
+        <svg viewBox="0 0 1440 80" preserveAspectRatio="none">
+            <path d="M0,40 C300,10 600,70 900,40 C1150,15 1300,60 1440,30"
+                  stroke="#FF7A00" stroke-width="3" fill="none" />
+            <path d="M0,60 C300,30 600,90 900,60 C1150,35 1300,80 1440,50"
+                  stroke="#FF7A00" stroke-width="2" fill="none" opacity="0.8" />
+        </svg>
+    </div>
+</header>
+
+
+
+<!-- MAIN CONTENT -->
+<section class="welcome-section">
+    <h2>Welcome to Transport Hub</h2>
+    <p>Your gateway to the world of buses, coaches, and the people who drive and love them.</p>
+
+    <p>
+        Choose your hub below to enter the part of the community that suits you best.
+        Whether you're a professional bus or coach driver, or a passionate enthusiast,
+        Transport Hub brings everyone together.
+    </p>
+</section>
+
+<!-- BUTTONS -->
+<section class="start-section">
+    <h3>Choose Your Hub</h3>
+
+    <div class="button-group">
+        <a class="btn" href="{{ url_for('drivers_hub') }}">Bus & Coach Drivers Hub</a>
+        <a class="btn" href="{{ url_for('enthusiast_hub') }}">Bus & Coach Enthusiast Hub</a>
+    </div>
+</section>
+
+</body>
+</html>

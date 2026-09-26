@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% set page_title = "Seasonal Gallery" %}
+
+{% block content %}
+<div style="padding: 20px;">
+    <h1 style="margin-bottom: 20px;">Transport Hub Seasonal Gallery</h1>
+    <p style="color: #555; margin-bottom: 30px;">Currently active seasonal themes based on the calendar.</p>
+
+    {% if active_season == 'halloween' %}
+        <!-- HALLOWEEN SECTION -->
+        <div style="margin-bottom: 40px;">
+            <h2>🎃 Halloween</h2>
+            <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-top: 15px;">
+                <div style="border: 1px solid #ddd; padding: 10px; border-radius: 6px; background: #fff; width: 250px;">
+                    <img src="{{ url_for('static', filename='assets/halloween_theme.jpg') }}" alt="Halloween" style="width: 100%; height: auto; border-radius: 4px;">
+                    <p style="text-align: center; margin-top: 8px; font-size: 0.9rem;">Spooky Season Bus</p>
+                </div>
+            </div>
+        </div>
+    {% elif active_season == 'christmas' %}
+        <!-- CHRISTMAS SECTION -->
+        <div style="margin-bottom: 40px;">
+            <h2>🎄 Christmas</h2>
+            <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-top: 15px;">
+                <div style="border: 1px solid #ddd; padding: 10px; border-radius: 6px; background: #fff; width: 250px;">
+                    <img src="{{ url_for('static', filename='assets/christmas_theme.jpg') }}" alt="Christmas" style="width: 100%; height: auto; border-radius: 4px;">
+                    <p style="text-align: center; margin-top: 8px; font-size: 0.9rem;">Festive Route Special</p>
+                </div>
+            </div>
+        </div>
+    {% elif active_season == 'easter' %}
+        <!-- EASTER SECTION -->
+        <div style="margin-bottom: 40px;">
+            <h2>🐰 Easter</h2>
+            <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-top: 15px;">
+                <div style="border: 1px solid #ddd; padding: 10px; border-radius: 6px; background: #fff; width: 250px;">
+                    <img src="{{ url_for('static', filename='assets/easter_theme.jpg') }}" alt="Easter" style="width: 100%; height: auto; border-radius: 4px;">
+                    <p style="text-align: center; margin-top: 8px; font-size: 0.9rem;">Spring Banner</p>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div style="padding: 30px; text-align: center; background: #f8f9fa; border-radius: 6px; border: 1px solid #e9ecef;">
+            <p style="color: #6c757d; margin: 0;">No seasonal themes are currently active on the calendar.</p>
+        </div>
+    {% endif %}
+
+    <div style="margin-top: 30px;">
+        <a href="javascript:history.back()" class="btn btn-primary">← Back</a>
+    </div>
+</div>
+{% endblock %}

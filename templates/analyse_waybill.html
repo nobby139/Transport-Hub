@@ -1,0 +1,299 @@
+{% extends "base.html" %}
+{% set home_target = "driver_dashboard" %}
+{% set is_UK_transport_hub = True %}
+{% set page_title = "UK Transport Hub" %}
+
+{% block content %}
+
+<h2>Duty Hours Analysis</h2>
+
+<div style="margin-bottom: 20px;">
+    <a href="/weekly_view" class="btn btn-primary" style="margin-right: 10px;">Weekly View</a>
+    <a href="/monthly-view" class="btn btn-primary" style="margin-right: 10px;">Monthly View</a>
+    <a href="/yearly-view" class="btn btn-primary">Yearly View</a>
+</div>
+
+<div style="margin-bottom: 20px;">
+    <a href="/" class="btn btn-secondary">← Back</a>
+</div>
+
+<div class="results">
+
+<!-- MAIN INFO TABLE -->
+<table class="results-table">
+    <tr>
+        <th>Duty Number / Code</th>
+        <td>{{ results.duty_number }}</td>
+    </tr>
+    <tr>
+        <th>Date</th>
+        <td>{{ results.duty_date }}</td>
+    </tr>
+    <tr>
+        <th>Vehicle Type</th>
+        <td>{{ results.vehicle_type }}</td>
+    </tr>
+</table>
+
+<!-- Multi-Bus Sub-section inside a clean card container -->
+    {% if results.buses and results.buses | selectattr('reg_plate') | list | length > 0 %}
+    <tr>
+        <td colspan="2" style="padding: 12px 0;">
+            <div style="background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 6px; padding: 15px;">
+                <h3 style="margin-top: 0; margin-bottom: 12px; font-size: 1.1rem; color: #333;">Vehicle Changes (Multi-Bus Breakdown)</h3>
+                <table class="results-table" style="width: 100%; margin-bottom: 0; background: #fff;">
+                    <tr>
+                        <th style="padding: 8px; text-align: left;">#</th>
+                        <th style="padding: 8px; text-align: left;">Bus No.</th>
+                        <th style="padding: 8px; text-align: left;">Registration Plate</th>
+                        <th style="padding: 8px; text-align: left;">Time From</th>
+                        <th style="padding: 8px; text-align: left;">Time To</th>
+                    </tr>
+                    {% for b in results.buses %}
+                        {% if b.reg_plate %}
+                        <tr>
+                            <td style="padding: 8px;">{{ loop.index }}</td>
+                            <td style="padding: 8px;">{{ b.bus_no if b.bus_no else "—" }}</td>
+                            <td style="padding: 8px;">{{ b.reg_plate }}</td>
+                            <td style="padding: 8px;">{{ b.time_from }}</td>
+                            <td style="padding: 8px;">{{ b.time_to }}</td>
+                        </tr>
+                        {% endif %}
+                    {% endfor %}
+                </table>
+            </div>
+        </td>
+    </tr>
+    {% endif %}
+
+<hr>
+
+<!-- METRICS & TIMES TABLE -->
+<table class="results-table">
+    <tr>
+        <td>Traffic Delay</td>
+        <td>
+            {% set traffic_mins = results.traffic_delay_minutes | default(0) | int %}
+            {% if traffic_mins > 0 %}
+                Yes ({{ traffic_mins }} mins)
+            {% else %}
+                No
+            {% endif %}
+        </td>
+    </tr>
+
+    <tr>
+        <td>Incident Delay</td>
+        <td>
+            {% set incident_mins = results.incident_delay_minutes | default(0) | int %}
+            {% if incident_mins > 0 %}
+                Yes ({{ incident_mins }} mins)
+            {% else %}
+                No
+            {% endif %}
+        </td>
+    </tr>
+
+
+    <tr>
+        <th>Outstation Allowance</th>
+        <td>{{ results.outstation_allowance }} mins</td>
+    </tr>
+
+    <tr>
+        <th>Start Time</th>
+        <td>{{ results.start_time }}</td>
+    </tr>
+
+    <tr>
+        <th>Scheduled Finish Time</th>
+        <td>{{ results.finish_time }}</td>
+    </tr>
+
+    <tr>
+        <th>Actual Finish Time</th>
+        <td>{{ results.actual_finish_time }}</td>
+    </tr>
+
+    <tr>
+        <th>Difference vs Waybill</th>
+        <td>{{ results.finish_difference }}</td>
+    </tr>
+
+    <tr>
+        <th>Total Duty Time</th>
+        <td>{{ results.total_duty }}</td>
+    </tr>
+
+    <tr>
+        <th>Total Breaks</th>
+        <td>{{ results.total_breaks }}</td>
+    </tr>
+
+    <tr>
+        <th>Total Lost Time</th>
+        <td>{{ results.total_lost_time }}</td>
+    </tr>
+
+    <tr>
+        <th>Total Passenger Issue Delay</th>
+        <td>{{ results.total_passenger_issue }}</td>
+    </tr>
+
+    <tr>
+        <th>Total NDW</th>
+        <td>{{ results.total_ndw }}</td>
+    </tr>
+
+    <tr>
+        <th>Driving Time</th>
+        <td>{{ results.driving_time }}</td>
+    </tr>
+
+    <tr>
+        <th>Duty Status</th>
+        <td>
+            <span class="status-badge {{ results.duty_status|lower }}">
+                {{ results.duty_status }}
+            </span>
+        </td>
+    </tr>
+
+    <tr>
+        <th>Driving Status</th>
+        <td>
+            <span class="status-badge {{ results.driving_status|lower }}">
+                {{ results.driving_status }}
+            </span>
+        </td>
+    </tr>
+
+    <tr>
+        <th>Overall Status</th>
+        <td>
+            <span class="status-badge {{ results.overall_status|lower }}">
+                {{ results.overall_status }}
+            </span>
+        </td>
+    </tr>
+
+</table>
+
+<hr>
+
+<h3>Passenger Issue Details</h3>
+
+<table class="results-table">
+    <tr>
+        <th>#</th>
+        <th>Issue Type</th>
+        <th>Delay (mins)</th>
+        <th>Notes</th>
+    </tr>
+
+    {% for i in results.passenger_issue %}
+        {% if i.type or i.delay or i.notes %}
+        <tr>
+            <td>{{ loop.index }}</td>
+            <td>{{ i.type if i.type else "—" }}</td>
+            <td>{{ i.delay if i.delay else "0" }}</td>
+            <td>{{ i.notes if i.notes else "—" }}</td>
+        </tr>
+        {% endif %}
+    {% endfor %}
+</table>
+
+<hr>
+
+<h3>Break Details</h3>
+
+<table class="results-table">
+    <tr>
+        <th>#</th>
+        <th>Start</th>
+        <th>End</th>
+        <th>Lost (mins)</th>
+    </tr>
+
+    {% for b in results.breaks %}
+        {% if b.start or b.end or b.lost %}
+        <tr>
+            <td>{{ loop.index }}</td>
+            <td>{{ b.start if b.start else "—" }}</td>
+            <td>{{ b.end if b.end else "—" }}</td>
+            <td>{{ b.lost if b.lost else "0" }}</td>
+        </tr>
+        {% endif %}
+    {% endfor %}
+</table>
+
+<hr>
+
+<h3>NDW Details</h3>
+
+<table class="results-table">
+    <tr>
+        <th>#</th>
+        <th>Task</th>
+        <th>Start</th>
+        <th>End</th>
+        <th>Duration</th>
+    </tr>
+
+    {% for n in results.ndw_entries %}
+        {% if n.task or n.start or n.end %}
+        <tr>
+            <td>{{ loop.index }}</td>
+            <td>{{ n.task if n.task else "—" }}</td>
+            <td>{{ n.start if n.start else "—" }}</td>
+            <td>{{ n.end if n.end else "—" }}</td>
+            <td>
+                {% if n.duration %}
+                    {{ (n.duration // 60) }}h {{ (n.duration % 60) }}m
+                {% else %}
+                    0m
+                {% endif %}
+            </td>
+        </tr>
+        {% endif %}
+    {% endfor %}
+</table>
+
+<hr>
+
+<h3>Theory Report</h3>
+
+<div class="theory-report">
+
+    <p><strong>Overall Status:</strong>
+        <span class="status-badge {{ results.overall_status|lower }}">
+            {{ results.overall_status }}
+        </span>
+    </p>
+
+    <p>{{ results.theory_report }}</p>
+
+    <form action="/duty-hours-checker" method="POST" style="margin-top:20px;">
+        <input type="hidden" name="repopulate" value="1">
+        <input type="hidden" name="results_json" value='{{ results | tojson }}'>
+        <input type="hidden" name="duty_number" value="{{ results.duty_number }}">
+        <input type="hidden" name="outstation_allowance" value="{{ results.outstation_allowance }}">
+
+        <button type="submit" class="btn">← Modify Duty</button>
+    </form>
+
+    <form action="/save-duty?return_to={{ request.args.get('return_to', 'weekly') }}" method="POST" style="margin-top:10px;">
+        <input type="hidden" name="results_json" value='{{ results | tojson }}'>
+        <input type="hidden" name="duty_number" value="{{ results.duty_number }}">
+        <input type="hidden" name="outstation_allowance" value="{{ results.outstation_allowance }}">
+        <input type="hidden" name="actual_finish_time" value="{{ results.actual_finish_time }}">
+        <input type="hidden" name="duty_date" value="{{ results.raw_date }}">
+
+        <button type="submit" class="btn btn-green">💾 Save Duty</button>
+    </form>
+
+</div>
+
+</div>
+
+{% endblock %}

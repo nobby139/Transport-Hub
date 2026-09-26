@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!-- PRINT MODE BLOCK (ADDED EXACTLY AS REQUESTED) -->
+{% if mode == "monthly" %}
+    <h2>Monthly Print – {{ month_name }} {{ year_label }}</h2>
+{% elif mode == "weekly" %}
+    <h2>Weekly Print – Week {{ week }} {{ year_label }}</h2>
+{% endif %}
+
+<!-- HEADER BAR (MATCH WEEKLY) -->
+<div class="weekly-header" style="padding: 15px; border-radius: 6px; margin-bottom: 20px;">
+    <h1 style="margin: 0; font-size: 26px; text-align: center;">
+        Monthly View – {{ month_name }} {{ year_label }}
+    </h1>
+</div>
+
+<!-- NAV BUTTONS -->
+<div style="margin-bottom: 20px;">
+    <a href="/duty-hours-checker" class="btn btn-secondary">← Back</a>
+    <a href="/weekly-view" class="btn btn-primary">Weekly</a>
+    <a href="/monthly-view" class="btn btn-primary">Monthly</a>
+    <a href="/yearly-view" class="btn btn-primary">Yearly</a>
+</div>
+
+<!-- YEAR MODE -->
+<div style="margin-bottom: 20px; text-align:center;">
+    <form method="GET" action="/set-year-mode">
+        <label class="fw-semibold">Year Mode:</label>
+        <select name="mode" onchange="this.form.submit()" class="form-select d-inline-block w-auto">
+            <option value="tax" {% if year_mode == 'tax' %}selected{% endif %}>Tax Year (6 Apr → 5 Apr)</option>
+            <option value="calendar" {% if year_mode == 'calendar' %}selected{% endif %}>Calendar Year (Jan → Dec)</option>
+        </select>
+    </form>
+</div>
+
+<!-- MONTH SCROLL -->
+<div style="margin-bottom: 20px; text-align:center;">
+    <a href="/monthly-view?month={{ prev_month }}&year={{ prev_year }}" class="btn btn-primary">← Previous Month</a>
+    <a href="/monthly-view?month={{ next_month }}&year={{ next_year }}" class="btn btn-primary">Next Month →</a>
+</div>
+
+<!-- YEAR DROPDOWN -->
+<div style="margin-bottom: 20px; text-align:center;">
+    <form method="GET" action="/monthly-view">
+        <label class="fw-semibold">Select Year:</label>
+        <select name="season" onchange="this.form.submit()" class="form-select d-inline-block w-auto">
+            {% for season in seasons %}
+                <option value="{{ season }}" {% if season == selected_season %}selected{% endif %}>
+                    {{ season }}
+                </option>
+            {% endfor %}
+        </select>
+        <input type="hidden" name="month" value="{{ month }}">
+    </form>
+</div>
+
+<style>
+    .table th {
+        white-space: normal !important;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        text-align: center;
+        padding: 4px;
+        font-size: 12px;
+    }
+
+    .osa {
+        width: 40px;
+        text-align: center;
+    }
+</style>
+
+
+<!-- MONTHLY TABLE -->
+<table class="table table-striped table-bordered" style="width:100%; border-collapse: collapse;">
+
+    <!-- BLUE HEADER (MATCHES WEEKLY EXACTLY) -->
+    <thead class="weekly-header">
+        <tr>
+            <th>Date</th>
+            <th>Duty No.</th>
+			<th class="osa">OSA</th>
+            <th>Vehicle</th>
+            <th>Start</th>
+            <th>Finish</th>
+            <th>Total Duty</th>
+            <th>Driving Time</th>
+            <th>Breaks</th>
+            <th>Passenger Issues</th>
+            <th>Delay Type</th>
+            <th>Duty Status</th>
+            <th>Driving Status</th>
+            <th>Overall Status</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for d in duties %}
+        <tr class="{% if d.date.month != month %}table-secondary{% endif %}">
+            <td>{{ d.date.strftime("%Y-%m-%d") }}</td>
+            <td>{{ d.duty_number }}</td>
+			<td class="osa">{{ d.outstation_allowance }}</td>
+            <td>{{ d.vehicle_type }}</td>
+            <td>{{ d.start_time }}</td>
+            <td>{{ d.finish_time }}</td>
+            <td>{{ d.total_duty }}</td>
+            <td>{{ d.driving_time }}</td>
+            <td>{{ d.breaks_display }}</td>
+            <td>{{ d.passenger_display }}</td>
+            <td>{{ d.delay_type or '' }}</td>
+
+            <td>
+                <span class="status-badge {{ d.duty_status|lower }}">
+                    {{ d.duty_status }}
+                </span>
+            </td>
+
+            <td>
+                <span class="status-badge {{ d.driving_status|lower }}">
+                    {{ d.driving_status }}
+                </span>
+            </td>
+
+            <td>
+                <span class="status-badge {{ d.overall_status|lower }}">
+                    {{ d.overall_status }}
+                </span>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

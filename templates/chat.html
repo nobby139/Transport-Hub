@@ -1,0 +1,411 @@
+{% extends "base.html" %}
+{% set home_target = "driver_dashboard" %}
+{% set is_UK_transport_hub = True %}
+{% set page_title = "UK Transport Hub" %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{{ url_for('static', filename='chat.css') }}">
+
+<section class="chat-container">
+
+    <!-- LEFT SIDE: Chat List -->
+    <div class="chat-list">
+
+        <h3>Chats</h3>
+
+        <!-- COMPANY CHAT SECTION -->
+        <div class="chat-section-title">Company Chat</div>
+
+        <a class="chat-item" onclick="openCompanyChat()">
+            <strong>Your Company Chat</strong>
+            <p>Drivers from your company only</p>
+        </a>
+
+        <!-- ALL DRIVERS CHAT -->
+        <a class="chat-item" onclick="openChat('all')">
+            <strong>All Bus Companies Chat</strong>
+            <p>All drivers together</p>
+        </a>
+
+        <!-- PRIVATE CHATS -->
+        <h4>Private Chats</h4>
+        <div id="privateChatList"></div>
+
+    </div>
+
+    <!-- RIGHT SIDE: Messages -->
+    <div class="chat-window">
+
+        <!-- TITLE BAR -->
+        <div id="chat-title" class="chat-title-bar">
+            <h3 id="chatTitleText">Select a chat to begin</h3>
+        </div>
+
+        <!-- CHAT MESSAGES -->
+        <div id="chat-messages" class="messages-area">
+            <p class="placeholder">No chat selected</p>
+        </div>
+
+        <!-- EMOJI PICKER -->
+        <div id="emoji-picker" class="emoji-picker hidden">
+            <input type="text" id="emoji-search" placeholder="Search emojis...">
+
+            <div class="emoji-categories">
+                <button onclick="loadEmojiCategory('smileys')">😊</button>
+                <button onclick="loadEmojiCategory('people')">🧑</button>
+                <button onclick="loadEmojiCategory('animals')">🐶</button>
+                <button onclick="loadEmojiCategory('food')">🍔</button>
+                <button onclick="loadEmojiCategory('activities')">⚽</button>
+                <button onclick="loadEmojiCategory('flags')">🏳️</button>
+                <button onclick="loadEmojiCategory('transport')">🚌</button>
+            </div>
+
+            <div id="emoji-grid" class="emoji-grid"></div>
+        </div>
+
+        <!-- INPUT BAR -->
+        <div class="chat-input">
+
+            <button class="icon-btn" onclick="openEmojiPicker()">😀</button>
+
+            <label class="icon-btn">
+                📷
+                <input type="file" accept="image/*" style="display:none" onchange="sendImage(this)">
+            </label>
+
+            <label class="icon-btn">
+                📎
+                <input type="file" accept="*/*" style="display:none" onchange="sendFile(this)">
+            </label>
+
+            <button id="historyToggle" class="icon-btn" onclick="toggleHistory()">
+                History: ON
+            </button>
+
+            <input type="text" id="messageBox" placeholder="Type a message...">
+
+            <button onclick="sendMessage()">Send</button>
+
+        </div>
+
+    </div>
+
+</section>
+
+<Script>
+// ------------------------------
+// CHAT STATE
+// ------------------------------
+let currentChatType = null;
+let currentReceiverId = null;
+
+let historyEnabled = true;
+
+
+// ------------------------------
+// TOGGLE HISTORY
+// ------------------------------
+function toggleHistory() {
+    historyEnabled = !historyEnabled;
+
+    const toggleBtn = document.getElementById("historyToggle");
+    const historyMessages = document.querySelectorAll(".history");
+
+    toggleBtn.textContent = historyEnabled ? "History: ON" : "History: OFF";
+
+    historyMessages.forEach(m => {
+        m.style.display = historyEnabled ? "block" : "none";
+    });
+}
+
+// ------------------------------
+// COMPANY CHAT (YOUR COMPANY ONLY)
+// ------------------------------
+
+// Open your company chat
+function openCompanyChat() {
+    currentChatType = "company";
+    currentReceiverId = null;
+
+    document.getElementById("chatTitleText").textContent = "Your Company Chat";
+
+    loadCompanyChat();
+}
+
+// Send message to YOUR company only
+function sendCompanyMessage(msg) {
+    return fetch("/send_message", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+            chat_type: "company",
+            receiver_id: null,
+            company_id: currentCompanyId,   // YOUR company only
+            message: msg
+        })
+    });
+}
+
+
+// ------------------------------
+// OPEN CHAT
+// ------------------------------
+function openChat(chatName) {
+    const titleText = document.getElementById("chatTitleText");
+    const area = document.getElementById("chat-messages");
+
+    area.innerHTML = `<p class="placeholder">Loading messages...</p>`;
+
+    if (chatName === "company") {
+        currentChatType = "company";
+        currentReceiverId = null;
+        titleText.textContent = "Company Chat";
+        loadCompanyChat();
+    }
+
+    if (chatName === "all") {
+        currentChatType = "all";
+        currentReceiverId = null;
+        titleText.textContent = "All Drivers Chat";
+        loadAllChat();
+    }
+
+    if (chatName === "john") {
+        currentChatType = "private";
+        currentReceiverId = 1;
+        titleText.textContent = "Private Chat: John Smith";
+        loadPrivateChat(1);
+    }
+
+    if (chatName === "amy") {
+        currentChatType = "private";
+        currentReceiverId = 2;
+        titleText.textContent = "Private Chat: Amy Jones";
+        loadPrivateChat(2);
+    }
+
+    if (chatName === "mark") {
+        currentChatType = "private";
+        currentReceiverId = 3;
+        titleText.textContent = "Private Chat: Mark T";
+        loadPrivateChat(3);
+    }
+}
+
+
+// ------------------------------
+// PRIVATE CHAT List
+// ------------------------------
+function loadPrivateChatList() {
+    fetch("/api/users")
+        .then(r => r.json())
+        .then(users => {
+            const list = document.getElementById("privateChatList");
+            list.innerHTML = "";
+
+            users.forEach(u => {
+                const item = document.createElement("a");
+                item.className = "chat-item";
+                item.textContent = u.name;
+                item.onclick = () => openPrivateChat(u.id, u.name);
+                list.appendChild(item);
+            });
+        });
+}
+
+function openPrivateChat(id, name) {
+    currentChatType = "private";
+    currentReceiverId = id;
+
+    document.getElementById("chatTitleText").textContent =
+        "Private Chat: " + name;
+
+    loadPrivateChat(id);
+}
+
+loadPrivateChatList();
+
+
+// ------------------------------
+// LOAD CHAT HISTORY
+// ------------------------------
+function loadCompanyChat() {
+    fetch("/history/company")
+        .then(r => r.json())
+        .then(showMessages);
+}
+
+function loadAllChat() {
+    fetch("/history/all")
+        .then(r => r.json())
+        .then(showMessages);
+}
+
+function loadPrivateChat(id) {
+    fetch("/history/private/" + id)
+        .then(r => r.json())
+        .then(showMessages);
+}
+
+// ------------------------------
+// SHOW MESSAGES
+// ------------------------------
+function showMessages(messages) {
+    const area = document.getElementById("chat-messages");
+    area.innerHTML = "";
+
+    if (messages.length === 0) {
+        area.innerHTML = `<p class="placeholder">No messages yet</p>`;
+        return;
+    }
+
+    messages.forEach(m => {
+        const div = document.createElement("div");
+
+        const isYou = m.sender_id === window.loggedInUserId;
+        const name = isYou ? "You" : m.sender_name;
+
+        div.className = "message " + (isYou ? "you" : "them");
+
+        div.innerHTML = `
+            <strong>${name}</strong><br>
+            ${m.message}
+            <div class="timestamp history">${m.timestamp || ""}</div>
+        `;
+
+        if (!historyEnabled) {
+            div.querySelector(".history").style.display = "none";
+        }
+
+        area.appendChild(div);
+    });
+
+    area.scrollTop = area.scrollHeight;
+}
+
+
+
+// ------------------------------
+// SEND MESSAGE
+// ------------------------------
+function sendMessage() {
+    const box = document.getElementById("messageBox");
+    const msg = box.value.trim();
+    if (!msg) return;
+
+    const payload = {
+        chat_type: currentChatType,
+        receiver_id: currentReceiverId,
+        message: msg
+    };
+
+    if (currentChatType === "company") {
+        payload.company_id = currentCompanyId;
+    }
+
+    fetch("/send_message", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(payload)
+    }).then(() => {
+        if (currentChatType === "company") loadCompanyChat();
+        if (currentChatType === "all") loadAllChat();
+        if (currentChatType === "private") loadPrivateChat(currentReceiverId);
+    });
+
+    box.value = "";
+}
+
+
+// ------------------------------
+// EMOJI PICKER
+// ------------------------------
+function openEmojiPicker() {
+    const picker = document.getElementById("emoji-picker");
+    picker.classList.toggle("hidden");
+}
+
+function insertEmoji(emoji) {
+    const box = document.getElementById("messageBox");
+    box.value += emoji;
+    box.focus();
+}
+
+
+// ------------------------------
+// IMAGE + FILE UPLOAD (LOCAL ONLY)
+// ------------------------------
+function sendImage(input) {
+    const file = input.files[0];
+    if (!file) return;
+
+    const area = document.getElementById("chat-messages");
+
+    area.innerHTML += `
+        <div class="message you">
+            <strong>You sent an image:</strong><br>
+            <em>${file.name}</em>
+        </div>
+    `;
+
+    area.scrollTop = area.scrollHeight;
+}
+
+function sendFile(input) {
+    const file = input.files[0];
+    if (!file) return;
+
+    const area = document.getElementById("chat-messages");
+
+    area.innerHTML += `
+        <div class="message you">
+            <strong>You sent a file:</strong><br>
+            <em>${file.name}</em>
+        </div>
+    `;
+
+    area.scrollTop = area.scrollHeight;
+}
+
+
+// ------------------------------
+// EMOJI SYSTEM
+// ------------------------------
+const emojiData = {
+    smileys: ["😀","😁","😂","🤣","😃","😄","😅","😆","😉","😊","😍","😘","😗","😙","😚","🙂","🤗","🤩","🤔","🤨","😐","😑","😶","🙄","😏","😣","😥","😮","🤐","😯","😪","😫","🥱","😴","😌","😛","😜","😝","🤤","😒","😓","😔","😕","🙃","🤑","😲","☹️","🙁","😖","😞","😟","😤","😢","😭","😦","😧","😨","😩","🤯","😬","😰","😱","🥵","🥶","😳","🤪","😵","🥴","😠","😡","🤬","😷","🤒","🤕","🤢","🤮","🤧","🥳"],
+    people: ["👋","🤚","🖐️","✋","🖖","👌","🤌","🤏","✌️","🤞","🤟","🤘","🤙","👈","👉","👆","👇","☝️","👍","👎","✊","👊","🤛","🤜","👏","🙌","👐","🤲","🙏","💅","🤳","💪","🦵","🦶","👂","👃","🧠","🫀","🫁","🦷","🦴","👀","👁️","👅","👄","🧑","👨","👩","🧓","👴","👵"],
+    animals: ["🐶","🐱","🐭","🐹","🐰","🦊","🐻","🐼","🐨","🐯","🦁","🐮","🐷","🐸","🐵","🐔","🐧","🐦","🐤","🐣","🦆","🦅","🦉","🦇","🐺","🐗","🐴","🦄","🐝","🐛","🦋","🐌","🐞","🐜","🪲","🪳","🪰","🪱","🐢","🐍","🦎","🐙","🦑","🦐","🦞","🦀","🐡","🐠","🐟"],
+    food: ["🍏","🍎","🍐","🍊","🍋","🍌","🍉","🍇","🍓","🫐","🍈","🍒","🍑","🥭","🍍","🥥","🥝","🍅","🍆","🥑","🥦","🥬","🥒","🌶️","🫑","🌽","🥕","🧄","🧅","🥔","🍠","🥐","🍞","🥖","🥨","🧀","🥚","🍳","🥞","🧇","🥓","🥩","🍗","🍖","🌭","🍔","🍟","🍕"],
+    activities: ["⚽","🏀","🏈","⚾","🎾","🏐","🏉","🥏","🎱","🏓","🏸","🥅","🏒","🏑","🥍","🏏","⛳","🏹","🎣","🤿","🥊","🥋","🎽","🛹","🛼","🛷","⛸️","🥌","🎿","⛷️","🏂","🪂","🏋️","🤼","🤸","⛹️","🤺","🤾","🏌️","🏇","🧘"],
+    flags: ["🏳️","🏴","🏁","🚩","🏳️‍🌈","🏳️‍⚧️","🇬🇧","🇺🇸","🇫🇷","🇩🇪","🇪🇸","🇮🇹","🇯🇵","🇨🇳","🇰🇷","🇧🇷","🇦🇺","🇨🇦","🇮🇳"],
+    transport: ["🚌","🚍","🚎","🚐","🚏","🚦","🚧","🛣️","🚨","🚓","🚑","🚒","🚛","🚚","🛑"],
+};
+
+function loadEmojiCategory(cat) {
+    const grid = document.getElementById("emoji-grid");
+    grid.innerHTML = "";
+
+    emojiData[cat].forEach(e => {
+        const span = document.createElement("span");
+        span.textContent = e;
+        span.onclick = () => insertEmoji(e);
+        grid.appendChild(span);
+    });
+}
+
+document.getElementById("emoji-search").addEventListener("input", function() {
+    const term = this.value.toLowerCase();
+    const grid = document.getElementById("emoji-grid");
+
+    grid.querySelectorAll("span").forEach(span => {
+        span.style.display = span.textContent.includes(term) ? "block" : "none";
+    });
+});
+</script>
+
+{% endblock %}
+
+
+
+

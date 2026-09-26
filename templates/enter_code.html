@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% set home_target = "/" %}
+{% set page_title = "Enter Login Code" %}
+
+{% block content %}
+
+<div class="enter-code-wrapper">
+
+<h2>Enter Your 4‑Digit Code</h2>
+
+<input type="text" id="code" maxlength="4" placeholder="1234">
+<button onclick="verifyCode()">Verify</button>
+
+<p id="result"></p>
+
+<script>
+async function verifyCode() {
+    const code = document.getElementById("code").value.trim();
+
+    if (code.length !== 4) {
+        document.getElementById("result").innerText = "Enter a 4‑digit code.";
+        return;
+    }
+
+    const response = await fetch("/api/verify_login_code", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            email: "{{ email }}",
+            code: code
+        })
+    });
+
+    const result = await response.json();
+    document.getElementById("result").innerText = result.message;
+
+    if (result.message === "Login success") {
+        if (result.driver) {
+            window.location.href = "/driver_dashboard";
+        } else if (result.enthusiast) {
+            window.location.href = "/enthusiast_dashboard";
+        }
+    }
+}
+</script>
+
+{% endblock %}

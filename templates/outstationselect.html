@@ -1,0 +1,71 @@
+<!-- OUTSTATION SELECT DROPDOWN -->
+<label for="outstationSelect" id="outstationLabel">Select Outstation:</label>
+<select id="outstationSelect">
+    <option value="">-- Select Outstation --</option>
+</select>
+
+<button id="finishBtn">Finish</button>
+
+<script src="../js/companyRegions.js"></script>
+<script>
+    const selectedCompany = localStorage.getItem("selectedCompany");
+    const selectedRegion = localStorage.getItem("selectedRegion");
+    const selectedDepot = localStorage.getItem("selectedDepot");
+
+    const outstationSelect = document.getElementById("outstationSelect");
+    const outstationLabel = document.getElementById("outstationLabel");
+
+    function loadOutstations() {
+        if (!selectedCompany || !selectedRegion || !selectedDepot) {
+            alert("Missing company, region, or depot selection.");
+            return;
+        }
+
+        const companyData = companyRegions[selectedCompany];
+
+        let outstations = [];
+
+        // Company WITH regions
+        if (selectedRegion !== "main" && companyData.regions) {
+            const regionData = companyData.regions[selectedRegion];
+
+            if (!regionData || !regionData.outstations) {
+                alert("Outstations not found for this region.");
+                return;
+            }
+
+            outstations = regionData.outstations;
+        }
+
+        // Company WITHOUT regions (main)
+        else if (selectedRegion === "main" && companyData.main) {
+            outstations = companyData.main.outstations;
+        }
+
+        // Populate dropdown
+        outstations.forEach(out => {
+            const option = document.createElement("option");
+            option.value = out;
+            option.textContent = out;
+            outstationSelect.appendChild(option);
+        });
+
+        outstationLabel.style.display = "block";
+        outstationSelect.style.display = "block";
+    }
+
+    document.getElementById("finishBtn").addEventListener("click", () => {
+        const selectedOutstation = outstationSelect.value;
+
+        if (!selectedOutstation) {
+            alert("Please select an outstation.");
+            return;
+        }
+
+        localStorage.setItem("selectedOutstation", selectedOutstation);
+
+        window.location.href = "create.html";
+    });
+
+    loadOutstations();
+</script>

@@ -1,0 +1,1783 @@
+{% extends "base.html" %}
+{% set home_target = "driver_dashboard" %}
+{% set is_UK_transport_hub = True %}
+{% set page_title = "UK Transport Hub" %}
+
+{% block content %}
+<a href="javascript:history.back()" class="back-btn">← Back</a>
+<div class="weekly-container" style="position: relative;">
+
+<style>
+/* ========================================================= */
+/*   					 STYLE BLOCK      					 */
+/* ========================================================= */
+
+
+.weekly-view-btn {
+    position: absolute;
+    top: 10px;
+    right: 0px;
+    background-color: #002366;
+    border-color: #002366;
+    color: white;
+    z-index: 10;
+}
+
+.row-top {
+    display: flex;
+    gap: 30px;
+    margin-bottom: 30px;
+}
+
+.col-left, .col-right {
+    flex: 1;
+}
+
+.takings-table, .remaining-table {
+    width: 70%;
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.takings-table th, .takings-table td {
+    padding: 4px 6px;
+    white-space: nowrap;
+}
+
+.short-input, .daily-input, .daily-full-amount, .footer-box {
+    width: 90px;
+    height: 26px;
+    padding: 2px 4px;
+}
+
+.money-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.takings-table thead th, .footer-cell {
+    padding: 6px 4px;
+    font-size: 0.9rem;
+}
+
+.remaining-table td {
+    padding: 4px 6px;
+}
+
+.remaining-table input {
+    width: 100px;
+    height: 26px;
+    padding: 2px 4px;
+}
+
+.count-input, .total-input {
+    width: 90px;
+    height: 26px;
+    padding: 2px 4px;
+}
+
+.count-table td, .count-table th {
+    padding: 2px 4px;
+    height: 22px;
+    line-height: 22px;
+}
+
+.count-table input {
+    height: 22px;
+    padding: 0;
+}
+
+.four-col-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    width: 100%;
+    box-sizing: border-box;
+}
+.footer-spacer td {
+  height: 10px; /* or whatever matches your row spacing */
+}
+
+.remove-col-btn {
+  background: none;       /* no background */
+  border: none;           /* no border */
+  padding: 0;             /* remove extra spacing */
+  margin-left: 6px;       /* small gap from label */
+  cursor: pointer;        /* pointer cursor */
+  font-size: 14px;        /* adjust size of icon/text */
+  color: #333;            /* icon colour */
+}
+
+.remove-col-btn:focus {
+  outline: none;          /* remove blue focus outline */
+}
+
+</style>
+
+<h2>Edit Daily/Weekly Takings</h2>
+<input type="hidden" id="week_start" value="{{ entry.week_start }}">
+
+<!-- Week Start -->
+<div class="mb-3">
+	<label for="entry_date"><strong>Date of Entry</strong></label>
+	<input type="date" id="entry_date" name="entry_date" required>
+</div>
+
+<!-- DAILY/WEEKLY TAKINGS DAY SELECTOR -->
+<div id="dailyTakingsSelect" class="mb-3">
+    <label for="dailyTakingsDay"><strong>Pay in Takings Day:</strong></label>
+    <select id="dailyTakingsDay">
+        <option value="monday">Monday</option>
+        <option value="tuesday">Tuesday</option>
+        <option value="wednesday">Wednesday</option>
+        <option value="thursday">Thursday</option>
+        <option value="friday">Friday</option>
+        <option value="saturday">Saturday</option>
+        <option value="sunday">Sunday</option>
+    </select>
+</div>
+
+<a href="/weekly-takings-view" class="btn weekly-view-btn">Weekly View</a>
+
+<div class="row-top">
+    <div class="col-left">
+        <div class="takings-container">
+            <button type="button" class="btn btn-secondary" id="addDailyTakingsBtn">
+                Add another Daily Takings column
+            </button>
+            <table class="takings-table" id="dailyTakingsTable">
+                <thead>
+                    <tr class="size-chart">
+                        <th class="day-header">Day</th>
+                        <th class="daily-group">Daily Takings</th>
+                        <th class="full-header">Full Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for day in ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"] %}
+                    <tr class="daily-row" data-day="{{ day|lower }}">
+                        <td><strong>{{ day }}</strong></td>
+                        <td class="daily-group">
+                            <div class="money-wrapper">
+                                <span class="currency-symbol">£</span>
+                                <input type="number" step="0.01" name="{{ day }}_daily_bus1" class="daily-input short-input">
+                            </div>
+                        </td>
+                        <td>
+                            <div class="money-wrapper">
+                                <span class="currency-symbol">£</span>
+                                <input type="text" name="{{ day }}_full_amount" class="daily-full-amount short-input" readonly value="0.00">
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+				<tfoot>
+				  <tr>
+					<td class="footer-label" colspan="999" id="dailyTakingsTotalCell">
+					  <div style="display:flex; justify-content:space-between; align-items:center;">
+						<span>Daily Takings Total</span>
+						<div class="money-wrapper">
+						  <span class="currency-symbol">£</span>
+						  <input type="number" id="dailyTakingsTotal" class="total-input" readonly value="0.00" step="0.01">
+						</div>
+					  </div>
+					</td>
+				  </tr>
+				</tfoot>
+            </table>
+        </div>
+    </div>
+
+    <div class="col-right">
+        <h2>Remaining Amounts</h2>
+        <table id="remainingTable" class="remaining-table">
+            <tbody>
+                <tr>
+                    <td class="day-cell">Remaining Float Amount</td>
+                    <td><div class="money-wrapper"><span>£</span><input type="text" id="remainingFloatAmount" readonly value="0.00"></div></td>
+                </tr>
+                <tr>
+                    <td class="day-cell">Tips</td>
+                    <td><div class="money-wrapper"><span>£</span><input type="text" id="tipsAmount" readonly value="0.00"></div></td>
+                </tr>
+                <tr>
+                    <td class="day-cell">Float Shortfall</td>
+                    <td><div class="money-wrapper"><span>£</span><input type="text" id="floatShortfall" readonly value="0.00"></div></td>
+                </tr>
+                <tr>
+                    <td class="day-cell">Full Amount +/-</td>
+                    <td><div class="money-wrapper"><span>£</span><input type="text" id="fullAmountShortfall" readonly value="0.00"></div></td>
+                </tr>
+                <tr>
+                    <td class="day-cell">Final Takings Amount</td>
+                    <td><div class="money-wrapper"><span>£</span><input type="text" id="finalInTotal" readonly value="0.00"></div></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+</div>
+
+
+<div class="weekly-container" style="position: relative;">
+
+<style>
+/* ========================================================= */
+/*    STYLE BLOCK FOR TAKINGS & REMAINING AMOUNTS TABLES     */
+/* ========================================================= */
+
+.weekly-view-btn {
+    position: absolute;
+    top: 10px;
+    right: 0px;
+    background-color: #002366;
+    border-color: #002366;
+    color: white;
+    z-index: 10;
+}
+
+.row-top {
+    display: flex;
+    gap: 30px;
+    margin-bottom: 30px;
+}
+
+.col-left,
+.col-right {
+    flex: 1;
+}
+
+/* ========================================================= */
+/* MATCH COUNT TABLE INPUTS TO TOP TABLE INPUTS (120px)      */
+/* ========================================================= */
+
+.count-input,
+.total-input {
+    width: 120px;     /* SAME SIZE AS DAILY + REMAINING AMOUNT TABLES */
+    height: 26px;
+    padding: 2px 4px;
+}
+
+/* ========================================================= */
+/* MAKE COUNT TABLES SHORTER IN HEIGHT                       */
+/* ========================================================= */
+
+.count-table td,
+.count-table th {
+    padding: 2px 4px;
+    height: 22px;
+    line-height: 22px;
+}
+
+.count-table input {
+    height: 22px;
+    padding: 0;
+}
+
+/* ========================================================= */
+/* SIDE-BY-SIDE COUNT TABLES (4 COLUMNS)                     */
+/* ========================================================= */
+
+.four-col-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* ========================================================= */
+/* TOP ROW TABLE WIDTH FIX                                   */
+/* ========================================================= */
+
+.takings-table,
+.remaining-table {
+    width: 50%;
+    max-width: 300px;
+    margin: 0 auto;
+}
+
+.short-input,
+.daily-input,
+.daily-full-amount,
+.footer-box {
+    width: 120px;     /* MATCHING WIDTH */
+    height: 26px;
+    padding: 2px 4px;
+}
+
+.money-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.takings-table thead th {
+    padding: 6px 4px;
+    font-size: 0.9rem;
+}
+
+.footer-cell {
+    padding: 6px 4px;
+    font-size: 0.9rem;
+}
+
+.remaining-table td {
+    padding: 4px 6px;
+}
+
+.remaining-table input {
+    width: 120px;     /* MATCHING WIDTH */
+    height: 26px;
+    padding: 2px 4px;
+}
+
+.footer-spacer td {
+  height: 0px; /* or whatever matches your row spacing */
+}
+
+</style>
+
+<!-- ======================================= -->
+<!--        FULL AMOUNT COUNT TABLE          -->
+<!-- ======================================= -->
+
+
+<div class="four-col-grid">
+  <div class="col" id="fullColumn">
+    <h2>Full Amount Count</h2>
+    <table class="count-table" id="fullAmountTable">
+      <thead>
+        <tr>
+          <th>Denom</th>
+          <th>Count</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- your table rows exactly as you provided -->
+        <tr>
+          <td>£50</td>
+          <td><input type="number" class="count-input" id="denom50Count" min="0"></td>
+          <td><div class="money-wrapper"><span class="currency-symbol">£</span><input type="text" class="total-input" id="denom50Total" readonly value="0.00"></div></td>
+        </tr>
+        <tr>
+          <td>£20</td>
+          <td><input type="number" class="count-input" id="denom20Count" min="0"></td>
+          <td><div class="money-wrapper"><span class="currency-symbol">£</span><input type="text" class="total-input" id="denom20Total" readonly value="0.00"></div></td>
+        </tr>
+        <tr>
+          <td>£10</td>
+          <td><input type="number" class="count-input" id="denom10Count" min="0"></td>
+          <td><div class="money-wrapper"><span class="currency-symbol">£</span><input type="text" class="total-input" id="denom10Total" readonly value="0.00"></div></td>
+        </tr>
+        <tr>
+          <td>£5</td>
+          <td><input type="number" class="count-input" id="denom5Count" min="0"></td>
+          <td><div class="money-wrapper"><span class="currency-symbol">£</span><input type="text" class="total-input" id="denom5Total" readonly value="0.00"></div></td>
+        </tr>
+        <tr>
+          <td>£2</td>
+          <td><input type="number" class="count-input" id="denom2Count" min="0"></td>
+          <td><div class="money-wrapper"><span class="currency-symbol">£</span><input type="text" class="total-input" id="denom2Total" readonly value="0.00"></div></td>
+        </tr>
+        <tr>
+          <td>£1</td>
+          <td><input type="number" class="count-input" id="denom1Count" min="0"></td>
+          <td><div class="money-wrapper"><span class="currency-symbol">£</span><input type="text" class="total-input" id="denom1Total" readonly value="0.00"></div></td>
+        </tr>
+        <tr>
+          <td>50p</td>
+          <td><input type="number" class="count-input" id="denom50pCount" min="0"></td>
+          <td><div class="money-wrapper"><span class="currency-symbol">£</span><input type="text" class="total-input" id="denom50pTotal" readonly value="0.00"></div></td>
+        </tr>
+        <tr>
+          <td>20p</td>
+          <td><input type="number" class="count-input" id="denom20pCount" min="0"></td>
+          <td><div class="money-wrapper"><span class="currency-symbol">£</span><input type="text" class="total-input" id="denom20pTotal" readonly value="0.00"></div></td>
+        </tr>
+        <tr>
+          <td>10p</td>
+          <td><input type="number" class="count-input" id="denom10pCount" min="0"></td>
+          <td><div class="money-wrapper"><span class="currency-symbol">£</span><input type="text" class="total-input" id="denom10pTotal" readonly value="0.00"></div></td>
+        </tr>
+        <tr>
+          <td>5p</td>
+          <td><input type="number" class="count-input" id="denom5pCount" min="0"></td>
+          <td><div class="money-wrapper"><span class="currency-symbol">£</span><input type="text" class="total-input" id="denom5pTotal" readonly value="0.00"></div></td>
+        </tr>
+        <tr>
+          <td>2p</td>
+          <td><input type="number" class="count-input" id="denom2pCount" min="0"></td>
+          <td><div class="money-wrapper"><span class="currency-symbol">£</span><input type="text" class="total-input" id="denom2pTotal" readonly value="0.00"></div></td>
+        </tr>
+        <tr>
+          <td>1p</td>
+          <td><input type="number" class="count-input" id="denom1pCount" min="0"></td>
+          <td><div class="money-wrapper"><span class="currency-symbol">£</span><input type="text" class="total-input" id="denom1pTotal" readonly value="0.00"></div></td>
+        </tr>
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="2" class="footer-label">Full Amount Total</td>
+          <td>
+            <div class="money-wrapper">
+              <span class="currency-symbol">£</span>
+              <input type="number" id="grandTotal" class="total-input" readonly value="0.00" step="0.01">
+            </div>
+          </td>
+        </tr>
+        <tr class="footer-spacer"><td colspan="1"></td></tr>
+      </tfoot>
+    </table>
+  </div>
+
+
+<!-- ======================================= -->
+<!--                 FLOAT COUNT             -->
+<!-- ======================================= -->
+
+<div class="col" id="floatColumn">
+  <h2>Float Count</h2>
+  <table class="count-table" id="floatAmountTable">
+    <thead>
+      <tr>
+        <th>Denom</th>
+        <th>Count</th>
+        <th>Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>£50</td>
+        <td><input type="number" class="count-input" id="float50Count" min="0"></td>
+        <td><div class="money-wrapper"><span class="currency-symbol">£</span><input type="text" class="total-input" id="float50Total" readonly value="0.00"></div></td>
+      </tr>
+      <tr>
+        <td>£20</td>
+        <td><input type="number" class="count-input" id="float20Count" min="0"></td>
+        <td><div class="money-wrapper"><span class="currency-symbol">£</span><input type="text" class="total-input" id="float20Total" readonly value="0.00"></div></td>
+      </tr>
+      <tr>
+        <td>£10</td>
+        <td><input type="number" class="count-input" id="float10Count" min="0"></td>
+        <td><div class="money-wrapper"><span class="currency-symbol">£</span><input type="text" class="total-input" id="float10Total" readonly value="0.00"></div></td>
+      </tr>
+      <tr>
+        <td>£5</td>
+        <td><input type="number" class="count-input" id="float5Count" min="0"></td>
+        <td><div class="money-wrapper"><span class="currency-symbol">£</span><input type="text" class="total-input" id="float5Total" readonly value="0.00"></div></td>
+      </tr>
+      <tr>
+        <td>£2</td>
+        <td><input type="number" class="count-input" id="float2Count" min="0"></td>
+        <td><div class="money-wrapper"><span class="currency-symbol">£</span><input type="text" class="total-input" id="float2Total" readonly value="0.00"></div></td>
+      </tr>
+      <tr>
+        <td>£1</td>
+        <td><input type="number" class="count-input" id="float1Count" min="0"></td>
+        <td><div class="money-wrapper"><span class="currency-symbol">£</span><input type="text" class="total-input" id="float1Total" readonly value="0.00"></div></td>
+      </tr>
+      <tr>
+        <td>50p</td>
+        <td><input type="number" class="count-input" id="float50pCount" min="0"></td>
+        <td><div class="money-wrapper"><span class="currency-symbol">£</span><input type="text" class="total-input" id="float50pTotal" readonly value="0.00"></div></td>
+      </tr>
+      <tr>
+        <td>20p</td>
+        <td><input type="number" class="count-input" id="float20pCount" min="0"></td>
+        <td><div class="money-wrapper"><span class="currency-symbol">£</span><input type="text" class="total-input" id="float20pTotal" readonly value="0.00"></div></td>
+      </tr>
+      <tr>
+        <td>10p</td>
+        <td><input type="number" class="count-input" id="float10pCount" min="0"></td>
+        <td><div class="money-wrapper"><span class="currency-symbol">£</span><input type="text" class="total-input" id="float10pTotal" readonly value="0.00"></div></td>
+      </tr>
+      <tr>
+        <td>5p</td>
+        <td><input type="number" class="count-input" id="float5pCount" min="0"></td>
+        <td><div class="money-wrapper"><span class="currency-symbol">£</span><input type="text" class="total-input" id="float5pTotal" readonly value="0.00"></div></td>
+      </tr>
+      <tr>
+        <td>2p</td>
+        <td><input type="number" class="count-input" id="float2pCount" min="0"></td>
+        <td><div class="money-wrapper"><span class="currency-symbol">£</span><input type="text" class="total-input" id="float2pTotal" readonly value="0.00"></div></td>
+      </tr>
+      <tr>
+        <td>1p</td>
+        <td><input type="number" class="count-input" id="float1pCount" min="0"></td>
+        <td><div class="money-wrapper"><span class="currency-symbol">£</span><input type="text" class="total-input" id="float1pTotal" readonly value="0.00"></div></td>
+      </tr>
+    </tbody>
+    <tfoot>
+      <tr>
+        <td colspan="2" class="footer-label">Float Total</td>
+        <td>
+          <div class="money-wrapper">
+            <span class="currency-symbol">£</span>
+            <input type="number" id="floatTotal" class="total-input" readonly value="0.00" step="0.01">
+          </div>
+        </td>
+      </tr>
+      <tr class="footer-spacer"><td colspan="1"></td></tr>
+    </tfoot>
+  </table>
+</div>
+
+
+<!-- ======================================= -->
+<!--                 TIPS COUNT              -->
+<!-- ======================================= -->
+
+<div class="col" id="tipsColumn">
+  <h2>Tips Count</h2>
+  <table class="count-table" id="tipsAmountTable">
+    <thead>
+      <tr>
+        <th>Denom</th>
+        <th>Count</th>
+        <th>Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>£50</td>
+        <td><input type="number" class="count-input" id="tips50Count" min="0"></td>
+        <td><div class="money-wrapper"><span class="currency-symbol">£</span>
+            <input type="text" class="total-input" id="tips50Total" readonly value="0.00"></div></td>
+      </tr>
+      <tr>
+        <td>£20</td>
+        <td><input type="number" class="count-input" id="tips20Count" min="0"></td>
+        <td><div class="money-wrapper"><span class="currency-symbol">£</span>
+            <input type="text" class="total-input" id="tips20Total" readonly value="0.00"></div></td>
+      </tr>
+      <tr>
+        <td>£10</td>
+        <td><input type="number" class="count-input" id="tips10Count" min="0"></td>
+        <td><div class="money-wrapper"><span class="currency-symbol">£</span>
+            <input type="text" class="total-input" id="tips10Total" readonly value="0.00"></div></td>
+      </tr>
+      <tr>
+        <td>£5</td>
+        <td><input type="number" class="count-input" id="tips5Count" min="0"></td>
+        <td><div class="money-wrapper"><span class="currency-symbol">£</span>
+            <input type="text" class="total-input" id="tips5Total" readonly value="0.00"></div></td>
+      </tr>
+      <tr>
+        <td>£2</td>
+        <td><input type="number" class="count-input" id="tips2Count" min="0"></td>
+        <td><div class="money-wrapper"><span class="currency-symbol">£</span>
+            <input type="text" class="total-input" id="tips2Total" readonly value="0.00"></div></td>
+      </tr>
+      <tr>
+        <td>£1</td>
+        <td><input type="number" class="count-input" id="tips1Count" min="0"></td>
+        <td><div class="money-wrapper"><span class="currency-symbol">£</span>
+            <input type="text" class="total-input" id="tips1Total" readonly value="0.00"></div></td>
+      </tr>
+      <tr>
+        <td>50p</td>
+        <td><input type="number" class="count-input" id="tips50pCount" min="0"></td>
+        <td><div class="money-wrapper"><span class="currency-symbol">£</span>
+            <input type="text" class="total-input" id="tips50pTotal" readonly value="0.00"></div></td>
+      </tr>
+      <tr>
+        <td>20p</td>
+        <td><input type="number" class="count-input" id="tips20pCount" min="0"></td>
+        <td><div class="money-wrapper"><span class="currency-symbol">£</span>
+            <input type="text" class="total-input" id="tips20pTotal" readonly value="0.00"></div></td>
+      </tr>
+      <tr>
+        <td>10p</td>
+        <td><input type="number" class="count-input" id="tips10pCount" min="0"></td>
+        <td><div class="money-wrapper"><span class="currency-symbol">£</span>
+            <input type="text" class="total-input" id="tips10pTotal" readonly value="0.00"></div></td>
+      </tr>
+      <tr>
+        <td>5p</td>
+        <td><input type="number" class="count-input" id="tips5pCount" min="0"></td>
+        <td><div class="money-wrapper"><span class="currency-symbol">£</span>
+            <input type="text" class="total-input" id="tips5pTotal" readonly value="0.00"></div></td>
+      </tr>
+      <tr>
+        <td>2p</td>
+        <td><input type="number" class="count-input" id="tips2pCount" min="0"></td>
+        <td><div class="money-wrapper"><span class="currency-symbol">£</span>
+            <input type="text" class="total-input" id="tips2pTotal" readonly value="0.00"></div></td>
+      </tr>
+      <tr>
+        <td>1p</td>
+        <td><input type="number" class="count-input" id="tips1pCount" min="0"></td>
+        <td><div class="money-wrapper"><span class="currency-symbol">£</span>
+            <input type="text" class="total-input" id="tips1pTotal" readonly value="0.00"></div></td>
+      </tr>
+    </tbody>
+    <tfoot>
+      <tr>
+        <td colspan="2" class="footer-label">Tips Total</td>
+        <td>
+          <div class="money-wrapper">
+            <span class="currency-symbol">£</span>
+            <input type="number" id="tipsTotal" class="total-input" readonly value="0.00" step="0.01">
+          </div>
+        </td>
+      </tr>
+      <tr class="footer-spacer"><td colspan="1"></td></tr>
+    </tfoot>
+  </table>
+</div>
+
+<!-- ======================================= -->
+<!--              TAKINGS COUNT TABLE           -->
+<!-- ======================================= -->
+
+<div class="col" id="takingsColumn">
+  <h2>Takings Count</h2>
+  <table class="count-table" id="takingsAmountTable">
+    <thead>
+      <tr>
+        <th>Denom</th>
+        <th>Count</th>
+        <th>Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>£50</td>
+        <td><input type="number" class="count-input" id="takings50Count" min="0"></td>
+        <td><div class="money-wrapper"><span class="currency-symbol">£</span>
+            <input type="text" class="total-input" id="takings50Total" readonly value="0.00"></div></td>
+      </tr>
+      <tr>
+        <td>£20</td>
+        <td><input type="number" class="count-input" id="takings20Count" min="0"></td>
+        <td><div class="money-wrapper"><span class="currency-symbol">£</span>
+            <input type="text" class="total-input" id="takings20Total" readonly value="0.00"></div></td>
+      </tr>
+      <tr>
+        <td>£10</td>
+        <td><input type="number" class="count-input" id="takings10Count" min="0"></td>
+        <td><div class="money-wrapper"><span class="currency-symbol">£</span>
+            <input type="text" class="total-input" id="takings10Total" readonly value="0.00"></div></td>
+      </tr>
+      <tr>
+        <td>£5</td>
+        <td><input type="number" class="count-input" id="takings5Count" min="0"></td>
+        <td><div class="money-wrapper"><span class="currency-symbol">£</span>
+            <input type="text" class="total-input" id="takings5Total" readonly value="0.00"></div></td>
+      </tr>
+      <tr>
+        <td>£2</td>
+        <td><input type="number" class="count-input" id="takings2Count" min="0"></td>
+        <td><div class="money-wrapper"><span class="currency-symbol">£</span>
+            <input type="text" class="total-input" id="takings2Total" readonly value="0.00"></div></td>
+      </tr>
+      <tr>
+        <td>£1</td>
+        <td><input type="number" class="count-input" id="takings1Count" min="0"></td>
+        <td><div class="money-wrapper"><span class="currency-symbol">£</span>
+            <input type="text" class="total-input" id="takings1Total" readonly value="0.00"></div></td>
+      </tr>
+      <tr>
+        <td>50p</td>
+        <td><input type="number" class="count-input" id="takings50pCount" min="0"></td>
+        <td><div class="money-wrapper"><span class="currency-symbol">£</span>
+            <input type="text" class="total-input" id="takings50pTotal" readonly value="0.00"></div></td>
+      </tr>
+      <tr>
+        <td>20p</td>
+        <td><input type="number" class="count-input" id="takings20pCount" min="0"></td>
+        <td><div class="money-wrapper"><span class="currency-symbol">£</span>
+            <input type="text" class="total-input" id="takings20pTotal" readonly value="0.00"></div></td>
+      </tr>
+      <tr>
+        <td>10p</td>
+        <td><input type="number" class="count-input" id="takings10pCount" min="0"></td>
+        <td><div class="money-wrapper"><span class="currency-symbol">£</span>
+            <input type="text" class="total-input" id="takings10pTotal" readonly value="0.00"></div></td>
+      </tr>
+      <tr>
+        <td>5p</td>
+        <td><input type="number" class="count-input" id="takings5pCount" min="0"></td>
+        <td><div class="money-wrapper"><span class="currency-symbol">£</span>
+            <input type="text" class="total-input" id="takings5pTotal" readonly value="0.00"></div></td>
+      </tr>
+      <tr>
+        <td>2p</td>
+        <td><input type="number" class="count-input" id="takings2pCount" min="0"></td>
+        <td><div class="money-wrapper"><span class="currency-symbol">£</span>
+            <input type="text" class="total-input" id="takings2pTotal" readonly value="0.00"></div></td>
+      </tr>
+      <tr>
+        <td>1p</td>
+        <td><input type="number" class="count-input" id="takings1pCount" min="0"></td>
+        <td><div class="money-wrapper"><span class="currency-symbol">£</span>
+            <input type="text" class="total-input" id="takings1pTotal" readonly value="0.00"></div></td>
+      </tr>
+    </tbody>
+	<tfoot>
+	  <!-- First total row -->
+	  <tr>
+		<td colspan="2" class="footer-label">Takings Total</td>
+		<td>
+		  <div class="money-wrapper">
+			<span class="currency-symbol">£</span>
+			<input type="number" id="takingsTotal" class="total-input" readonly value="0.00" step="0.01">
+		  </div>
+		</td>
+	  </tr>
+	  <!-- Spacer row for consistent gap -->
+	  <tr class="footer-spacer"><td colspan="1"></td></tr>
+
+	  <!-- Second total row -->
+	  <tr>
+		<td colspan="2" class="footer-label">Final Takings Count</td>
+		<td>
+		  <div class="money-wrapper">
+			<span class="currency-symbol">£</span>
+			<input type="number" id="takingsCountTotal" class="total-input" readonly value="0.00" step="0.01">
+		  </div>
+		</td>
+	  </tr>
+	  <!-- Spacer row for consistent gap at the bottom -->
+	  <tr class="footer-spacer"><td colspan="1"></td></tr>
+	</tfoot>
+	</table>
+</div>
+</div>
+
+<!-- ======================================= -->
+<!--            ANNULLED TABLE             -->
+<!-- ======================================= -->
+
+<style>
+.annulled-section {
+display:block;
+width:100%;
+margin-top:50px;
+}
+
+.annulled-table {
+display:table;
+width:100%;
+border-collapse:collapse;
+}
+
+.annulled-table th,
+.annulled-table td {
+border:1px solid #ccc;
+padding:6px;
+background:#fff;
+}
+
+.annulled-table th {
+background:#e0e0e0;
+font-weight:bold;
+}
+
+.annulled-table input {
+width:100%;
+box-sizing:border-box;
+}
+
+.annulled-table .money-wrapper input {
+padding-left:20px;
+text-align:right;
+}
+
+.annulled-ticket-desc {
+width:100%;
+min-width:250px;
+}
+
+button {
+background-color:#002366;
+color:#fff;
+border:none;
+padding:8px 14px;
+font-size:16px;
+font-weight:bold;
+border-radius:4px;
+cursor:pointer;
+}
+
+button:hover {
+background-color:#002266;
+}
+</style>
+
+<div class="annulled-row" style="display:block; width:50%; margin-top:40px;">
+
+<h2>Annulled Tickets</h2>
+
+<table id="annulledTicketsTable" class="annulled-table" style="width:100%; table-layout:fixed;">
+    <thead>
+        <tr>
+            <th style="width:25%;">Ticket No</th>
+            <th style="width:45%;">Description</th>
+            <th style="width:20%;">Price</th>
+            <th style="width:10%;"></th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr>
+            <td><input type="text" class="annulled-ticket-no"></td>
+            <td><input type="text" class="annulled-ticket-desc"></td>
+            <td>
+                <div class="money-wrapper">
+                    <span class="currency-symbol">£</span>
+                    <input type="number" step="0.01" class="annulled-ticket-price">
+                </div>
+            </td>
+            <td class="delete-cell"><span class="delete-bin">🗑️</span></td>
+        </tr>
+    </tbody>
+
+    <tfoot>
+        <tr>
+            <td colspan="2" class="footer-label">Total Annulled Amount</td>
+            <td>
+                <div class="money-wrapper">
+                    <span class="currency-symbol">£</span>
+                    <input 
+                        type="number"
+                        id="annulledTotal"
+                        class="total-input"
+                        readonly
+                        value="0.00"
+                        step="0.01"
+                    >
+                </div>
+            </td>
+        </tr>
+    </tfoot>
+</table>
+
+<button id="addAnnulledRowBtn">Add Row</button>
+
+
+<button id="saveTakingsBtn" type="button" style="margin-top:20px; display:block;">
+    Save Today's Takings
+</button>
+
+</div>
+
+{% endblock %}
+{% block scripts %}
+<script>
+console.log("SCRIPT STARTED");
+/* ===========================================================
+             START OF MAIN SCRIPT 
+=========================================================== */
+	
+window.addEventListener("DOMContentLoaded", () => {
+
+console.log("ENTRY DATE FIELD:", document.getElementById("entry_date"));
+
+const entry = JSON.parse(`{{ entry|tojson|safe }}`);
+console.log("EDIT ENTRY:", entry);   // ✔ NOW entry exists
+
+
+
+    // ============================
+    // BASIC FIELDS
+    // ============================
+    document.getElementById("entry_date").value = entry.entry_date;
+    document.getElementById("dailyTakingsDay").value = entry.day;
+
+    // ============================
+    // TOTALS
+    // ============================
+    document.getElementById("grandTotal").value = entry.full_amount_total;
+    document.getElementById("floatTotal").value = entry.float_total;
+    document.getElementById("tipsTotal").value = entry.tips_total;
+    document.getElementById("takingsTotal").value = entry.takings_total;
+
+    document.getElementById("remainingFloatAmount").value = entry.remaining_float;
+    document.getElementById("fullAmountShortfall").value = entry.full_amount_diff;
+    document.getElementById("finalInTotal").value = entry.final_takings;
+
+    // ============================
+    // FULL AMOUNT TABLE
+    // ============================
+    entry.full_amount_count.forEach(item => {
+        const key = Object.keys(denoms).find(k => denoms[k] === item.denom);
+        if (!key) return;
+        document.getElementById(`denom${key}Count`).value = item.count;
+        document.getElementById(`denom${key}Total`).value = item.total;
+    });
+
+    // ============================
+    // FLOAT TABLE
+    // ============================
+    entry.float_amount_count.forEach(item => {
+        const key = Object.keys(denoms).find(k => Number(denoms[k]) === Number(item.denom));
+        if (!key) return;
+        document.getElementById(`float${key}Count`).value = item.count;
+        document.getElementById(`float${key}Total`).value = item.total;
+    });
+
+    // ============================
+    // TIPS TABLE
+    // ============================
+    entry.tips_amount_count.forEach(item => {
+        const key = Object.keys(denoms).find(k => denoms[k] === item.denom);
+        if (!key) return;
+        document.getElementById(`tips${key}Count`).value = item.count;
+        document.getElementById(`tips${key}Total`).value = item.total;
+    });
+
+    // ============================
+    // TAKINGS COUNT TABLE
+    // ============================
+    entry.takings_amount_count.forEach(item => {
+        const key = Object.keys(denoms).find(k => denoms[k] === item.denom);
+        if (!key) return;
+        document.getElementById(`takings${key}Count`).value = item.count;
+        document.getElementById(`takings${key}Total`).value = item.total;
+    });
+
+    /* ============================
+       DAILY BREAKDOWN
+    ============================ */
+    entry.daily_weekly_takings_data.forEach((row, index) => {
+        const tableRow = document.querySelector(`#dailyTakingsTable tbody tr:nth-child(${index+1})`);
+        if (!tableRow) return;
+
+        const inputs = tableRow.querySelectorAll("input.daily-input, input.daily-input-extra");
+
+        if (inputs[0]) inputs[0].value = row.bus1;
+        if (inputs[1]) inputs[1].value = row.bus2;
+        if (inputs[2]) inputs[2].value = row.bus3;
+    });
+
+    /* ============================
+       ANNULLED TICKETS LOADER
+    ============================ */
+    const annulledBody = document.querySelector("#annulledTicketsTable tbody");
+    annulledBody.innerHTML = "";
+
+    const annulledList = entry.annulled || [];
+
+    annulledList.forEach(item => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+            <td><input type="text" class="annulled-ticket-no" value="${item.ticket_no}"></td>
+            <td><input type="text" class="annulled-ticket-desc" value="${item.description}"></td>
+            <td>
+                <div class="money-wrapper">
+                    <span class="currency-symbol">£</span>
+                    <input type="number" step="0.01" class="annulled-ticket-price" value="${item.price}">
+                </div>
+            </td>
+            <td class="delete-cell"><span class="delete-bin">&#128465;</span></td>
+        `;
+        annulledBody.appendChild(row);
+    });
+
+	/* ============================
+	   // RUN ENGINE ON LOADED DATA
+	============================ */
+	updateFullAmount();
+	updateFloatTotal();
+	updateTipsTable();
+	updateDailyTakings();
+	updateTakingsCountTable();   // ⭐ REQUIRED
+	updateTakingsEngine();
+	updateAnnulledTotal();
+	updateExtras();
+
+
+}); // ← CORRECTLY closes the load event
+
+
+
+
+/* =====================================================
+		DENOMINATIONS (your original stable list)
+===================================================== */
+const denoms = {
+    "50": 50.00,
+    "20": 20.00,
+    "10": 10.00,
+    "5": 5.00,
+	"2": 2.00,
+    "1": 1.00,
+    "50p": 0.50,
+    "20p": 0.20,
+    "10p": 0.10,
+    "5p": 0.05,
+    "2p": 0.02,
+    "1p": 0.01
+};
+
+
+window.takingsData = {};
+/* =====================================================
+   FULL AMOUNT TABLE
+===================================================== */
+function updateFullAmount() {
+    let grand = 0;
+
+    for (const key in denoms) {
+        const count = Number(document.getElementById(`denom${key}Count`)?.value) || 0;
+        const total = count * denoms[key];
+
+        const totalBox = document.getElementById(`denom${key}Total`);
+        if (totalBox) totalBox.value = total.toFixed(2);
+
+        grand += total;
+    }
+
+    document.getElementById("grandTotal").value = grand.toFixed(2);
+    updateTakingsEngine();
+    updateExtras();
+
+    // CORRECT PLACE FOR ARRAY BUILDING
+    window.takingsData.full_amount_count = [];
+
+    for (const key in denoms) {
+        const count = Number(document.getElementById(`denom${key}Count`)?.value) || 0;
+        const total = count * denoms[key];
+
+        window.takingsData.full_amount_count.push({
+            denom: denoms[key],
+            count: count,
+            total: total.toFixed(2)
+        });
+    }
+} // ← function ends here at indent 0
+
+// EVENT LISTENERS (MUST BE OUTSIDE THE FUNCTION)
+Object.keys(denoms).forEach(key => {
+    const box = document.getElementById(`denom${key}Count`);
+    if (box) box.addEventListener("input", updateFullAmount);
+});
+
+// INITIALISE
+updateFullAmount();
+
+/* =====================================================
+   FLOAT TABLE
+===================================================== */
+function updateFloatTotal() {
+    let floatTotal = 0;
+
+    for (const key in denoms) {
+        const count = Number(document.getElementById(`float${key}Count`)?.value) || 0;
+        const total = count * denoms[key];
+
+        const totalBox = document.getElementById(`float${key}Total`);
+        if (totalBox) totalBox.value = total.toFixed(2);
+
+        floatTotal += total;
+    }
+
+    document.getElementById("floatTotal").value = floatTotal.toFixed(2);
+
+    updateFloatArray();       // <-- NEW
+    updateTakingsEngine();
+    updateExtras();
+}
+
+
+// ===============================
+// NEW: Proper float array builder
+// ===============================
+function updateFloatArray() {
+    window.takingsData.float_amount_count = [];
+
+    for (const key in denoms) {
+        const count = Number(document.getElementById(`float${key}Count`)?.value) || 0;
+        const total = count * denoms[key];
+
+        window.takingsData.float_amount_count.push({
+            denom: denoms[key],          // numeric denom
+            count: count,
+            total: total.toFixed(2)
+        });
+    }
+}
+
+
+// ===============================
+// Attach listeners correctly
+// ===============================
+Object.keys(denoms).forEach(key => {
+    const box = document.getElementById(`float${key}Count`);
+    if (box) {
+        box.addEventListener("input", updateFloatTotal);
+    }
+});
+
+/* =====================================================
+   TAKINGS ENGINE (Full − Float − Tips)
+   ⭐ Option A: Auto‑Takings only (not editable)
+===================================================== */
+function updateTakingsEngine() {
+    let takingsGrand = 0;
+
+    for (const key in denoms) {
+        const countBox = document.getElementById(`takings${key}Count`);
+        const totalBox = document.getElementById(`takings${key}Total`);
+
+        const count = Number(countBox?.value) || 0;
+        const total = count * denoms[key];
+
+        if (totalBox) totalBox.value = total.toFixed(2);
+
+        takingsGrand += total;
+    }
+
+    document.getElementById("takingsTotal").value = takingsGrand.toFixed(2);
+
+    const dailyTotal = Number(document.getElementById("dailyTakingsTotal")?.value) || 0;
+    const final = Math.min(takingsGrand, dailyTotal);
+
+    document.getElementById("takingsCountTotal").value = final.toFixed(2);
+}
+
+
+/* =====================================================
+   REMAINING / FINAL IN / SHORTFALL
+===================================================== */
+function updateExtras() {
+
+    // ⭐ READ INPUTS SAFELY
+    const full = parseFloat(document.getElementById("grandTotal")?.value) || 0;
+    const takings = parseFloat(document.getElementById("dailyTakingsTotal")?.value) || 0;
+    const float = parseFloat(document.getElementById("floatTotal")?.value) || 0;
+
+    // ⭐ OUTPUT FIELDS
+    const remainingFloatBox = document.getElementById("remainingFloatAmount");
+    const tipsBox = document.getElementById("tipsAmount");
+    const floatShortfallBox = document.getElementById("floatShortfall");
+    const finalTakingsBox = document.getElementById("finalInTotal");
+
+    // ⭐ REMAINING FLOAT AMOUNT (always float total)
+    remainingFloatBox.value = float.toFixed(2);
+
+    // ⭐ TIPS — full minus takings minus float
+    const tips = full - takings - float;
+
+    if (tips > 0) {
+        tipsBox.value = tips.toFixed(2);
+        tipsBox.style.color = "green";
+        tipsBox.style.fontWeight = "bold";
+    } else {
+        tipsBox.value = "";
+        tipsBox.style.color = "";
+        tipsBox.style.fontWeight = "";
+    }
+
+    // ⭐ FLOAT SHORTFALL — full minus takings (only show when negative)
+    const floatShortfall = full - takings;
+
+    if (takings === 0 || floatShortfall >= 0) {
+        floatShortfallBox.value = "";
+        floatShortfallBox.style.color = "";
+        floatShortfallBox.style.fontWeight = "";
+    } else {
+        floatShortfallBox.value = floatShortfall.toFixed(2);
+        floatShortfallBox.style.color = "red";
+        floatShortfallBox.style.fontWeight = "bold";
+    }
+
+    // ⭐ FULL AMOUNT +/- — full amount count minus float count
+    const fullShortfallBox = document.getElementById("fullAmountShortfall");
+
+    // Read updated totals
+    const fullAmount = parseFloat(document.getElementById("grandTotal")?.value) || 0;
+    const floatAmount = parseFloat(document.getElementById("floatTotal")?.value) || 0;
+
+    // Calculate difference
+    const fullDiff = fullAmount - floatAmount;
+
+    // Show value
+    fullShortfallBox.value = fullDiff.toFixed(2);
+
+    // Style
+    if (fullDiff < 0) {
+        fullShortfallBox.style.color = "red";   // shortfall
+        fullShortfallBox.style.fontWeight = "bold";
+    } else {
+        fullShortfallBox.style.color = "green"; // surplus
+        fullShortfallBox.style.fontWeight = "bold";
+    }
+
+    // ⭐ FINAL TAKINGS AMOUNT — takings only
+    finalTakingsBox.value = takings.toFixed(2);
+    finalTakingsBox.style.color = "green";
+    finalTakingsBox.style.fontWeight = "bold";
+
+	window.takingsData.full_amount_total = full.toFixed(2);
+	window.takingsData.float_total = float.toFixed(2);
+	window.takingsData.tips_total = tips > 0 ? tips.toFixed(2) : "0.00";
+	window.takingsData.takings_total = takings.toFixed(2);
+	window.takingsData.remaining_float = float.toFixed(2);
+	window.takingsData.full_amount_diff = fullDiff.toFixed(2);
+	window.takingsData.final_takings = takings.toFixed(2);
+
+
+    // ⭐ Correct: actual date of entry
+    window.takingsData.entry_date = document.getElementById("entry_date").value;
+
+    // ⭐ Correct: day selected in the dropdown
+    window.takingsData.day = document.getElementById("dailyTakingsDay").value;
+}
+
+
+
+    
+
+/* =====================================================
+   DAILY TAKINGS (your original stable logic)
+===================================================== */
+function updateDailyTakings() {
+    let total = 0;
+
+    document.querySelectorAll('#dailyTakingsTable tbody tr').forEach(row => {
+        let rowTotal = 0;
+
+        row.querySelectorAll('.daily-input').forEach(input => {
+            rowTotal += parseFloat(input.value) || 0;
+        });
+
+        row.querySelectorAll('.daily-input-extra').forEach(input => {
+            rowTotal += parseFloat(input.value) || 0;
+        });
+
+        const fullAmountField = row.querySelector('.daily-full-amount');
+        if (fullAmountField) fullAmountField.value = rowTotal.toFixed(2);
+
+        total += rowTotal;
+    });
+
+    document.getElementById("dailyTakingsTotal").value = total.toFixed(2);
+
+    updateTakingsEngine();
+    updateExtras();
+}
+
+document.addEventListener("input", function(e) {
+    if (e.target.classList.contains("daily-input") ||
+        e.target.classList.contains("daily-input-extra")) {
+        updateDailyTakings();
+    }
+});
+
+updateDailyTakings();
+
+	
+/* =====================================================
+   TIPS TABLE
+===================================================== */
+function updateTipsTable() {
+    let tipsTotal = 0;
+
+    for (const key in denoms) {
+        const count = Number(document.getElementById(`tips${key}Count`)?.value) || 0;
+        const total = count * denoms[key];
+
+        const totalBox = document.getElementById(`tips${key}Total`);
+        if (totalBox) totalBox.value = total.toFixed(2);
+
+        tipsTotal += total;
+    }
+	
+	window.takingsData.tips_amount_count = [];
+
+	for (const key in denoms) {
+		const count = Number(document.getElementById(`tips${key}Count`)?.value) || 0;
+		const total = count * denoms[key];
+
+		window.takingsData.tips_amount_count.push({
+			denom: denoms[key],
+			count: count,
+			total: total.toFixed(2)
+		});
+	}
+
+
+    document.getElementById("tipsTotal").value = tipsTotal.toFixed(2);
+
+    updateTakingsEngine();
+    updateExtras();
+}
+
+/* =====================================================
+			TAKINGS COUNT TABLE
+===================================================== */
+function updateTakingsCountTable() {
+    let takingsTotal = 0;
+
+    // 1. Calculate takings totals
+    for (const key in denoms) {
+        const count = Number(document.getElementById(`takings${key}Count`)?.value) || 0;
+        const total = count * denoms[key];
+
+        const totalBox = document.getElementById(`takings${key}Total`);
+        if (totalBox) totalBox.value = total.toFixed(2);
+
+        takingsTotal += total;
+    }
+
+    // 2. Build takings count array (correct place)
+    window.takingsData.takings_amount_count = [];
+
+    for (const key in denoms) {
+        const count = Number(document.getElementById(`takings${key}Count`)?.value) || 0;
+        const total = count * denoms[key];
+
+        window.takingsData.takings_amount_count.push({
+            denom: denoms[key],
+            count: count,
+            total: total.toFixed(2)
+        });
+    }
+
+    // 3. Update takings total box
+    document.getElementById("takingsTotal").value = takingsTotal.toFixed(2);
+
+    // 4. Update engine + extras
+    updateTakingsEngine();
+    updateExtras();
+}
+
+
+/* =====================================================
+   TIPS TABLE EVENT LISTENERS
+===================================================== */
+Object.keys(denoms).forEach(key => {
+    const box = document.getElementById(`tips${key}Count`);
+    if (box) box.addEventListener("input", updateTipsTable);
+});
+
+
+/* ====================================================
+   TIPS COLUMN TOGGLE
+===================================================== */
+document.getElementById("toggleTipsBtn")?.addEventListener("click", function () {
+    const col = document.getElementById("tipsColumn");
+    const hidden = window.getComputedStyle(col).display === "none";
+
+    col.style.display = hidden ? "block" : "none";
+    this.textContent = hidden ? "Hide Tips Count" : "Add Tips Count";
+
+    updateTakingsEngine();
+    updateExtras();
+});
+
+	
+/* =====================================================
+   ANNULLED TICKETS
+===================================================== */
+function updateAnnulledTotal() {
+    let total = 0;
+    document.querySelectorAll(".annulled-ticket-price").forEach(input => {
+        total += parseFloat(input.value) || 0;
+    });
+    document.getElementById("annulledTotal").value = total.toFixed(2);
+}
+
+/* ⭐ MOVE THIS OUTSIDE — GLOBAL FUNCTION ⭐ */
+function collectAnnulledTickets() {
+    const rows = document.querySelectorAll("#annulledTicketsTable tbody tr");
+    const annulled = [];
+
+    rows.forEach(row => {
+        const ticket = row.querySelector(".annulled-ticket-no").value.trim();
+        const desc = row.querySelector(".annulled-ticket-desc").value.trim();
+        const price = parseFloat(row.querySelector(".annulled-ticket-price").value) || 0;
+
+        if (ticket !== "") {
+            annulled.push({
+                ticket_no: ticket,
+                description: desc,
+                price: price
+            });
+        }
+    });
+
+    window.takingsData.annulled = annulled;
+}
+
+document.getElementById("addAnnulledRowBtn").addEventListener("click", function() {
+    const tbody = document.querySelector("#annulledTicketsTable tbody");
+    const row = document.createElement("tr");
+
+    row.innerHTML = `
+        <td><input type="text" class="annulled-ticket-no"></td>
+        <td><input type="text" class="annulled-ticket-desc"></td>
+        <td>
+            <div class="money-wrapper">
+                <span class="currency-symbol">£</span>
+                <input type="number" step="0.01" class="annulled-ticket-price" value="0.00">
+            </div>
+        </td>
+        <td class="delete-cell"><span class="delete-bin">🗑️</span></td>
+    `;
+
+    tbody.appendChild(row);
+});
+
+document.addEventListener("input", function(e) {
+    if (e.target.classList.contains("annulled-ticket-price")) {
+        updateAnnulledTotal();
+    }
+});
+
+updateAnnulledTotal();
+
+/* =====================================================
+				DEFINE WEEK_START
+===================================================== */
+const entryDateInput = document.getElementById("entry_date");
+
+
+/* =====================================================
+   1. INITIALISE GLOBAL DATA OBJECT
+===================================================== */
+if (!window.takingsData) {
+    window.takingsData = {
+        full_amount_count: [],
+        float_amount_count: [],
+        tips_amount_count: [],
+        takings_amount_count: []
+    };
+}
+
+/* =====================================================
+   3. UPDATE FULL AMOUNT
+===================================================== */
+function updateFullAmount() {
+    let grand = 0;
+
+    // Update DOM totals
+    for (const key in denoms) {
+        const count = Number(document.getElementById(`denom${key}Count`)?.value) || 0;
+        const total = count * denoms[key];
+
+        const totalBox = document.getElementById(`denom${key}Total`);
+        if (totalBox) totalBox.value = total.toFixed(2);
+
+        grand += total;
+    }
+
+    // Update grand total in DOM
+    document.getElementById("grandTotal").value = grand.toFixed(2);
+
+    // Rebuild takingsData array
+    window.takingsData.full_amount_count = [];
+
+    for (const key in denoms) {
+        const count = Number(document.getElementById(`denom${key}Count`)?.value) || 0;
+        const total = count * denoms[key];
+
+        window.takingsData.full_amount_count.push({
+            denom: denoms[key],
+            count: count,
+            total: total.toFixed(2)
+        });
+    }
+
+    // Update takingsData total
+    window.takingsData.full_amount_total = grand.toFixed(2);
+
+    // Update extras
+    updateTakingsEngine();
+    updateExtras();
+}
+
+
+
+/* =====================================================
+   8. ATTACH EVENT LISTENERS
+===================================================== */
+document.querySelectorAll(".full-input").forEach(el => el.addEventListener("input", updateFullAmount));
+document.querySelectorAll(".float-input").forEach(el => el.addEventListener("input", updateFloatTotal));
+document.querySelectorAll(".tips-input").forEach(el => el.addEventListener("input", updateTipsTable));
+document.querySelectorAll(".takings-input").forEach(el => el.addEventListener("input", updateTakingsCountTable));
+
+
+/* =====================================================
+   FIX: MAP ENGINE OUTPUTS TO EDIT PAGE FIELDS
+===================================================== */
+function applyEditPageTotals() {
+
+    // These values come from your engine
+    const full = Number(window.takingsData.full_amount_total) || 0;
+    const float = Number(window.takingsData.float_total) || 0;
+    const tips = Number(window.takingsData.tips_total) || 0;
+    const takings = Number(window.takingsData.takings_total) || 0;
+
+    // EDIT PAGE ELEMENTS
+    const fullAmountCell = document.getElementById("edit_full_amount");
+    const finalTakingsCell = document.getElementById("edit_final_takings");
+    const finalInTotalCell = document.getElementById("edit_final_in_total");
+
+    if (fullAmountCell) fullAmountCell.textContent = "£" + full.toFixed(2);
+    if (finalTakingsCell) finalTakingsCell.textContent = "£" + (takings + tips).toFixed(2);
+    if (finalInTotalCell) finalInTotalCell.textContent = "£" + takings.toFixed(2);
+}
+
+/* =====================================================
+   FIX: FORCE TAKINGS ENGINE + EXTRAS TO UPDATE
+===================================================== */
+document.querySelectorAll(".full-input, .float-input, .tips-input, .takings-input")
+    .forEach(el => {
+        el.addEventListener("input", () => {
+            updateTakingsEngine();      // recalculates takings table
+            updateExtras();             // recalculates remaining/diff/final
+        });
+    });
+
+/* =====================================================
+   ADD ANOTHER DAILY TAKINGS COLUMN
+===================================================== */
+const addDailyBtn = document.getElementById("addDailyTakingsBtn");
+if (addDailyBtn) {
+  addDailyBtn.addEventListener("click", () => {
+    const table = document.getElementById("dailyTakingsTable");
+    const headerRow = table.querySelector("thead tr");
+
+    // Count columns
+    const totalCols = headerRow.children.length;
+    const fullAmountColIndex = totalCols - 1;
+
+    // Determine new column number
+    const newColNumber = fullAmountColIndex; // before Full Amount
+    const newLabel = newColNumber === 2
+      ? "Daily Takings 2 (£)"
+      : `Daily Takings ${newColNumber} (£)`;
+
+    // Insert new header BEFORE Full Amount
+    const newHeader = document.createElement("th");
+    newHeader.classList.add("daily-group");
+
+    // Label
+    const labelSpan = document.createElement("span");
+    labelSpan.textContent = newLabel;
+
+    // Bin button
+    const removeBtn = document.createElement("button");
+    removeBtn.textContent = "🗑";
+    removeBtn.classList.add("remove-col-btn");
+
+    // Attach click handler
+    removeBtn.addEventListener("click", () => {
+      removeDailyColumn(newHeader);
+    });
+
+    newHeader.appendChild(labelSpan);
+    newHeader.appendChild(removeBtn);
+
+    headerRow.insertBefore(newHeader, headerRow.children[fullAmountColIndex]);
+
+    // Insert new input cell BEFORE Full Amount in each row
+    table.querySelectorAll("tbody tr").forEach(row => {
+      const newCell = document.createElement("td");
+      const newInput = document.createElement("input");
+      newInput.type = "number";
+      newInput.step = "0.01";
+      newInput.classList.add("daily-input", "short-input");
+
+      // Match width of first Daily Takings column
+      const firstTakingsCell = row.querySelector(".daily-group");
+      if (firstTakingsCell) {
+        const style = window.getComputedStyle(firstTakingsCell);
+        newCell.style.width = style.width;
+      }
+
+      const wrapper = document.createElement("div");
+      wrapper.classList.add("money-wrapper");
+      const symbol = document.createElement("span");
+      symbol.classList.add("currency-symbol");
+      symbol.textContent = "£";
+
+      wrapper.appendChild(symbol);
+      wrapper.appendChild(newInput);
+      newCell.appendChild(wrapper);
+
+      row.insertBefore(newCell, row.children[fullAmountColIndex]);
+    });
+
+    // Update total row colspan so it sits under Full Amount
+    updateDailyTotalColspan();
+  });
+
+
+}
+
+/* =====================================================
+   REMOVE DAILY TAKINGS COLUMN
+===================================================== */
+function removeDailyColumn(headerCell) {
+  const table = document.getElementById("dailyTakingsTable");
+  const colIndex = Array.from(headerCell.parentNode.children).indexOf(headerCell);
+
+  headerCell.remove();
+
+  table.querySelectorAll("tbody tr").forEach(row => {
+    if (row.children[colIndex]) {
+      row.children[colIndex].remove();
+    }
+  });
+
+  updateDailyTotalColspan();
+}
+
+/* =====================================================
+   UPDATE TOTAL ROW COLSPAN
+===================================================== */
+function updateDailyTotalColspan() {
+  const table = document.getElementById("dailyTakingsTable");
+  const headerCols = table.querySelector("thead tr").children.length;
+  document.getElementById("dailyTakingsTotalCell").setAttribute("colspan", headerCols);
+}
+
+
+window.addEventListener("DOMContentLoaded", () => {
+
+  console.log("ENTRY DATE FIELD:", document.getElementById("entry_date"));
+
+  const entry = JSON.parse(`{{ entry|tojson|safe }}`);
+
+  console.log("EDIT ENTRY:", entry);
+
+  /* =====================================================
+     LOAD EXISTING ENTRY INTO EDIT PAGE
+  ====================================================== */ 
+  window.addEventListener("load", () => {
+    // put your existing load logic here:
+    // set entry_date, dailyTakingsDay, table values, then:
+    updateFullAmount();
+    updateFloatTotal();
+    updateTipsTable();
+    updateDailyTakings();
+    updateTakingsCountTable();
+    updateTakingsEngine();
+    updateExtras();
+  });
+  
+/* =====================================================
+   FINAL INITIAL RUN — REQUIRED FOR EDIT PAGE
+===================================================== */
+document.querySelectorAll(
+    ".daily-input, .daily-full-amount, .daily-float-amount, .daily-tips-amount, .daily-count-input, .count-input"
+).forEach(el => {
+    el.addEventListener("input", () => {
+        updateFullAmount();
+        updateFloatTotal();
+        updateTipsTable();
+        updateDailyTakings();
+        updateTakingsCountTable();
+        updateTakingsEngine();
+        updateExtras();
+    });
+});  
+
+/* =====================================================
+   SAVE BUTTON HANDLER — CLEAN, CORRECT, WORKING VERSION
+===================================================== */
+const saveBtn = document.getElementById("saveTakingsBtn");
+if (saveBtn) {
+  saveBtn.addEventListener("click", () => {
+
+    // 1. Update takings count + totals BEFORE saving
+    updateTakingsCountTable();
+
+    // 2. Collect annulled tickets
+    collectAnnulledTickets();
+
+    // 3. Safely grab required fields
+    const entryDateEl = document.getElementById("entry_date");
+    const dayEl = document.getElementById("dailyTakingsDay");
+
+    const data = {
+      entry_date: entryDateEl ? entryDateEl.value : null,
+      day: dayEl ? dayEl.value : null,
+      full_amount_total: window.takingsData.full_amount_total,
+      float_total: window.takingsData.float_total,
+      tips_total: window.takingsData.tips_total,
+      takings_total: window.takingsData.takings_total,
+      remaining_float: window.takingsData.remaining_float,
+      full_amount_diff: window.takingsData.full_amount_diff,
+      final_takings: window.takingsData.final_takings,
+      annulled: window.takingsData.annulled || [],
+      full_amount_count: window.takingsData.full_amount_count || [],
+      float_amount_count: window.takingsData.float_amount_count || [],
+      tips_amount_count: window.takingsData.tips_amount_count || [],
+      takings_amount_count: window.takingsData.takings_amount_count || []
+    };
+
+    if (!data.entry_date) {
+      alert("Entry date is missing — cannot save.");
+      return;
+    }
+
+    // 4. Calculate correct Saturday week start
+    let entryDate = new Date(data.entry_date);
+    let weekday = entryDate.getDay();
+    let offset = (weekday === 6) ? 0 : (weekday + 1);
+    let saturdayStart = new Date(entryDate);
+    saturdayStart.setDate(entryDate.getDate() - offset);
+    data.week_start = saturdayStart.toISOString().split("T")[0];
+
+    // 5. Daily breakdown (dynamic columns)
+    data.daily_weekly_takings_data = [];
+
+    document.querySelectorAll("#dailyTakingsTable tbody tr").forEach(row => {
+      const day = row.querySelector("td:first-child").textContent.trim();
+      const busValues = { day };
+
+      const inputs = row.querySelectorAll("td input");
+
+      busValues.bus1 = parseFloat(inputs[0].value) || 0;
+      busValues.bus2 = parseFloat(inputs[1].value) || 0;
+
+      if (inputs.length === 4) {
+        busValues.bus3 = parseFloat(inputs[2].value) || 0;
+      } else {
+        busValues.bus3 = 0;
+      }
+
+      data.daily_weekly_takings_data.push(busValues);
+    });
+
+    // 6. Send to backend
+    fetch("/weekly-takings-add", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    })
+    .then(response => {
+      console.log("Save response:", response.status, response.statusText);
+      if (!response.ok) {
+        throw new Error("Save failed: " + response.status);
+      }
+      return response.json().catch(() => ({}));
+    })
+    .then(() => {
+      console.log("Redirecting to weekly view with week_start:", data.week_start);
+      window.location.href = "/weekly-takings-view?week_start=" + data.week_start;
+    })
+    .catch(err => {
+      console.error("Error saving takings:", err);
+      alert("Save failed — check console for details.");
+    });
+  });	
+}
+
+});          // ← closes window.addEventListener("DOMContentLoaded", ...)
+
+</script>
+{% endblock %}
+
+
+		

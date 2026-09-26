@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+{% set home_target = "driver_dashboard" %}
+{% set is_UK_transport_hub = True %}
+{% set page_title = "UK Transport Hub" %}
+
+{% block content %}
+
+
+
+	<!-- HEADER BAR WITH WEEK START DATE CENTERED -->
+	<div class="weekly-header-bar"
+		 style="padding: 15px; border-radius: 6px; margin-bottom: 20px;
+				display:flex; justify-content:space-between; align-items:center;">
+
+		<h1 style="margin: 0; font-size: 35px;">Weekly Duty Records</h1>
+
+		<div style="font-size: 24px; font-weight: 600; text-align:center; flex-grow:1;">
+			Week starting {{ current_week_display }}
+		</div>
+
+		<div style="width:150px;"></div>
+	</div>
+
+	<!-- BUTTON ROW WITH SPACING BELOW -->
+	<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;">
+
+		<div>
+			<a href="/duty-hours-checker" class="btn btn-secondary">← Back</a>
+			<a href="/weekly_view" class="btn btn-primary">↻ Refresh / Sort by Date</a>
+			<a href="/print-weekly" class="btn btn-primary">🖨 Print</a>
+			<a href="/weekly_view" class="btn btn-primary">Weekly</a>
+			<a href="/monthly-view" class="btn btn-primary">Monthly</a>
+			<a href="/weekly-takings-add" class="btn btn-primary">Add Weekly Takings</a>
+		</div>
+
+		<div>
+			<a class="btn btn-secondary"
+			   href="/weekly_view?date={{ prev_week_start }}">
+			   ← Previous ({{ prev_week_display }})
+			</a>
+
+			<a class="btn btn-secondary"
+			   href="/weekly_view?date={{ next_week_start }}">
+			   Next ({{ next_week_display }}) →
+			</a>
+		</div>
+
+	</div>
+
+
+
+
+{% if duties %}
+<div class="weekly-scroll">
+    <table class="weekly-table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Duty No.</th>
+                <th style="width:40px;">OSA</th>
+				<th>Vehicles</th>
+                <th>Start</th>
+                <th>Finish</th>
+                <th>Actual Finish</th>
+                <th>Total Duty</th>
+                <th>Driving Time</th>
+                <th>Break Total</th>
+                <th>Issue Total</th>
+                <th>NDW Total</th>
+                <th>Delay Type</th>
+                <th>Duty Status</th>
+                <th>Driving Status</th>
+                <th>Overall Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+
+        {% for date, day_duties in duties_by_date.items() %}
+            {% for d in day_duties %}
+            <tr>
+                <td>{{ d.date_uk }}</td>
+                <td>{{ d.duty_number }}</td>
+                <td style="width:40px; text-align:center;">{{ d.outstation_allowance }}</td>
+                <td>
+					<details>
+						<summary style="cursor: pointer; color: #0056b3; font-weight: 600; white-space: nowrap; text-transform: capitalize;">
+							{{ d.vehicle_type }} 
+							{% if d.buses %}
+								<span style="font-size: 0.75rem; color: #555; font-weight: normal;">({{ d.buses|length }} vehicle{% if d.buses|length > 1 %}s{% endif %})</span>
+							{% endif %}
+						</summary>
+
+						{% if d.buses %}
+							<div style="margin-top: 6px; padding: 6px; background: #f8f9fa; border: 1px solid #ddd; border-radius: 4px; font-size: 0.8rem; line-height: 1.3;">
+								{% for bus in d.buses %}
+									<div style="white-space: nowrap; margin-bottom: 3px;">
+										{% if bus.bus_no %}<strong>No. {{ bus.bus_no }}:</strong> {% endif %}
+										<span>{{ bus.reg_plate }}</span>
+										<span style="color: #666;">({{ bus.time_from }} - {{ bus.time_to }})</span>
+									</div>
+								{% endfor %}
+							</div>
+						{% endif %}
+					</details>
+				</td>
+                <td>{{ d.start_time }}</td>
+                <td>{{ d.finish_time }}</td>
+                <td>{{ d.actual_finish_time }}</td>
+                <td>{{ d.total_duty }}</td>
+                <td>{{ d.driving_time }}</td>
+
+                <!-- BREAK TOTAL -->
+                <td>{{ d.total_breaks }}</td>
+
+                <!-- PASSENGER ISSUE TOTAL -->
+                <td>{{ d.total_passenger_issue }}</td>
+
+                <!-- NDW TOTAL -->
+                <td>{{ d.total_ndw }}</td>
+
+                <!-- DELAY TYPE -->
+                <td>{{ d.delay_type | safe }}</td>
+
+                <!-- DUTY STATUS -->
+                <td>
+                    <span class="status-badge {{ d.duty_status|lower }}">
+                        {{ d.duty_status }}
+                    </span>
+                </td>
+
+                <!-- DRIVING STATUS -->
+                <td>
+                    <span class="status-badge {{ d.driving_status|lower }}">
+                        {{ d.driving_status }}
+                    </span>
+                </td>
+
+                <!-- OVERALL STATUS -->
+                <td>
+                    <span class="status-badge {{ d.overall_status|lower }}">
+                        {{ d.overall_status }}
+                    </span>
+                </td>
+
+                <td>
+					<a href="/analyse-summary/{{ d.id }}?return_to=monthly" class="btn btn-primary" style="padding:4px 8px; font-size:0.5rem; display:inline-block;">View Summary</a>
+
+
+
+                    <form action="/delete-duty/{{ d.id }}" method="POST" style="display:inline;">
+						<button type="submit"
+								style="background:none; border:none; padding:0; cursor:pointer;"
+								onclick="return confirm('Are you sure you want to delete this duty entry?');">
+							<span style="font-size:1.5rem;">🗑</span>
+						</button>
+
+
+
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        {% endfor %}
+
+        </tbody>
+    </table>
+
+</div>
+
+
+<!-- WEEKLY TOTALS -->
+<h2 style="margin-top: 40px;">Weekly Totals</h2>
+
+<table class="weekly-table">
+    <thead>
+        <tr>
+            <th>Total Duty</th>
+            <th>Driving Time</th>
+            <th>Break Total</th>
+            <th>Pass Issue Total</th>
+            <th>NDW Total</th>
+            <th>Total Delay</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr>
+            <td>{{ weekly_totals.duty }}</td>
+            <td>{{ weekly_totals.driving }}</td>
+            <td>{{ weekly_totals.breaks }}</td>
+            <td>{{ weekly_totals.issue }}</td>
+            <td>{{ weekly_totals.ndw }}</td>
+            <td>{{ weekly_totals.delay }}</td>
+        </tr>
+    </tbody>
+</table>
+
+{% endif %}
+{% endblock %}
+

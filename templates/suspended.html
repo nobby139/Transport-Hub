@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="suspended-container">
+    <h2>Your Account Is Suspended</h2>
+    <p>You cannot access dashboard features until your suspension ends.</p>
+
+    <p><strong>Reason:</strong> {{ current_user.suspension_reason }}</p>
+
+	<p><strong>Ends:</strong>
+		{% if current_user.suspended_until %}
+			{% if current_user.suspended_until.strftime %}
+				{{ current_user.suspended_until.strftime("%d/%m/%Y %H:%M") }}
+			{% else %}
+				{{ current_user.suspended_until }}
+			{% endif %}
+		{% else %}
+			Not currently suspended
+		{% endif %}
+	</p>
+
+    <p id="countdown"></p>
+</section>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .header-left a,
+    .header-left img,
+    .nav-btn,
+    .nav-icon {
+        display: none !important;
+    }
+
+    #menuToggle {
+        display: none !important;
+    }
+
+    #globalMenu {
+        display: none !important;
+    }
+
+    .suspended-container {
+        max-width: 600px;
+        margin: 120px auto;
+        text-align: center;
+        font-size: 1.1rem;
+        line-height: 1.5;
+    }
+
+    .suspended-container h2 {
+        font-size: 1.8rem;
+        margin-bottom: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    {% if current_user.suspended_until and current_user.suspended_until.isoformat %}
+    const endTime = new Date("{{ current_user.suspended_until.isoformat() }}");
+
+    function updateCountdown() {
+        const now = new Date();
+        const diff = endTime - now;
+
+        if (diff <= 0) {
+            document.getElementById("countdown").textContent = "Suspension has ended.";
+            return;
+        }
+
+        const hours = Math.floor(diff / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+        document.getElementById("countdown").textContent =
+            "Time remaining: " + hours + "h " + minutes + "m " + seconds + "s";
+    }
+
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+    {% endif %}
+</script>
+{% endblock %}
+

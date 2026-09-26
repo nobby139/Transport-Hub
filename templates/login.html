@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+{% set page_title = "UK Transport Hub" %}
+{% set home_target = "home" %}
+{% set is_drivers_hub = False %}
+
+{% block content %}
+
+<style>
+    .form-card {
+        max-width: 400px;
+        margin: 0 auto;
+        padding: 20px;
+        text-align: center; /* ensures headings + buttons align */
+    }
+
+    .form-card input[type="email"],
+    .form-card input[type="password"] {
+        width: 100%;
+        max-width: 300px;
+        padding: 8px;
+        margin-bottom: 12px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+    }
+
+    /* FIXED: Center the Login button */
+    .btn {
+        margin-top: 10px;
+        width: 200px;
+        display: block;          /* REQUIRED for centering */
+        margin-left: auto;       /* centers horizontally */
+        margin-right: auto;      /* centers horizontally */
+        text-align: center;
+    }
+
+    /* FIXED: Center the 4‑digit code button */
+    .code-btn {
+        margin-top: 10px;
+        width: 200px;
+        background: #1E88E5;
+        color: white;
+        border: none;
+        padding: 10px;
+        border-radius: 6px;
+        cursor: pointer;
+        display: block;          /* REQUIRED for centering */
+        margin-left: auto;       /* centers horizontally */
+        margin-right: auto;      /* centers horizontally */
+        text-align: center;
+    }
+
+    .code-btn:hover {
+        background: #1565C0;
+    }
+
+    .error-text {
+        color: red;
+        margin-top: 10px;
+    }
+
+    .forgot-link {
+        margin-top: 15px;
+        text-align: center;
+    }
+</style>
+
+
+<h2>Login</h2>
+
+<form id="loginForm" class="form-card">
+
+    <label>Email</label>
+    <input type="email" id="email" required>
+
+    <label>Password</label>
+    <input type="password" id="password" required>
+
+    <button type="submit" class="btn">Login</button>
+
+    <button type="button" class="code-btn" onclick="requestCode()">
+        Login with 4‑digit code
+    </button>
+
+    <p id="error" class="error-text"></p>
+
+    <p class="forgot-link">
+        <a href="/forgot_password">Forgot your password?</a>
+    </p>
+
+</form>
+
+<script>
+document.getElementById("loginForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value.trim();
+    const error = document.getElementById("error");
+
+    error.textContent = "";
+
+    const res = await fetch("/api/login", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+        error.textContent = data.message || "Login failed";
+        return;
+    }
+
+    if (data.redirect) {
+        window.location.href = data.redirect;
+        return;
+    }
+});  <!-- THIS WAS MISSING -->
+
+async function requestCode() {
+    const email = document.getElementById("email").value.trim();
+
+    if (!email) {
+        alert("Enter your email first.");
+        return;
+    }
+
+    const response = await fetch("/api/request_login_code", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email })
+    });
+
+    const result = await response.json();
+    alert(result.message);
+
+    window.location.href = "/enter_code/" + email;
+}
+</script>
+
+
+
+{% endblock %}

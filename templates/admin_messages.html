@@ -1,0 +1,220 @@
+{% extends "base.html" %}
+{% set page_title = "UK Transport Hub" %}
+{% set home_target = "home" %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{{ url_for('static', filename='system_chat.css') }}">
+
+<div class="platform-messages">
+    <a href="javascript:history.back()" class="back-btn">← Back</a>
+</div>
+
+<h2>
+    Platform Messages —
+    {% if user %}
+        {% if user.level == 1 %} Admin to SuperAdmin {% else %} Admin to {{ user.first_name }} {{ user.last_name }} {% endif %}
+    {% else %}
+        {{ target|capitalize if target else "Select User" }}
+    {% endif %}
+</h2>
+
+<h2>Select User to Chat With</h2>
+
+{% if current_user.level == 2 %}
+    <select id="category_select" onchange="toggleUserDropdown()" style="width:200px;">
+        <option value="">-- Select Category --</option>
+        <option value="users">Users</option>
+        <option value="superadmin">SuperAdmin</option>
+    </select>
+{% endif %}
+
+<script>
+    const catSelect = document.getElementById('category_select');
+    if (catSelect) {
+        catSelect.value = "{{ target if target else '' }}";
+        if (!["users","superadmin"].includes(catSelect.value)) {
+            catSelect.value = "";
+        }
+    }
+</script>
+
+<br><br>
+
+{% if current_user.level == 2 %}
+    <select id="user_select" onchange="openUser()" 
+            style="width:200px; {% if target == 'users' %}display:block;{% else %}display:none;{% endif %}">
+        <option value="">-- Select User --</option>
+        {% for u in users %}
+            <option value="{{ u.id }}" {% if user and user.id == u.id %}selected{% endif %}>
+                {{ u.first_name }} {{ u.last_name }}
+            </option>
+        {% endfor %}
+    </select>
+{% endif %}
+
+{% if target == "users" and not user %}
+    <div class="chat-outer">
+        <div class="messages-container">
+            <p>No messages selected. Pick a user from the dropdown above to start chatting.</p>
+        </div>
+        <div class="input-container">
+            <p>Select a user to enable composing messages.</p>
+        </div>
+    </div>
+{% elif user and target not in ["blank"] %}
+    <div class="chat-outer">
+        <div class="chat-container">
+
+            <!-- Messages Container -->
+            <div class="messages-container">
+                {% for msg in messages %}
+                    <div class="chat-message {% if msg.sender.level in [1,2] %}admin-msg{% else %}user-msg{% endif %}">
+                        <div class="msg-header">
+                            {% if msg.sender.role_superadmin == 1 %}
+                                {% if current_user.level in [1, 2] %}SuperAdmin{% else %}Admin{% endif %}
+                            {% elif msg.sender.role_admin == 1 %}
+                                Admin
+                            {% else %}
+                                {{ msg.sender.first_name }} {{ msg.sender.last_name }}
+                            {% endif %}
+                            <span class="timestamp">{{ msg.local_time().strftime("%d/%m/%Y %H:%M") if msg.local_time else msg.created_at.strftime("%d/%m/%Y %H:%M") }}</span>
+                        </div>
+
+                        <div class="msg-body">{{ msg.body }}</div>
+
+                        <!-- READ/UNREAD INDICATOR -->
+                        <div class="msg-indicator">
+                            {% if msg.sender_id == current_user.id %}
+                                Message Sent
+                            {% else %}
+                                {% if not msg.read %}
+                                    <button class="mark-read-btn" id="read-btn-{{ msg.id }}" onclick="markRead({{ msg.id }})">Mark as Read</button>
+                                {% else %}
+                                    <span class="read-status">Message Read</span>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- Compose Message -->
+            <div class="input-container">
+                <label for="subject_select">Subject</label>
+                <select id="subject_select">
+                    <option value="">-- Select Subject --</option>
+                    <option value="Suspension Notice">Suspension Notice</option>
+                    <option value="Role Change">Role Change</option>
+                    <option value="System Update">System Update</option>
+                    <option value="Weekly Takings Issue">Weekly Takings Issue</option>
+                    <option value="Driver Conduct">Driver Conduct</option>
+                    <option value="General Message">General Message</option>
+                    <option value="Takings Query">Takings Query</option>
+                    <option value="System Help">System Help</option>
+                    <option value="Report an Issue">Report an Issue</option>
+                    <option value="Drivers Log">Drivers Log</option>
+                    <option value="Bus & Coach Enthusiast">Bus & Coach Enthusiast</option>
+                    <option value="Other">Other (Custom)</option>
+                </select>
+
+                <div id="custom_subject_container" style="display:none;">
+                    <label for="custom_subject">Custom Subject</label>
+                    <input type="text" id="custom_subject" placeholder="Enter custom subject">
+                </div>
+
+                <label for="chat_body">Message</label>
+                <textarea id="chat_body" placeholder="Type your message..."></textarea>
+
+                <button onclick="sendChat()">Send</button>
+            </div>
+
+        </div> <!-- END chat-container -->
+    </div> <!-- END chat-outer -->
+{% endif %}
+
+<script>
+document.getElementById("subject_select")?.addEventListener("change", function() {
+    const customBox = document.getElementById("custom_subject_container");
+    if (customBox) {
+        customBox.style.display = (this.value === "Other") ? "block" : "none";
+    }
+});
+
+function toggleUserDropdown() {
+    const cat = document.getElementById('category_select').value;
+    if (cat === '') {
+        window.location.href = "/admin/messages/blank";
+    } else if (cat === 'users') {
+        window.location.href = "/admin/messages/users";
+    } else if (cat === 'superadmin') {
+        window.location.href = "/admin/messages/superadmin";
+    }
+}
+
+function openUser() {
+    const id = document.getElementById("user_select").value;
+    if (!id) return;
+    window.location.href = "/admin/messages/" + id;
+}
+
+function sendChat() {
+    const id = "{{ user.id if user else '' }}" || document.getElementById("user_select")?.value;
+
+    if (!id) {
+        alert("Please select a user first.");
+        return;
+    }
+
+    const body = document.getElementById("chat_body").value.trim();
+    if (!body) {
+        alert("Please enter a message body.");
+        return;
+    }
+
+    const subjectSelect = document.getElementById("subject_select").value;
+    const customSubject = document.getElementById("custom_subject").value;
+    const finalSubject = subjectSelect === "Other" ? customSubject : subjectSelect;
+
+    fetch("/send_chat_message", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+            body: body,
+            receiver_id: id,
+            title: finalSubject
+        })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById("chat_body").value = "";
+            document.getElementById("subject_select").selectedIndex = 0;
+            if (document.getElementById("custom_subject")) {
+                document.getElementById("custom_subject").value = "";
+            }
+            location.reload();
+        } else {
+            alert(data.error || "Failed to send message.");
+        }
+    });
+}
+
+function markRead(msgId) {
+    fetch("/mark_message_read/" + msgId, {
+        method: "POST",
+        headers: {"Content-Type": "application/json"}
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            const btn = document.getElementById("read-btn-" + msgId);
+            if (btn) {
+                btn.outerHTML = '<span class="read-status">Message Read</span>';
+            }
+        }
+    });
+}
+</script>
+
+{% endblock %}

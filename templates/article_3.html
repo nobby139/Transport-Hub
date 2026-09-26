@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% set home_target = "driver_dashboard" %}
+{% set is_UK_transport_hub = True %}
+{% set page_title = "UK Transport Hub" %}
+
+{% block content %}
+
+
+
+	<div class="article-container">
+
+		<a href="/driver-information" class="back-link">← Back to Articles</a>
+
+		<div class="article-nav">
+			{% if prev_url %}
+				<a class="nav-prev" href="{{ prev_url }}">← Previous</a>
+			{% endif %}
+			{% if next_url %}
+				<a class="nav-next" href="{{ next_url }}">Next →</a>
+			{% endif %}
+		</div>
+
+		<p class="article-date">
+			Published: {{ published }}
+			{% if updated %}
+				• Last updated: {{ updated }}
+			{% endif %}
+		</p>
+
+		<!-- ICON + MAIN PAGE HEADER -->
+		<div class="section-header">
+			<img src="/static/assets/Passenger_Stepping_on_bus.png" class="article-header-image" alt="Article Icon">
+			<h1 class="article-title">Passenger Safety & Accessibility Overview </h1>
+		</div>
+
+		<div class="article-content">
+
+
+			<h2>1. Passenger Safety & Accessibility</h2>
+		</div>
+
+		<p>
+			Keeping passengers safe and comfortable is a key part of every driver’s role. 
+			Whether you’re operating a bus or a coach, every journey should feel safe, smooth, 
+			and accessible for everyone on board.
+		</p>
+			<p>
+				A safe journey starts before the wheels even move. Always allow passengers enough 
+				time to board and exit, especially those who may need extra support. Stopping close 
+				to the kerb reduces trip hazards and makes access easier for everyone.
+			</p>
+
+			<!-- ICON + MID HEADER -->
+			<div class="section-header">
+				<img src="/static/assets/Driver_Support.png" class="article-header-image" alt="Article Icon">
+				<h2>2. Supporting Passengers with Additional Needs</h2>
+			</div>
+
+			<p>
+				Accessibility is an essential part of modern public transport. Many passengers rely 
+				on ramps, priority seating, or extra time when boarding. As a driver, you can help by:
+			</p>
+
+			<ul>
+				<li>Using the ramp or kneeling function when required.</li>
+				<li>Offering assistance politely while respecting independence.</li>
+				<li>Keeping wheelchair spaces clear and ready for use.</li>
+				<li>Communicating clearly and calmly when helping passengers.</li>
+			</ul>
+
+			<h2>3. Driving Smoothly</h2>
+			<p>
+				Smooth driving keeps everyone safe. Sudden braking, harsh acceleration, or sharp 
+				cornering can cause injuries, especially for standing passengers. Anticipate traffic 
+				and maintain a steady, controlled driving style.
+			</p>
+
+			<h2>4. Keeping the Vehicle Safe</h2>
+			<p>
+				A clean and well-maintained interior helps prevent slips and falls. Make sure aisles 
+				are clear, seats are secure, and emergency exits are unobstructed. Report any issues 
+				you notice during your shift.
+			</p>
+
+			<!-- ICON + FINAL HEADER -->
+			<div class="section-header">
+				<img src="/static/assets/Communication.png" class="article-header-image" alt="Article Icon">
+				<h2>5. Clear Communication</h2>
+			</div>
+
+			<p>
+				Passengers appreciate clear, friendly communication. Whether you’re explaining a 
+				delay, offering reassurance, or helping with directions, a calm approach helps build 
+				trust and creates a better experience for everyone.
+			</p>
+
+			<p>
+				Passenger safety and accessibility are at the heart of professional driving. By 
+				staying aware, offering support, and driving smoothly, you help ensure every journey 
+				is safe, comfortable, and welcoming for all.
+			</p>
+
+{% endblock %}

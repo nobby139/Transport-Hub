@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<section class="welcome-section">
+    <h2>Welcome Enthusiasts</h2>
+    <p>Explore, share, and enjoy everything transport.</p>
+
+    <p>
+        The Bus & Coach Enthusiast Hub is your dedicated space for spotting, photography,
+        fleet lists, and community discussions. Whether you're into buses, coaches, depots,
+        or rare finds — this is your home.
+    </p>
+</section>
+
+<section class="start-section">
+    <h3>Join the Community</h3>
+    <div class="button-group">
+        <a class="btn" href="{{ url_for('enthusiast_create') }}">Register as an Enthusiast</a>
+        <a class="btn" href="{{ url_for('enthusiast_login') }}">Enthusiast Login</a>
+    </div>
+</section>
+
+<section class="info-section">
+    <h3>What Enthusiasts Get</h3>
+    <ul>
+        <li>Upload and share your transport photos</li>
+        <li>View galleries and collections from other enthusiasts</li>
+        <li>Keep spotting logs and fleet lists</li>
+        <li>Join community discussions and chat</li>
+        <li>Access your personal enthusiast dashboard</li>
+    </ul>
+</section>
+
+<div class="back-container">
+    <a class="back-link" href="{{ url_for('home') }}">← Back to Transport Hub</a>
+</div>
+
+{% endblock %}

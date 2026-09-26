@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bus & Coach Drivers Hub – Welcome</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<!-- HEADER -->
+<header class="main-header">
+    <div class="header-left">
+        <h1>Bus & Coach Drivers Hub</h1>
+    </div>
+
+    <div class="header-right">
+        <img src="{{ url_for('static', filename='assets/logo.png') }}" 
+             alt="Transport Hub Logo" 
+             class="header-logo">
+    </div>
+
+    <!-- ORANGE WAVES -->
+    <div class="header-waves">
+        <svg viewBox="0 0 1440 80" preserveAspectRatio="none">
+            <path d="M0,40 C300,10 600,70 900,40 C1150,15 1300,60 1440,30"
+                  stroke="#FF7A00" stroke-width="3" fill="none" />
+            <path d="M0,60 C300,30 600,90 900,60 C1150,35 1300,80 1440,50"
+                  stroke="#FF7A00" stroke-width="2" fill="none" opacity="0.8" />
+        </svg>
+    </div>
+</header>
+
+<!-- MAIN CONTENT -->
+<section class="welcome-section">
+    <h2>Welcome Bus & Coach Drivers</h2>
+    <p>Your tools, your information, your hub.</p>
+
+    <p>
+        The Bus & Coach Drivers Hub is your dedicated space for everything related to
+        professional bus and coach driving. From accessing your dashboard to checking updates,
+        this is where your journey begins.
+    </p>
+</section>
+
+<!-- BUTTONS -->
+<section class="start-section">
+    <h3>Start Here</h3>
+
+    <div class="button-group">
+        <a class="btn" href="{{ url_for('driver_create') }}">Register as a Driver</a>
+        <a class="btn" href="{{ url_for('driver_login') }}">Driver Login</a>
+    </div>
+</section>
+
+<!-- INFO SECTION -->
+<section class="info-section">
+    <h3>What Drivers Get</h3>
+    <ul>
+        <li>Access to your personal driver dashboard</li>
+        <li>Tools and resources designed for bus & coach drivers</li>
+        <li>Company updates and driver information</li>
+        <li>Community support and driver discussions</li>
+        <li>Access to recommended gear and essentials</li>
+    </ul>
+</section>
+
+<!-- BACK LINK -->
+<div class="back-container">
+    <a class="back-link" href="{{ url_for('home') }}">← Back to Transport Hub</a>
+</div>
+
+</body>
+</html>

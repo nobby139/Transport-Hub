@@ -1,0 +1,170 @@
+/* ================================
+   CHAT LAYOUT
+================================ */
+.chat-container {
+    display: flex;
+    height: calc(100vh - 140px);
+}
+
+/* ================================
+   LEFT SIDE — CHAT LIST
+================================ */
+.chat-list {
+    width: 30%;
+    background: #0F1F5C;
+    color: white;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.chat-item {
+    display: block;
+    background: rgba(255,255,255,0.1);
+    padding: 12px;
+    margin-bottom: 10px;
+    border-radius: 6px;
+    color: white;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.chat-item:hover {
+    background: rgba(255,255,255,0.2);
+}
+
+/* ================================
+   RIGHT SIDE — CHAT WINDOW
+================================ */
+.chat-window {
+    width: 70%;
+    display: flex;
+    flex-direction: column;
+    background: #f4f4f4;
+}
+
+#chat-title {
+    padding: 15px;
+    background: #ddd;
+    border-bottom: 1px solid #ccc;
+}
+
+.messages-area {
+    flex: 1;
+    padding: 15px;
+    overflow-y: auto;
+}
+
+/* ================================
+   INPUT BAR
+================================ */
+.chat-input {
+    display: flex;
+    padding: 10px;
+    background: #ddd;
+    align-items: center;
+    gap: 10px;
+}
+
+.chat-input input {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 4px;
+}
+
+.chat-input button {
+    padding: 10px 20px;
+    background: #0F1F5C;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+/* ================================
+   ICON BUTTONS
+================================ */
+.icon-btn {
+    background: #1E3A8A;
+    color: white;
+    border: none;
+    padding: 10px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.icon-btn:hover {
+    background: #3B82F6;
+}
+
+/* ================================
+   EMOJI PICKER
+================================ */
+.emoji-picker {
+    position: absolute;
+    bottom: 70px;
+    left: 20px;
+    width: 320px;
+    background: #ffffff;
+    border: 2px solid #1E3A8A;
+    border-radius: 10px;
+    padding: 10px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+    z-index: 999;
+}
+
+.hidden {
+    display: none;
+}
+
+#emoji-search {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #aaa;
+    border-radius: 6px;
+    margin-bottom: 10px;
+}
+
+.emoji-categories {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 10px;
+}
+
+.emoji-categories button {
+    flex: 1;
+    padding: 6px;
+    font-size: 20px;
+    border: none;
+    background: #1E3A8A;
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.emoji-categories button:hover {
+    background: #3B82F6;
+}
+
+.emoji-grid {
+    max-height: 200px;
+    overflow-y: auto;
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 6px;
+}
+
+.emoji-grid span {
+    font-size: 24px;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 6px;
+}
+
+.emoji-grid span:hover {
+    background: #e0e7ff;
+}
