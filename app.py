@@ -117,24 +117,22 @@ from reportlab.lib.utils import ImageReader
 # =======================================================
 # CREATE FLASK APP & CONFIGURATION
 # =======================================================
+from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
 
-app.config["SECRET_KEY"] = "your_super_secret_key_here"
-app.config["MAINTENANCE_MODE"] = False  # Set to True when you want to freeze the app for updates
+# Handle Render's PostgreSQL URL format for SQLAlchemy
+database_url = os.environ.get('DATABASE_URL')
+if database_url and database_url.startswith('postgres://'):
+    database_url = database_url.replace('postgres://', 'postgresql://', 1)
 
-# Dynamically find drivershub.db whether it's in root or instance folder
-db_path = os.path.join(app.root_path, "instance", "drivershub.db")
-if not os.path.exists(db_path):
-    db_path = os.path.join(app.root_path, "drivershub.db")
+app.config['SQLALCHEMY_DATABASE_URI'] = database_url or 'sqlite:///transport.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{db_path}"
-
-# Attach db to the app FIRST
-db.init_app(app)
-
-# Register migrations
+db = SQLAlchemy(app)
 migrate = Migrate(app, db)
+
 
 # =======================================================
 # AUTOMATIC SCHEMA PATCH
