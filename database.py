@@ -2,8 +2,7 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timedelta
 from flask_login import UserMixin
 import pytz
-
-db = SQLAlchemy()
+from app import db
 
 # ---------------------------------------------------------
 # USER MODEL (FINAL + CORRECT)
