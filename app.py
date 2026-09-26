@@ -66,13 +66,12 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from werkzeug.exceptions import HTTPException
 
-
 # =======================================================
 # DATABASE & ORM MODELS
 # =======================================================
 from sqlalchemy import func
 from database import db
-from database import (
+from models import (
     User,
     Company,
     PasswordResetToken,
