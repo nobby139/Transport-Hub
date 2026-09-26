@@ -502,34 +502,26 @@ header {
    MOBILE LAYOUT (GLOBAL)
    ============================ */
 @media (max-width: 900px) {
-
     body {
         padding: 0;
         margin: 0;
         font-size: 16px;
     }
 
-    /* Force the header to span 100% and stack nicely on mobile */
-    header {
-        flex-direction: column;
-        padding: 15px 10px;
-        text-align: center;
-        gap: 15px;
+    /* Force the header container to stay within the screen width */
+    header, .navbar, .header-container {
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 10px 15px;
+        box-sizing: border-box;
     }
 
-    /* Reset columns so they don't fight flex alignment on mobile */
-    .header-left, .header-center, #drivershub-logo {
-        flex: unset !important;
-        width: 100%;
-        margin: 0 !important;
-        text-align: center;
+    /* Keep the logo scaled properly so it doesn't overflow */
+    .logo, img.brand-logo {
+        max-height: 40px;
+        width: auto;
     }
-
-    /* Adjust logo size for mobile screens */
-    #drivershub-logo {
-        height: 80px;
-        margin: 0 auto;
-    }
+}
 
     /* Force the main content area to take up the full screen width */
     main {
