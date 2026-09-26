@@ -767,17 +767,20 @@ def force_create_superadmin():
     # Check if the superadmin already exists
     existing = User.query.filter_by(email='info@transporthub.uk').first()
     if existing:
-        existing.role = 'superadmin'
+        existing.role_superadmin = True
+        existing.role_admin = True
         db.session.commit()
-        return "User 'info@transporthub.uk' role updated to superadmin successfully!"
+        return "User 'info@transporthub.uk' updated to superadmin successfully!"
         
-    # Otherwise, create them from scratch
+    # Otherwise, create them from scratch using your model's exact fields
     superadmin = User(
         first_name='Admin',
         last_name='User',
         email='info@transporthub.uk',
         password=generate_password_hash('YOUR_SECURE_PASSWORD_HERE'),
-        role='superadmin'
+        role_superadmin=True,
+        role_admin=True,
+        level=1
     )
     db.session.add(superadmin)
     db.session.commit()
