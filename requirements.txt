@@ -45,8 +45,6 @@ PyOTP==2.10.0
 pypdfium2==5.10.1
 python-bidi==0.6.10
 pytz==2026.2
-pywin32==311
-pywin32-ctypes==0.2.3
 PyYAML==6.0.3
 qrcode==8.2
 reportlab==5.0.0
