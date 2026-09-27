@@ -1688,7 +1688,11 @@ def settings():
 
     user_settings = Settings.query.filter_by(user_id=user.id).first()
     if not user_settings:
-        user_settings = Settings(user_id=user.id, username=user.username)
+        user_settings = Settings(
+            user_id=user.id, 
+            username=getattr(user, "username", None) or "User",
+            week_start_day="Monday"  # Provide your default week start day here
+        )
         db.session.add(user_settings)
         db.session.commit()
 
