@@ -1677,7 +1677,7 @@ def settings_system_save():
 
     return redirect("/settings/system")
 
-  @app.route("/settings", methods=["GET", "POST"])
+@app.route("/settings", methods=["GET", "POST"])
 def settings():
     user_id = session.get("user_id")
     if not user_id:
