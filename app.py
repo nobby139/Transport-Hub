@@ -1677,7 +1677,48 @@ def settings_system_save():
 
     return redirect("/settings/system")
 
+  @app.route("/settings", methods=["GET", "POST"])
+def settings():
+    user_id = session.get("user_id")
+    if not user_id:
+        return redirect("/login")
 
+    user = User.query.get(user_id)
+    if not user:
+        return redirect("/login")
+
+    # Get or create user-specific settings
+    user_settings = Settings.query.filter_by(user_id=user.id).first()
+    if not user_settings:
+        user_settings = Settings(user_id=user.id, username=user.username)
+        db.session.add(user_settings)
+        db.session.commit()
+
+    if request.method == "POST":
+        # Save updates from Year/Date or Driver Preferences forms
+        user_settings.year_mode = request.form.get("year_mode", user_settings.year_mode)
+        user_settings.tax_year_preset = request.form.get("tax_year_preset", user_settings.tax_year_preset)
+        user_settings.custom_tax_year_start = request.form.get("custom_tax_year_start", user_settings.custom_tax_year_start)
+        user_settings.week_start_day = request.form.get("week_start_day", user_settings.week_start_day)
+        
+        db.session.commit()
+        flash("Settings updated successfully!", "success")
+        return redirect(url_for("settings"))
+
+    # Fetch data for the pay rates and special days tables
+    pay_rates = PayRate.query.filter_by(user_id=user.id).all() if 'PayRate' in globals() else []
+    special_days = SpecialDay.query.filter_by(user_id=user.id).all() if 'SpecialDay' in globals() else []
+    
+    return_to = request.referrer or url_for("home")
+    
+    return render_template(
+        "profile_settings.html",
+        user=user,
+        settings=user_settings,
+        pay_rates=pay_rates,
+        special_days=special_days,
+        return_to=return_to
+    )
 
 # ============================================================
 # SUPERADMIN CHAT SYSTEM (NEW)
@@ -6020,8 +6061,9 @@ def article(num):
     )
 
 # ============================================================
-# PROFILE, EDIT PROFILE & PASSWORD MANAGEMENT
+# PROFILE & EDIT PROFILE ROUTES
 # ============================================================
+
 @app.route("/profile")
 def profile():
     user_id = session.get("user_id")
@@ -6036,7 +6078,7 @@ def profile():
     if not settings:
         settings = Settings(
             user_id=user.id,
-            username=user.username,  # <--- THIS LINE FIXES THE ERROR
+            username=user.username,
             account_type="enthusiast",
             year_mode="calendar",
             theme="light"
@@ -6045,7 +6087,7 @@ def profile():
         db.session.commit()
 
         if user.age < 18:
-            user.level = 4  # enthusiast
+            user.level = 4
         db.session.commit()
 
     return_to = request.referrer or url_for("home")
@@ -6109,47 +6151,6 @@ def edit_profile():
         return_to=return_to,
         home_target="home"
     )
-
-
-# Dedicated Password Change Route for your Superadmin / Account Security
-@app.route("/settings/profile", methods=["GET", "POST"])
-def settings_profile():
-    user_id = session.get("user_id")
-    if not user_id:
-        return redirect("/login")
-
-    user = User.query.get(user_id)
-    if not user:
-        return redirect("/login")
-
-    if request.method == "POST":
-        current_password = request.form.get("current_password")
-        new_password = request.form.get("new_password")
-        confirm_password = request.form.get("confirm_password")
-        
-        # Verify current password
-        if not check_password_hash(user.password, current_password):
-            flash("Incorrect current password.", "danger")
-            return redirect(url_for("settings_profile"))
-            
-        # Verify new password match
-        if new_password != confirm_password:
-            flash("New passwords do not match.", "danger")
-            return redirect(url_for("settings_profile"))
-            
-        if not new_password or len(new_password) < 6:
-            flash("Password must be at least 6 characters long.", "danger")
-            return redirect(url_for("settings_profile"))
-            
-        # Update password securely
-        user.password = generate_password_hash(new_password)
-        db.session.commit()
-        
-        flash("Password updated successfully!", "success")
-        return redirect(url_for("settings_profile"))
-        
-    return render_template("profile_settings.html", user=user)
-
 # ---------------------------------------------------------
 # UPLOAD PROFILE PHOTO
 # ---------------------------------------------------------
