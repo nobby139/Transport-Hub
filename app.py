@@ -6048,14 +6048,12 @@ def article(num):
         updated=None
     )
 
+# ============================================================
+# PROFILE, EDIT PROFILE & PASSWORD MANAGEMENT
+# ============================================================
 
-# ---------------------------------------------------------
-# PROFILE PAGE
-# ---------------------------------------------------------
 @app.route("/profile")
 def profile():
-
-    # ✔ Use your actual login system
     user_id = session.get("user_id")
     if not user_id:
         return redirect("/login")
@@ -6064,9 +6062,7 @@ def profile():
     if not user:
         return redirect("/login")
 
-    # ✔ Load settings correctly
     settings = Settings.query.filter_by(user_id=user.id).first()
-
     if not settings:
         settings = Settings(
             user_id=user.id,
@@ -6077,14 +6073,11 @@ def profile():
         db.session.add(settings)
         db.session.commit()
 
-        # ✔ Enforce age restriction using LEVEL system
         if user.age < 18:
             user.level = 4  # enthusiast
         db.session.commit()
 
-    # ✔ Capture last page visited
     return_to = request.referrer or url_for("home")
-
     return render_template(
         "profile.html",
         user=user,
@@ -6093,10 +6086,6 @@ def profile():
     )
 
 
-
-# ---------------------------------------------------------
-# EDIT PROFILE
-# ---------------------------------------------------------
 @app.route("/edit_profile", methods=["GET", "POST"])
 def edit_profile():
     user_id = session.get("user_id")
@@ -6111,7 +6100,7 @@ def edit_profile():
     return_to = request.referrer or url_for("profile")
 
     if request.method == "POST":
-        data = request.get_json()
+        data = request.get_json() or request.form
 
         # Basic details
         user.username = data.get("username")
@@ -6121,33 +6110,27 @@ def edit_profile():
         user.depot = data.get("depot")
         user.outstation = data.get("outstation")
 
-        # Role flags from payload (booleans)
+        # Role flags
         user.role_driver = bool(data.get("role_driver"))
         user.role_enthusiast = bool(data.get("role_enthusiast"))
 
-        # Age check
-        dob_date = datetime.strptime(user.date_of_birth, "%Y-%m-%d")
-        today = datetime.today()
-        age = today.year - dob_date.year - (
-            (today.month, today.day) < (dob_date.month, dob_date.day)
-        )
-
-        # Level assignment
-        level_value = data.get("level")
-        if age < 16:
-            user.level = 4   # Enthusiast (lowest allowed)
-        elif age < 18:
-            user.level = 4   # Enthusiast only
-        else:
+        # Age and level handling
+        if getattr(user, 'date_of_birth', None):
             try:
-                user.level = int(level_value)
-            except (TypeError, ValueError):
-                user.level = 4
+                dob_date = datetime.strptime(user.date_of_birth, "%Y-%m-%d")
+                today = datetime.today()
+                age = today.year - dob_date.year - ((today.month, today.day) < (dob_date.month, dob_date.day))
+                if age < 18:
+                    user.level = 4
+            except (ValueError, TypeError):
+                pass
 
         db.session.commit()
-        return jsonify({"message": "Profile updated successfully"}), 200
+        if request.is_json:
+            return jsonify({"message": "Profile updated successfully"}), 200
+        flash("Profile updated successfully", "success")
+        return redirect(url_for("profile"))
 
-    # GET request → render page
     return render_template(
         "edit_profile.html",
         user=user,
@@ -6157,7 +6140,44 @@ def edit_profile():
     )
 
 
+# Dedicated Password Change Route for your Superadmin / Account Security
+@app.route("/settings/profile", methods=["GET", "POST"])
+def settings_profile():
+    user_id = session.get("user_id")
+    if not user_id:
+        return redirect("/login")
 
+    user = User.query.get(user_id)
+    if not user:
+        return redirect("/login")
+
+    if request.method == "POST":
+        current_password = request.form.get("current_password")
+        new_password = request.form.get("new_password")
+        confirm_password = request.form.get("confirm_password")
+        
+        # Verify current password
+        if not check_password_hash(user.password, current_password):
+            flash("Incorrect current password.", "danger")
+            return redirect(url_for("settings_profile"))
+            
+        # Verify new password match
+        if new_password != confirm_password:
+            flash("New passwords do not match.", "danger")
+            return redirect(url_for("settings_profile"))
+            
+        if not new_password or len(new_password) < 6:
+            flash("Password must be at least 6 characters long.", "danger")
+            return redirect(url_for("settings_profile"))
+            
+        # Update password securely
+        user.password = generate_password_hash(new_password)
+        db.session.commit()
+        
+        flash("Password updated successfully!", "success")
+        return redirect(url_for("settings_profile"))
+        
+    return render_template("profile_settings.html", user=user)
 
 # ---------------------------------------------------------
 # UPLOAD PROFILE PHOTO
