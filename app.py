@@ -6055,7 +6055,7 @@ def article(num):
 # ============================================================
 @app.route("/profile")
 def profile():
-    # ⭐ Check session first, then fallback to Flask-Login's current_user
+    # Check session first, then fallback to Flask-Login's current_user
     user_id = session.get("user_id")
     if not user_id and current_user.is_authenticated:
         user_id = getattr(current_user, "id", None)
@@ -6074,16 +6074,16 @@ def profile():
         return redirect("/login")
 
     settings = Settings.query.filter_by(user_id=user.id).first()
-        if not settings:
-            settings = Settings(
-                user_id=user.id,
-                username=user.username or "User",  # ⭐ Added fallback to prevent null violation
-                account_type="enthusiast",
-                year_mode="calendar",
-                theme="light"
-            )
-            db.session.add(settings)
-            db.session.commit()
+    if not settings:
+        settings = Settings(
+            user_id=user.id,
+            username=user.username or "User",
+            account_type="enthusiast",
+            year_mode="calendar",
+            theme="light"
+        )
+        db.session.add(settings)
+        db.session.commit()
 
     # Age and role validation check on load
     if getattr(user, 'date_of_birth', None):
@@ -6102,14 +6102,13 @@ def profile():
         except (ValueError, TypeError):
             pass
 
-    return_to = request.referrer or url_for("home_target") if 'home_target' in globals() else "/"
+    return_to = request.referrer or (url_for("home_target") if 'home_target' in globals() else "/")
     return render_template(
         "profile.html",
         user=user,
         settings=settings,
         return_to=return_to
     )
-
 
 
 @app.route("/edit_profile", methods=["GET", "POST"])
