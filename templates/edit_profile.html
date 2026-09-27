@@ -134,6 +134,11 @@
     </div>
 
 	<div class="form-group">
+	    <label for="phone">Phone Number</label>
+	    <input type="text" id="phone" name="phone" value="{{ user.phone or '' }}">
+	</div>
+
+	<div class="form-group">
         <label for="date_of_birth">Date of Birth</label>
         <input type="date" id="date_of_birth" name="date_of_birth" value="{{ user.date_of_birth }}" required>
     </div>
@@ -377,20 +382,21 @@ document.addEventListener("DOMContentLoaded", () => {
 		e.preventDefault();
 
 		const payload = {
-			first_name: document.getElementById("first_name").value.trim(),
-			last_name: document.getElementById("last_name").value.trim(),
-			username: document.getElementById("username").value.trim(),
-			email: document.getElementById("email").value.trim(),
-			date_of_birth: document.getElementById("date_of_birth").value,
-			address: document.getElementById("address").value.trim(),
-			postcode: document.getElementById("postcode").value.trim(),
-			role_driver: roleDriver.checked ? 1 : 0,
-			role_enthusiast: roleEnthusiast.checked ? 1 : 0,
-			company: finalCompany.value,
-			region: finalRegion.value,
-			depot: finalDepot.value,
-			outstation: finalOutstation.value,
-			level: finalLevel.value
+		    first_name: document.getElementById("first_name").value.trim(),
+		    last_name: document.getElementById("last_name").value.trim(),
+		    username: document.getElementById("username").value.trim(),
+		    email: document.getElementById("email").value.trim(),
+		    phone: document.getElementById("phone").value.trim(), // <-- Add this line
+		    date_of_birth: document.getElementById("date_of_birth").value,
+		    address: document.getElementById("address").value.trim(),
+		    postcode: document.getElementById("postcode").value.trim(),
+		    role_driver: roleDriver.checked ? 1 : 0,
+		    role_enthusiast: roleEnthusiast.checked ? 1 : 0,
+		    company: finalCompany.value,
+		    region: finalRegion.value,
+		    depot: finalDepot.value,
+		    outstation: finalOutstation.value,
+		    level: finalLevel.value
 		};
 
 		console.log("Submitting with:", payload);
