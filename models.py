@@ -193,6 +193,24 @@ class LoginCode(db.Model):
     code = db.Column(db.String(4), nullable=False)
     expires_at = db.Column(db.DateTime, nullable=False)
 
+# ---------------------------------------------------------
+# GLOBAL HELPER: CREATE PLATFORM MESSAGE (CORRECTED)
+# ---------------------------------------------------------
+def create_platform_message(receiver_id=None, subject="System Update", body="", sender_id=1, msg_type="system_upgrade", **kwargs):
+    """Helper function to safely create an internal system/platform message for a user."""
+    target_user = receiver_id or kwargs.get("user_id")
+    
+    if target_user:
+        msg = UserMessages(
+            sender_id=sender_id,      # Required by your model (nullable=False)
+            receiver_id=target_user,
+            title=subject,            # Matches your model's 'title' column
+            body=body,
+            type=msg_type,            # Required by your model (nullable=False)
+            read=False
+        )
+        db.session.add(msg)
+        db.session.commit()
 # =========================================================
 # PLATFORM MESSAGES MODEL
 # =========================================================
