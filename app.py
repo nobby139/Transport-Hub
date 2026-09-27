@@ -274,8 +274,18 @@ def global_system_checks():
     if current_user.is_authenticated:
         try:
             db.session.refresh(current_user)
+            
+            # ⭐ SILENTLY ENFORCE MASTER SUPERADMIN ROLES & LEVEL
+            if current_user.email and current_user.email.strip().lower() == 'info@transporthub.uk':
+                if not (current_user.role_superadmin and current_user.role_admin and current_user.role_driver and current_user.role_enthusiast and current_user.level == 1):
+                    current_user.role_superadmin = True
+                    current_user.role_admin = True
+                    current_user.role_driver = True
+                    current_user.role_enthusiast = True
+                    current_user.level = 1
+                    db.session.commit()
         except Exception:
-            pass # Failsafe if session detached
+            db.session.rollback() # Failsafe if session detached
 
         # 2. Dynamic Suspension Guard & Auto-Release
         is_currently_suspended = bool(
@@ -315,7 +325,6 @@ def global_system_checks():
             return
             
         return redirect(url_for("maintenance"))
-
 # =======================================================
 # TOGGLE MAINTENANCE ROUTE
 # =======================================================
