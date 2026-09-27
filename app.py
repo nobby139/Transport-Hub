@@ -6125,7 +6125,9 @@ def profile():
         return_to=return_to
     )
 
-
+# -----------------------------------------------------
+# EDIT PROFILE ROUTE
+# -----------------------------------------------------
 @app.route("/edit_profile", methods=["GET", "POST"])
 def edit_profile():
     user_id = session.get("user_id")
@@ -6244,7 +6246,7 @@ def upload_profile_photo():
     user.profile_photo = f"/static/profile_photos/{filename}"
     db.session.commit()
 
-    return redirect("/profile")
+    return redirect("profile.html")
 
 
 # ---------------------------------------------------------
@@ -6270,7 +6272,7 @@ def delete_profile_photo():
     user.profile_photo = None
     db.session.commit()
 
-    return redirect("/profile")
+    return redirect("profile.html")
 
 
 # ---------------------------------------------------------
