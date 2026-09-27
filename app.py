@@ -3338,7 +3338,7 @@ def debug_templates():
 # ================================================
 # SETTINGS
 # ================================================   
-@app.route("/settings", methods=["GET", "POST"], endpoint="settings")
+@app.route("/settings", methods=["GET", "POST"])
 def user_settings():
     user_id = session.get("user_id")
 
