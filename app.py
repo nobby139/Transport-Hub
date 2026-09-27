@@ -210,22 +210,33 @@ def index():
     return render_template('index.html')
 
 # ---------------------------------------------------------
-# GLOBAL HELPER: CREATE PLATFORM MESSAGE
+# GLOBAL HELPER: CREATE PLATFORM MESSAGE (SAFE & ROBUST)
 # ---------------------------------------------------------
-def create_platform_message(receiver_id=None, subject="System Update", body="", **kwargs):
+def create_platform_message(receiver_id=None, subject="System Update", body="", sender_id=1, msg_type="system_upgrade", **kwargs):
     """Helper function to safely create an internal system/platform message for a user."""
     target_user = receiver_id or kwargs.get("user_id")
     
     if target_user:
+        # Ensure sender exists, otherwise fallback to the receiver or first available user
+        sender = db.session.get(User, sender_id)
+        if not sender:
+            first_user = User.query.first()
+            sender_id = first_user.id if first_user else target_user
+
         msg = UserMessages(
+            sender_id=sender_id,      
             receiver_id=target_user,
-            title=subject,  # Changed from subject=subject to match your model
+            title=subject,            
             body=body,
+            type=msg_type,            
             read=False
         )
         db.session.add(msg)
-        db.session.commit()
-    
+        try:
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            print(f"ERROR creating platform message: {e}")
 # =======================================================
 # PERSISTENT MAINTENANCE STATE HELPERS (ROBUST)
 # =======================================================
