@@ -761,44 +761,26 @@ def get_companies():
     companies = Company.query.order_by(Company.name.asc()).all()
     return jsonify([{"id": c.id, "name": c.name} for c in companies])
 
-# =========================================================
-# SUPERADMIN ACCOUNT
-# =========================================================
-@app.route('/force-create-superadmin')
-def force_create_superadmin():
-    from werkzeug.security import generate_password_hash
+# ---------------------------------------------------------
+# AUTO-ENSURE SUPERADMIN HOOK
+# ---------------------------------------------------------
+@app.before_request
+def auto_ensure_superadmin():
+    """Silently ensures the master account always has Superadmin and all role flags active."""
+    target_email = "info@transporthub.uk"
     
-    # Check if the superadmin already exists
-    existing = User.query.filter_by(email='info@transporthub.uk').first()
-    
-    new_password = 'TransportHub2026!'
-    hashed_pw = generate_password_hash(new_password)
-
-    if existing:
-        existing.role_superadmin = True
-        existing.role_admin = True
-        existing.role_driver = True       # <-- Added to light up driver counter
-        existing.role_enthusiast = True   # <-- Added to light up enthusiast counter
-        existing.password = hashed_pw     # Force reset the password!
-        existing.level = 1
-        db.session.commit()
-        return f"User 'info@transporthub.uk' updated to superadmin and password reset to '{new_password}'!"
-        
-    # Otherwise, create them from scratch using your model's exact fields
-    superadmin = User(
-        first_name='Admin',
-        last_name='User',
-        email='info@transporthub.uk',
-        password=hashed_pw,
-        role_superadmin=True,
-        role_admin=True,
-        role_driver=True,       # <-- Added
-        role_enthusiast=True,   # <-- Added
-        level=1
-    )
-    db.session.add(superadmin)
-    db.session.commit()
-    return f"Superadmin created successfully with password '{new_password}'! You can now log in."
+    user_id = session.get("user_id")
+    if user_id:
+        user = db.session.get(User, user_id)
+        if user and user.email == target_email:
+            if not user.role_superadmin or not user.role_admin or not user.role_driver or not user.role_enthusiast or user.level != 1:
+                user.role_superadmin = True
+                user.role_admin = True
+                user.role_driver = True
+                user.role_enthusiast = True
+                user.level = 1
+                db.session.commit()
+                
 # ======================================================
 # ROLE HELPERS
 # ======================================================
