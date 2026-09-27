@@ -6144,20 +6144,26 @@ def edit_profile():
     if request.method == "POST":
         data = request.get_json() or request.form
 
-        # Basic details
+        # Save all basic profile details
+        user.first_name = data.get("first_name")
+        user.last_name = data.get("last_name")
         user.username = data.get("username")
         user.email = data.get("email")
+        user.phone = data.get("phone")
+        user.address = data.get("address")
+        user.postcode = data.get("postcode")
+        user.date_of_birth = data.get("date_of_birth")
         user.company = data.get("company")
         user.region = data.get("region")
         user.depot = data.get("depot")
         user.outstation = data.get("outstation")
 
-        # Requested role flags
+        # Requested role flags (checkboxes or form values)
         requested_driver = bool(data.get("role_driver"))
         requested_enthusiast = bool(data.get("role_enthusiast"))
 
         # Strict Age and Role Enforcement (16 for enthusiast, 18 for drivers)
-        if getattr(user, 'date_of_birth', None):
+        if user.date_of_birth:
             try:
                 dob_date = datetime.strptime(user.date_of_birth, "%Y-%m-%d")
                 today = datetime.today()
@@ -6176,15 +6182,19 @@ def edit_profile():
                     user.level = 4
                 else:
                     # 18+ can choose freely
-                    user.role_driver = requested_driver
-                    user.role_enthusiast = requested_enthusiast
+                    if requested_driver:
+                        user.role_driver = True
+                        user.role_enthusiast = False
+                        user.level = 3  # Driver level
+                    elif requested_enthusiast:
+                        user.role_driver = False
+                        user.role_enthusiast = True
+                        user.level = 4  # Enthusiast level
             except (ValueError, TypeError):
                 pass
-        else:
-            user.role_driver = requested_driver
-            user.role_enthusiast = requested_enthusiast
 
         db.session.commit()
+        
         if request.is_json:
             return jsonify({"message": "Profile updated successfully"}), 200
         flash("Profile updated successfully", "success")
