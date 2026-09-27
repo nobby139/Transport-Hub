@@ -6480,8 +6480,11 @@ def emergency_fix_alex():
         alex.level = 2
         alex.role_superadmin = False
         alex.role_admin = True
+        # If your model also has a string 'role' or 'role_name' column:
+        if hasattr(alex, 'role'):
+            alex.role = 'Admin'
         db.session.commit()
-        return "Alex has been successfully downgraded to Admin!"
+        return "Alex has been fully updated to Admin across all fields!"
     return "Alex not found."
 # ---------------------------------------------------------
 # RUN SERVER
