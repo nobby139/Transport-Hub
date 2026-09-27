@@ -6086,7 +6086,7 @@ def profile():
         db.session.add(settings)
         db.session.commit()
 
-        if user.age < 18:
+        if getattr(user, 'age', None) and user.age < 18:
             user.level = 4
         db.session.commit()
 
