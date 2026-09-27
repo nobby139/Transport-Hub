@@ -214,13 +214,12 @@ def index():
 # ---------------------------------------------------------
 def create_platform_message(receiver_id=None, subject="System Update", body="", **kwargs):
     """Helper function to safely create an internal system/platform message for a user."""
-    # Fallbacks in case keyword arguments are named differently
     target_user = receiver_id or kwargs.get("user_id")
     
     if target_user:
         msg = UserMessages(
             receiver_id=target_user,
-            subject=subject,
+            title=subject,  # Changed from subject=subject to match your model
             body=body,
             read=False
         )
