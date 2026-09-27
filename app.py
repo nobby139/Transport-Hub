@@ -1672,7 +1672,6 @@ def settings_system_save():
     db.session.commit()
     return redirect("/settings/system")
 
-
 # ============================================================
 # 2. USER SETTINGS (Individual Profile & Preferences)
 # ============================================================
@@ -1691,7 +1690,7 @@ def settings():
         user_settings = Settings(
             user_id=user.id, 
             username=getattr(user, "username", None) or "User",
-            week_start_day="Monday"  # Provide your default week start day here
+            week_start_day="Monday"
         )
         db.session.add(user_settings)
         db.session.commit()
@@ -1706,9 +1705,21 @@ def settings():
         flash("Settings updated successfully!", "success")
         return redirect(url_for("settings"))
 
-    pay_rates = PayRate.query.filter_by(user_id=user.id).all() if 'PayRate' in globals() else []
-    special_days = SpecialDay.query.filter_by(user_id=user.id).all() if 'SpecialDay' in globals() else []
+    # Safe queries for pay rates and special days
+    pay_rates = []
+    if 'PayRate' in globals():
+        if hasattr(PayRate, 'user_id'):
+            pay_rates = PayRate.query.filter_by(user_id=user.id).all()
+        else:
+            pay_rates = PayRate.query.all()
     
+    special_days = []
+    if 'SpecialDay' in globals():
+        if hasattr(SpecialDay, 'user_id'):
+            special_days = SpecialDay.query.filter_by(user_id=user.id).all()
+        else:
+            special_days = SpecialDay.query.all()
+        
     return_to = request.referrer or url_for("home")
     
     return render_template(
