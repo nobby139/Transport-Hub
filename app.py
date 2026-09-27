@@ -6088,6 +6088,11 @@ def profile():
     if not user:
         return redirect("/login")
 
+    # Auto-assign joined date if missing (using today's date)
+    if not user.joined_date:
+        user.joined_date = datetime.today().strftime("%Y-%m-%d")
+        db.session.commit()
+
     settings = Settings.query.filter_by(user_id=user.id).first()
     if not settings:
         settings = Settings(
@@ -6128,6 +6133,9 @@ def profile():
 # -----------------------------------------------------
 # EDIT PROFILE ROUTE
 # -----------------------------------------------------
+from werkzeug.utils import secure_filename
+import os
+
 @app.route("/edit_profile", methods=["GET", "POST"])
 def edit_profile():
     user_id = session.get("user_id")
@@ -6158,43 +6166,56 @@ def edit_profile():
         user.depot = data.get("depot")
         user.outstation = data.get("outstation")
 
-        # Requested role flags (robust parsing for 1/0, "1"/"0", True/False)
-        role_driver_val = data.get("role_driver")
-        role_enthusiast_val = data.get("role_enthusiast")
+        # Ensure joined date exists if missing
+        if not user.joined_date:
+            user.joined_date = datetime.today().strftime("%Y-%m-%d")
 
-        requested_driver = str(role_driver_val) in ["1", "true", "True", "on"]
-        requested_enthusiast = str(role_enthusiast_val) in ["1", "true", "True", "on"]
+        # Handle Profile Photo Upload
+        if "profile_photo" in request.files:
+            file = request.files["profile_photo"]
+            if file and file.filename != "":
+                filename = secure_filename(file.filename)
+                upload_folder = os.path.join("static", "uploads")
+                os.makedirs(upload_folder, exist_ok=True)
+                file_path = os.path.join(upload_folder, filename)
+                file.save(file_path)
+                user.profile_photo = f"/static/uploads/{filename}"
 
-        # Strict Age and Role Enforcement (16 for enthusiast, 18 for drivers)
-        if user.date_of_birth:
-            try:
-                dob_date = datetime.strptime(user.date_of_birth, "%Y-%m-%d")
-                today = datetime.today()
-                age = today.year - dob_date.year - ((today.month, today.day) < (dob_date.month, dob_date.day))
-                
-                if age < 16:
-                    flash("You must be at least 16 years old to hold an account.", "danger")
-                    user.role_driver = False
-                    user.role_enthusiast = False
-                elif age < 18:
-                    # Under 18 cannot be a driver, forced to enthusiast (level 4)
-                    if requested_driver:
-                        flash("Drivers must be 18 or older. Role adjusted to Enthusiast.", "warning")
-                    user.role_driver = False
-                    user.role_enthusiast = True
-                    user.level = 4
-                else:
-                    # 18+ can choose freely
-                    if requested_driver:
-                        user.role_driver = True
+        # Only apply driver/enthusiast age rules if the user is NOT a Superadmin or Admin
+        if not user.role_superadmin and not user.role_admin:
+            role_driver_val = data.get("role_driver")
+            role_enthusiast_val = data.get("role_enthusiast")
+
+            requested_driver = str(role_driver_val) in ["1", "true", "True", "on"]
+            requested_enthusiast = str(role_enthusiast_val) in ["1", "true", "True", "on"]
+
+            if user.date_of_birth:
+                try:
+                    dob_date = datetime.strptime(user.date_of_birth, "%Y-%m-%d")
+                    today = datetime.today()
+                    age = today.year - dob_date.year - ((today.month, today.day) < (dob_date.month, dob_date.day))
+                    
+                    if age < 16:
+                        flash("You must be at least 16 years old to hold an account.", "danger")
+                        user.role_driver = False
                         user.role_enthusiast = False
-                        user.level = 3  # Driver level
-                    elif requested_enthusiast:
+                    elif age < 18:
+                        if requested_driver:
+                            flash("Drivers must be 18 or older. Role adjusted to Enthusiast.", "warning")
                         user.role_driver = False
                         user.role_enthusiast = True
-                        user.level = 4  # Enthusiast level
-            except (ValueError, TypeError):
-                pass
+                        user.level = 4
+                    else:
+                        if requested_driver:
+                            user.role_driver = True
+                            user.role_enthusiast = False
+                            user.level = 3  # Driver level
+                        elif requested_enthusiast:
+                            user.role_driver = False
+                            user.role_enthusiast = True
+                            user.level = 4  # Enthusiast level
+                except (ValueError, TypeError):
+                    pass
 
         db.session.commit()
         
@@ -6213,7 +6234,6 @@ def edit_profile():
 # ---------------------------------------------------------
 # UPLOAD PROFILE PHOTO
 # ---------------------------------------------------------
-
 @app.route("/upload_profile_photo", methods=["POST"])
 def upload_profile_photo():
     email = session.get("email")
@@ -6225,14 +6245,14 @@ def upload_profile_photo():
         return redirect("/login")
 
     if "photo" not in request.files:
-        return redirect("/profile")
+        return redirect(url_for("profile"))
 
     file = request.files["photo"]
 
     if file.filename == "":
-        return redirect("/profile")
+        return redirect(url_for("profile"))
 
-    upload_folder = app.config["UPLOAD_FOLDER"]
+    upload_folder = app.config.get("UPLOAD_FOLDER", "static/profile_photos")
     os.makedirs(upload_folder, exist_ok=True)
 
     original_name = secure_filename(file.filename)
@@ -6259,13 +6279,12 @@ def upload_profile_photo():
     user.profile_photo = f"/static/profile_photos/{filename}"
     db.session.commit()
 
-    return redirect("profile.html")
+    return redirect(url_for("profile"))
 
 
 # ---------------------------------------------------------
 # DELETE PROFILE PHOTO
 # ---------------------------------------------------------
-
 @app.route("/delete_profile_photo", methods=["POST"])
 def delete_profile_photo():
     email = session.get("email")
@@ -6285,7 +6304,7 @@ def delete_profile_photo():
     user.profile_photo = None
     db.session.commit()
 
-    return redirect("profile.html")
+    return redirect(url_for("profile"))
 
 
 # ---------------------------------------------------------
