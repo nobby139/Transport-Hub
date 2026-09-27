@@ -6051,7 +6051,6 @@ def article(num):
 # ============================================================
 # PROFILE, EDIT PROFILE & PASSWORD MANAGEMENT
 # ============================================================
-
 @app.route("/profile")
 def profile():
     user_id = session.get("user_id")
@@ -6066,6 +6065,7 @@ def profile():
     if not settings:
         settings = Settings(
             user_id=user.id,
+            username=user.username,  # <--- THIS LINE FIXES THE ERROR
             account_type="enthusiast",
             year_mode="calendar",
             theme="light"
