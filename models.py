@@ -77,7 +77,7 @@ class User(db.Model, UserMixin):
             (today.month, today.day) < (dob.month, dob.day)
         )
 
-    # AUTO ROLE LABEL (NEW)
+    # AUTO ROLE LABEL (CORRECTED)
     @property
     def role_label(self):
         # If boolean flags are set, they override numeric level
@@ -90,12 +90,12 @@ class User(db.Model, UserMixin):
         if self.role_enthusiast:
             return "Enthusiast"
 
-        # Fallback to numeric level
+        # Fallback to numeric level (Level 3 = Driver, Level 4 = Enthusiast)
         mapping = {
             1: "Superadmin",
             2: "Admin",
-            3: "Enthusiast",
-            4: "Driver"
+            3: "Driver",
+            4: "Enthusiast"
         }
         return mapping.get(self.level, "Unknown")
  
