@@ -6479,9 +6479,14 @@ with app.app_context():
 # ------------------------------------------
 @app.route('/debug-check-roles')
 def debug_check_roles():
-    # Double-locked: Must be authenticated, have the superadmin flag, AND match your exact master email
-    if not current_user.is_authenticated or not getattr(current_user, 'role_superadmin', False) or current_user.email.strip().lower() != 'info@transporthub.uk':
-        return "Access denied. Superadmin privileges required.", 403
+    if not current_user.is_authenticated:
+        return "Access denied: Not logged in.", 403
+        
+    # Debug print to server logs to see what email and role are active
+    print(f"DEBUG ACCESS: User={current_user.email}, SuperAdmin={getattr(current_user, 'role_superadmin', False)}")
+    
+    if current_user.email.strip().lower() != 'info@transporthub.uk':
+        return f"Access denied: Email mismatch ({current_user.email}).", 403
         
     all_users = User.query.all()
     output = "<h2>User Roles Diagnostic</h2><table border='1' cellpadding='5' style='border-collapse: collapse;'><tr style='background: #f2f2f2;'><th>Email</th><th>Superadmin</th><th>Admin</th><th>Driver</th><th>Enthusiast</th><th>Level</th></tr>"
@@ -6491,9 +6496,6 @@ def debug_check_roles():
     
     output += "</table>"
     return output
-
-# --- (Rest of your app.py or if __name__ == '__main__': below) ---
-    
 # ---------------------------------------------------------
 # RUN SERVER
 # ---------------------------------------------------------
