@@ -134,6 +134,10 @@ from database import db
 db.init_app(app)
 migrate = Migrate(app, db)
 
+with app.app_context():
+    db.create_all()
+    print("Database tables checked/created successfully!")
+
 
 # =======================================================
 # AUTOMATIC SCHEMA PATCH
