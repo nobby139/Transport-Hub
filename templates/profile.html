@@ -37,9 +37,13 @@
 
             <p><strong>Username:</strong> {{ user.username }}</p>
 
-            <p><strong>Date of Birth:</strong> 
-                {{ user.date_of_birth.split('-')[2] }}/{{ user.date_of_birth.split('-')[1] }}/{{ user.date_of_birth.split('-')[0] }}
-            </p>
+			<p><strong>Date of Birth:</strong> 
+			    {% if user.date_of_birth %}
+			        {{ user.date_of_birth.split('-')[2] }}/{{ user.date_of_birth.split('-')[1] }}/{{ user.date_of_birth.split('-')[0] }}
+			    {% else %}
+			        <span style="color: red;">Missing (Update Below)</span>
+			    {% endif %}
+			</p>
 
             <p><strong>Age:</strong> {{ user.age }}</p>
 
