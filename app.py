@@ -6473,16 +6473,16 @@ def debug_check_roles():
     output += "</table>"
     return output
 
-@app.route("/emergency-fix-alex")
-def emergency_fix_alex():
-    alex = User.query.filter_by(email="test1transporthub@outlook.com").first()
-    if alex:
-        alex.level = 2                  # Must be 2 for Admin
-        alex.role_superadmin = False    # Explicitly False
-        alex.role_admin = True          # Explicitly True
-        db.session.commit()
-        return "Alex updated: level=2, role_superadmin=False, role_admin=True"
-    return "Alex not found."
+@app.route("/debug-current-user")
+@login_required
+def debug_current_user():
+    return f"""
+    Logged in as: {current_user.email}<br>
+    Level: {current_user.level} (Type: {type(current_user.level)})<br>
+    role_superadmin: {current_user.role_superadmin} (Type: {type(current_user.role_superadmin)})<br>
+    role_admin: {current_user.role_admin} (Type: {type(current_user.role_admin)})<br>
+    <b>Evaluated role_label: {current_user.role_label}</b>
+    """
 # ---------------------------------------------------------
 # RUN SERVER
 # ---------------------------------------------------------
