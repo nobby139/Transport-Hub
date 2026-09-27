@@ -6478,6 +6478,17 @@ def debug_check_roles():
     
     output += "</table>"
     return output
+
+@app.route("/emergency-fix-alex")
+def emergency_fix_alex():
+    alex = User.query.filter_by(email="test1transporthub@outlook.com").first()
+    if alex:
+        alex.level = 2
+        alex.role_superadmin = False
+        alex.role_admin = True
+        db.session.commit()
+        return "Alex has been successfully downgraded to Admin!"
+    return "Alex not found."
 # ---------------------------------------------------------
 # RUN SERVER
 # ---------------------------------------------------------
