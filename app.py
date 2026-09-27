@@ -1723,7 +1723,7 @@ def settings():
     return_to = request.referrer or url_for("home")
     
     return render_template(
-        "profile_settings.html",
+        "settings.html",
         user=user,
         settings=user_settings,
         pay_rates=pay_rates,
