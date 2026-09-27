@@ -1275,11 +1275,10 @@ def platform_messages():
     # All messages sent to OR from the logged-in user
     messages = UserMessages.query.order_by(UserMessages.created_at.desc()).all()
 
-
-    # Unread count for logged-in user only
+    # Unread count for logged-in user only (using is_read or read matching your model)
     unread_count = UserMessages.query.filter(
         UserMessages.receiver_id == user.id,
-        UserMessages.read == False
+        UserMessages.is_read == False
     ).count()
 
     return render_template(
@@ -1290,8 +1289,6 @@ def platform_messages():
         messages=messages,
         unread_count=unread_count
     )
-
-
 
 
 @app.route("/mark_read/<int:msg_id>", methods=["POST"])
@@ -1306,13 +1303,10 @@ def mark_read(msg_id):
     if msg.receiver_id != current_user.id:
         return jsonify({"success": False, "error": "Not allowed"}), 403
 
-    msg.read = True
+    msg.is_read = True
     db.session.commit()
 
     return jsonify({"success": True})
-
-
-
 
 # =========================================
 # SET ROLE
