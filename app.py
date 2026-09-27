@@ -6487,17 +6487,14 @@ def debug_check_roles():
     if not current_user.is_authenticated:
         return "Access denied: Not logged in.", 403
         
-    # Debug print to server logs to see what email and role are active
-    print(f"DEBUG ACCESS: User={current_user.email}, SuperAdmin={getattr(current_user, 'role_superadmin', False)}")
-    
     if current_user.email.strip().lower() != 'info@transporthub.uk':
         return f"Access denied: Email mismatch ({current_user.email}).", 403
         
     all_users = User.query.all()
-    output = "<h2>User Roles Diagnostic</h2><table border='1' cellpadding='5' style='border-collapse: collapse;'><tr style='background: #f2f2f2;'><th>Email</th><th>Superadmin</th><th>Admin</th><th>Driver</th><th>Enthusiast</th><th>Level</th></tr>"
+    output = "<h2>User Roles Diagnostic</h2><table border='1' cellpadding='5' style='border-collapse: collapse;'><tr style='background: #f2f2f2;'><th>Email</th><th>Highest Role</th><th>Level</th><th>Superadmin</th><th>Admin</th><th>Driver</th><th>Enthusiast</th></tr>"
     
     for u in all_users:
-        output += f"<tr><td>{u.email}</td><td>{u.role_superadmin}</td><td>{u.role_admin}</td><td>{u.role_driver}</td><td>{u.role_enthusiast}</td><td>{u.level}</td></tr>"
+        output += f"<tr><td>{u.email}</td><td><b>{u.highest_role_display}</b></td><td>{u.level}</td><td>{u.role_superadmin}</td><td>{u.role_admin}</td><td>{u.role_driver}</td><td>{u.role_enthusiast}</td></tr>"
     
     output += "</table>"
     return output
