@@ -1730,7 +1730,7 @@ def settings():
     )
 
 # ============================================================
-# SUPERADMIN CHAT SYSTEM (NEW)
+# SUPERADMIN CHAT SYSTEM (FIXED & SAFE)
 # ============================================================
 @app.route("/superadmin/messages/<target>")
 @login_required
@@ -1740,16 +1740,20 @@ def superadmin_messages(target):
     if current_user.level != 1:
         return "Unauthorized", 403
 
-    # Identify Admin + Superadmin
+    # Identify Admin + Superadmin safely
     admin = User.query.filter_by(level=2).first()
     superadmin = User.query.filter_by(level=1).first()
+
+    # Fallback if admin or superadmin row is missing to prevent 500 errors
+    if not superadmin:
+        superadmin = current_user
 
     # ============================
     # CATEGORY MODE — MERGED INBOX
     # ============================
     if target in ["user", "enthusiast", "driver", "admin", "all"]:
 
-        # Build user list based on category
+        # Build user list based on category (Using Level 3 for Drivers)
         if target == "user":
             users = User.query.filter(User.level != 1).all()
 
@@ -1757,33 +1761,38 @@ def superadmin_messages(target):
             users = User.query.filter_by(level=4).all()
 
         elif target == "driver":
-            users = User.query.filter_by(level=5).all()
+            users = User.query.filter_by(level=3).all()
 
         elif target == "admin":
             users = User.query.filter_by(level=2).all()
 
         elif target == "all":
             users = User.query.filter(User.level != 1).all()
+        else:
+            users = []
 
-        # ⭐ Load ALL messages addressed to Admin OR Superadmin
-        messages = UserMessages.query.filter(
-            (
-                (UserMessages.sender_id == admin.id) &
-                (UserMessages.receiver_id == superadmin.id)
-            )
-            |
-            (
-                (UserMessages.sender_id == superadmin.id) &
-                (UserMessages.receiver_id == admin.id)
-            )
-        ).order_by(UserMessages.created_at.asc()).all()
+        # Load messages safely if admin exists
+        if admin:
+            messages = UserMessages.query.filter(
+                (
+                    (UserMessages.sender_id == admin.id) &
+                    (UserMessages.receiver_id == superadmin.id)
+                )
+                |
+                (
+                    (UserMessages.sender_id == superadmin.id) &
+                    (UserMessages.receiver_id == admin.id)
+                )
+            ).order_by(UserMessages.created_at.asc()).all()
 
-        # ⭐ Mark messages as read for BOTH Admin + Superadmin
-        for m in messages:
-            if m.receiver_id in [admin.id, superadmin.id] and not m.read:
-                m.read = True
+            # Mark messages as read for both
+            for m in messages:
+                if m.receiver_id in [admin.id, superadmin.id] and not m.read:
+                    m.read = True
 
-        db.session.commit()
+            db.session.commit()
+        else:
+            messages = []
 
         return render_template(
             "superadmin_messages.html",
@@ -1794,6 +1803,8 @@ def superadmin_messages(target):
             admin=admin,
             superadmin=superadmin
         )
+    
+    return "Invalid target category", 404
 
 
     # ============================
