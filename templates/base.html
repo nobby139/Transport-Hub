@@ -46,13 +46,15 @@
 				</a>
 
 				<!-- PROFILE ICON -->
-				<a class="nav-btn" href="{{ url_for('profile') }}">
+				<a href="{{ url_for('profile') }}" class="nav-btn">
 				    <img src="{{ url_for('static', filename='assets/profile.png') }}" class="nav-icon">
+				    <span>Profile</span>
 				</a>
 				
 				<!-- SETTINGS ICON -->
-				<a class="nav-btn" href="{{ url_for('user_settings') }}">
+				<a href="{{ url_for('settings') }}" class="nav-btn">
 				    <img src="{{ url_for('static', filename='assets/settings.png') }}" class="nav-icon">
+				    <span>Settings</span>
 				</a>
 
 				<!-- LOGOUT ICON -->
@@ -102,7 +104,7 @@
 				<li><a href="{{ url_for('profile') }}">Profile</a></li>
 				<li><a href="/weekly_view">Duty Reports</a></li>
 				<li><a href="/weekly-takings-view">Takings Reports</a></li>
-				<li><a href="{{ url_for('user_settings') }}">Settings</a></li>
+				<li><a href="{{ url_for('settings') }}">Settings</a></li>
 			{% endif %}
 
 			<li><a href="/legal">Legal & Disclaimers</a></li>
