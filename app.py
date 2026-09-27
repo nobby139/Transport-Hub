@@ -1609,11 +1609,13 @@ def role_change_history():
     )
 
 # ============================================================
-# GLOBAL SYSTEM SETTINGS
+# GLOBAL SYSTEM SETTINGS & PROFILE MANAGEMENT
 # ============================================================
 from database import db
 from models import SystemSettings
-from flask import request, redirect
+from flask import request, redirect, render_template, url_for, flash
+from flask_login import login_required, current_user
+from werkzeug.security import generate_password_hash, check_password_hash
 
 @app.route("/settings/system")
 @login_required
@@ -1636,10 +1638,15 @@ def settings_system_save():
         settings = SystemSettings()
         db.session.add(settings)
 
-    # Normal fields
-    settings.session_timeout = int(request.form.get("session_timeout"))
-    settings.default_suspension_length = int(request.form.get("default_suspension_length"))
-    settings.log_retention = int(request.form.get("log_retention"))
+    # Normal fields with safe defaults/conversions
+    session_timeout_val = request.form.get("session_timeout")
+    settings.session_timeout = int(session_timeout_val) if session_timeout_val else 30
+
+    suspension_val = request.form.get("default_suspension_length")
+    settings.default_suspension_length = int(suspension_val) if suspension_val else 7
+
+    retention_val = request.form.get("log_retention")
+    settings.log_retention = int(retention_val) if retention_val else 90
 
     # Boolean checkboxes (checkbox returns None if unchecked)
     settings.superadmin_protection = request.form.get("superadmin_protection") is not None
@@ -1688,11 +1695,11 @@ def settings_profile():
             flash("New passwords do not match.", "danger")
             return redirect(url_for("settings_profile"))
             
-        if len(new_password) < 6:
+        if not new_password or len(new_password) < 6:
             flash("Password must be at least 6 characters long.", "danger")
             return redirect(url_for("settings_profile"))
             
-        # Update and commit
+        # Update and commit securely
         current_user.password = generate_password_hash(new_password)
         db.session.commit()
         
