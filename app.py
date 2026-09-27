@@ -6158,9 +6158,12 @@ def edit_profile():
         user.depot = data.get("depot")
         user.outstation = data.get("outstation")
 
-        # Requested role flags (checkboxes or form values)
-        requested_driver = bool(data.get("role_driver"))
-        requested_enthusiast = bool(data.get("role_enthusiast"))
+        # Requested role flags (robust parsing for 1/0, "1"/"0", True/False)
+        role_driver_val = data.get("role_driver")
+        role_enthusiast_val = data.get("role_enthusiast")
+
+        requested_driver = str(role_driver_val) in ["1", "true", "True", "on"]
+        requested_enthusiast = str(role_enthusiast_val) in ["1", "true", "True", "on"]
 
         # Strict Age and Role Enforcement (16 for enthusiast, 18 for drivers)
         if user.date_of_birth:
