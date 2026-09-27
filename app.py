@@ -777,7 +777,9 @@ def force_create_superadmin():
     if existing:
         existing.role_superadmin = True
         existing.role_admin = True
-        existing.password = hashed_pw  # Force reset the password!
+        existing.role_driver = True       # <-- Added to light up driver counter
+        existing.role_enthusiast = True   # <-- Added to light up enthusiast counter
+        existing.password = hashed_pw     # Force reset the password!
         existing.level = 1
         db.session.commit()
         return f"User 'info@transporthub.uk' updated to superadmin and password reset to '{new_password}'!"
@@ -790,12 +792,13 @@ def force_create_superadmin():
         password=hashed_pw,
         role_superadmin=True,
         role_admin=True,
+        role_driver=True,       # <-- Added
+        role_enthusiast=True,   # <-- Added
         level=1
     )
     db.session.add(superadmin)
     db.session.commit()
     return f"Superadmin created successfully with password '{new_password}'! You can now log in."
-
 # ======================================================
 # ROLE HELPERS
 # ======================================================
