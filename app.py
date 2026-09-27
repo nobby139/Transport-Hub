@@ -6059,14 +6059,23 @@ def article(num):
 # ============================================================
 # PROFILE & EDIT PROFILE ROUTES (Age Rules: 16+ Enthusiast, 18+ Driver)
 # ============================================================
-
 @app.route("/profile")
 def profile():
+    # ⭐ Check session first, then fallback to Flask-Login's current_user
     user_id = session.get("user_id")
+    if not user_id and current_user.is_authenticated:
+        user_id = getattr(current_user, "id", None)
+
     if not user_id:
         return redirect("/login")
 
-    user = User.query.get(user_id)
+    try:
+        user_id = int(user_id)
+    except (ValueError, TypeError):
+        session.clear()
+        return redirect("/login")
+
+    user = db.session.get(User, user_id)
     if not user:
         return redirect("/login")
 
@@ -6092,7 +6101,6 @@ def profile():
             if age < 16:
                 flash("Access restricted: You must be at least 16 years old.", "danger")
             elif age < 18:
-                # 16-17: Enthusiast only, cannot be a driver
                 user.role_driver = False
                 user.role_enthusiast = True
                 user.level = 4
@@ -6100,13 +6108,14 @@ def profile():
         except (ValueError, TypeError):
             pass
 
-    return_to = request.referrer or url_for("home")
+    return_to = request.referrer or url_for("home_target") if 'home_target' in globals() else "/"
     return render_template(
         "profile.html",
         user=user,
         settings=settings,
         return_to=return_to
     )
+
 
 
 @app.route("/edit_profile", methods=["GET", "POST"])
