@@ -6061,7 +6061,7 @@ def article(num):
     )
 
 # ============================================================
-# PROFILE & EDIT PROFILE ROUTES
+# PROFILE & EDIT PROFILE ROUTES (Age Rules: 16+ Enthusiast, 18+ Driver)
 # ============================================================
 
 @app.route("/profile")
@@ -6086,9 +6086,23 @@ def profile():
         db.session.add(settings)
         db.session.commit()
 
-        if getattr(user, 'age', None) and user.age < 18:
-            user.level = 4
-        db.session.commit()
+    # Age and role validation check on load
+    if getattr(user, 'date_of_birth', None):
+        try:
+            dob_date = datetime.strptime(user.date_of_birth, "%Y-%m-%d")
+            today = datetime.today()
+            age = today.year - dob_date.year - ((today.month, today.day) < (dob_date.month, dob_date.day))
+            
+            if age < 16:
+                flash("Access restricted: You must be at least 16 years old.", "danger")
+            elif age < 18:
+                # 16-17: Enthusiast only, cannot be a driver
+                user.role_driver = False
+                user.role_enthusiast = True
+                user.level = 4
+                db.session.commit()
+        except (ValueError, TypeError):
+            pass
 
     return_to = request.referrer or url_for("home")
     return render_template(
@@ -6123,20 +6137,37 @@ def edit_profile():
         user.depot = data.get("depot")
         user.outstation = data.get("outstation")
 
-        # Role flags
-        user.role_driver = bool(data.get("role_driver"))
-        user.role_enthusiast = bool(data.get("role_enthusiast"))
+        # Requested role flags
+        requested_driver = bool(data.get("role_driver"))
+        requested_enthusiast = bool(data.get("role_enthusiast"))
 
-        # Age and level handling
+        # Strict Age and Role Enforcement (16 for enthusiast, 18 for drivers)
         if getattr(user, 'date_of_birth', None):
             try:
                 dob_date = datetime.strptime(user.date_of_birth, "%Y-%m-%d")
                 today = datetime.today()
                 age = today.year - dob_date.year - ((today.month, today.day) < (dob_date.month, dob_date.day))
-                if age < 18:
+                
+                if age < 16:
+                    flash("You must be at least 16 years old to hold an account.", "danger")
+                    user.role_driver = False
+                    user.role_enthusiast = False
+                elif age < 18:
+                    # Under 18 cannot be a driver, forced to enthusiast (level 4)
+                    if requested_driver:
+                        flash("Drivers must be 18 or older. Role adjusted to Enthusiast.", "warning")
+                    user.role_driver = False
+                    user.role_enthusiast = True
                     user.level = 4
+                else:
+                    # 18+ can choose freely
+                    user.role_driver = requested_driver
+                    user.role_enthusiast = requested_enthusiast
             except (ValueError, TypeError):
                 pass
+        else:
+            user.role_driver = requested_driver
+            user.role_enthusiast = requested_enthusiast
 
         db.session.commit()
         if request.is_json:
