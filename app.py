@@ -6070,7 +6070,6 @@ def article(num):
 # ============================================================
 @app.route("/profile")
 def profile():
-    # Check session first, then fallback to Flask-Login's current_user
     user_id = session.get("user_id")
     if not user_id and current_user.is_authenticated:
         user_id = getattr(current_user, "id", None)
@@ -6089,14 +6088,13 @@ def profile():
         return redirect("/login")
 
     # =========================================================
-    # ONE-TIME LIVE PROMOTION: Remove these 6 lines after refreshing once!
-    if user.email == "info@transporthub.uk":
-        user.role_superadmin = True
-        user.role_admin = False
-        user.role_driver = False
-        user.role_enthusiast = False
-        user.level = 1
-        db.session.commit()
+    # FORCE SUPERADMIN ON CURRENT USER (Run once, then delete)
+    user.role_superadmin = True
+    user.role_admin = False
+    user.role_driver = False
+    user.role_enthusiast = False
+    user.level = 1
+    db.session.commit()
     # =========================================================
 
     # Auto-assign joined date if missing (using today's date)
