@@ -3338,10 +3338,9 @@ def debug_templates():
     import os
     return str(os.listdir(app.template_folder))
 
-
 # ================================================
 # SETTINGS
-# ================================================   
+# ================================================    
 @app.route("/settings", methods=["GET", "POST"])
 def user_settings():
     user_id = session.get("user_id")
@@ -3362,21 +3361,20 @@ def user_settings():
 
     session["last_page"] = request.referrer or session.get("last_page")
 
-    # ⭐ FIX: define user BEFORE creating Settings
     user = db.session.get(User, user_id)
+    if not user:
+        return redirect("/login")
 
     settings = Settings.query.filter_by(user_id=user_id).first()
     if settings is None:
         settings = Settings(
             user_id=user_id,
-            username=user.username
+            username=user.username or "User"  # ⭐ Safe fallback
         )
         db.session.add(settings)
         db.session.commit()
 
     if request.method == "POST":
-
-        # YEAR MODE FIELDS (only update if this form was submitted)
         if "year_mode" in request.form:
             settings.year_mode = request.form.get("year_mode")
 
@@ -3386,25 +3384,21 @@ def user_settings():
         if "custom_tax_year_start" in request.form:
             settings.custom_tax_year_start = request.form.get("custom_tax_year_start")
 
-        # WEEK START DAY (only update if this form was submitted)
         if "week_start_day" in request.form:
             new_week_start = request.form.get("week_start_day")
             settings.week_start_day = new_week_start
 
-            # Admin → update company default
             if user.level == 3:
                 company = Company.query.filter_by(name=user.company).first()
                 if company:
                     company.week_start_day = new_week_start
-
-            # Driver → update personal override
             else:
                 user.week_start_override = new_week_start
 
         db.session.commit()
-        return redirect("/settings")
+        return redirect(url_for("user_settings"))
 
-            
+    # ⭐ Correctly un-indented so it runs on GET requests
     pay_rates = PayRate.query.order_by(PayRate.effective_from.asc().nulls_last()).all()
     special_days = SpecialDay.query.order_by(SpecialDay.date.asc()).all()
 
@@ -3418,7 +3412,7 @@ def user_settings():
         pay_rates=pay_rates,
         special_days=special_days
     )
-                
+  
 
 # ============================
 # PAY RATE SETTINGS
@@ -6080,16 +6074,16 @@ def profile():
         return redirect("/login")
 
     settings = Settings.query.filter_by(user_id=user.id).first()
-    if not settings:
-        settings = Settings(
-            user_id=user.id,
-            username=user.username,
-            account_type="enthusiast",
-            year_mode="calendar",
-            theme="light"
-        )
-        db.session.add(settings)
-        db.session.commit()
+        if not settings:
+            settings = Settings(
+                user_id=user.id,
+                username=user.username or "User",  # ⭐ Added fallback to prevent null violation
+                account_type="enthusiast",
+                year_mode="calendar",
+                theme="light"
+            )
+            db.session.add(settings)
+            db.session.commit()
 
     # Age and role validation check on load
     if getattr(user, 'date_of_birth', None):
