@@ -6477,14 +6477,11 @@ def debug_check_roles():
 def emergency_fix_alex():
     alex = User.query.filter_by(email="test1transporthub@outlook.com").first()
     if alex:
-        alex.level = 2
-        alex.role_superadmin = False
-        alex.role_admin = True
-        # If your model also has a string 'role' or 'role_name' column:
-        if hasattr(alex, 'role'):
-            alex.role = 'Admin'
+        alex.level = 2                  # Must be 2 for Admin
+        alex.role_superadmin = False    # Explicitly False
+        alex.role_admin = True          # Explicitly True
         db.session.commit()
-        return "Alex has been fully updated to Admin across all fields!"
+        return "Alex updated: level=2, role_superadmin=False, role_admin=True"
     return "Alex not found."
 # ---------------------------------------------------------
 # RUN SERVER
