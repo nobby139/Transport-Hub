@@ -2302,7 +2302,7 @@ def goodbye():
     )
    
 # ---------------------------------------------------------
-# UNIFIED LOGIN (DRIVER + ENTHUSIAST + 2FA CHECK)
+# UNIFIED LOGIN (DRIVER + ENTHUSIAST + MANDATORY 2FA)
 # ---------------------------------------------------------
 @app.post("/api/login")
 def unified_login():
@@ -2323,61 +2323,30 @@ def unified_login():
     if not check_password_hash(user.password, password):
         return jsonify({"message": "Incorrect password"}), 400
     
-    # 🛡️ 2FA INTERCEPTION CHECK
-    if user.is_2fa_enabled and user.totp_secret:
+    # 🛡️ MANDATORY 2FA ENFORCEMENT CHECK
+    if not user.is_2fa_enabled or not user.totp_secret:
         session["pre_2fa_user_id"] = user.id
+        login_user(user)  # Log them in briefly so @login_required allows them to view /setup_2fa
         return jsonify({
-            "message": "2FA verification required",
-            "redirect": "/verify_2fa"
+            "message": "Please set up Two-Factor Authentication",
+            "redirect": "/setup_2fa"
         }), 200
 
-    # ⭐ Store user_id for your system
-    session["user_id"] = user.id
-    session["_user_id"] = str(user.id)
-    
-    # 🔑 CORRECTED FIX: Use your actual database field 'role_superadmin'
-    if user.role_superadmin or user.level == 1:
-        session['is_superadmin'] = True
-
-    # Get company record
-    company = Company.query.filter_by(name=user.company).first()
-
-    # Handle week start logic
-    if company and company.week_start_day is None and user.level == 3:
-        login_user(user, remember=True)   # persist session
-        return jsonify({"redirect": "/choose-week-start"}), 200
-
-    # Week start override or company default
-    if user.week_start_override:
-        session["week_start"] = user.week_start_override
-    else:
-        session["week_start"] = company.week_start_day if company else "monday"
-
-    # Persist login session
-    login_user(user, remember=True)
-
-    # Dashboard redirect (Routes Superadmin directly to their tools panel)
-    if user.role_superadmin:
-        redirect_target = url_for('superadmin_tools')
-    elif user.role_driver:
-        redirect_target = "/driver_dashboard"
-    else:
-        redirect_target = "/enthusiast_dashboard"
-
+    # If 2FA is active, hold them here and send them to the code entry screen
+    session["pre_2fa_user_id"] = user.id
     return jsonify({
-        "message": "Login successful",
-        "redirect": redirect_target
+        "message": "2FA verification required",
+        "redirect": "/verify_2fa"
     }), 200
-
+    
 # ---------------------------------------------------------
 # SETUP 2FA LOGIN 
 # ---------------------------------------------------------
 @app.route("/setup_2fa", methods=["GET", "POST"])
 @login_required
 def setup_2fa():
-    if not is_superadmin_user(current_user):
-        flash("Unauthorized access.", "danger")
-        return redirect(url_for("index"))
+    # ⚠️ REMOVED: if not is_superadmin_user(current_user): 
+    # Now ALL users can access setup_2fa so regular users can enable their Authenticator apps!
 
     if request.method == "POST":
         token = request.form.get("token")
@@ -2389,7 +2358,7 @@ def setup_2fa():
             db.session.commit()
             flash("Two-Factor Authentication enabled successfully!", "success")
             
-            # Safe dashboard redirect using singular 'driver_dashboard'
+            # Safe dashboard redirect based on role
             if current_user.role_driver:
                 return redirect(url_for("driver_dashboard"))
             else:
