@@ -407,21 +407,22 @@ print("UTC:", utc_now.strftime("%Y-%m-%d %H:%M:%S"))
 print("UK :", uk_now.strftime("%Y-%m-%d %H:%M:%S"))
 
 # =======================================================
-# SUPERADMIN USER ANALYTICS ROUTE
+# SUPERADMIN USER ANALYTICS ROUTE (FIXED)
 # =======================================================
 @app.route('/admin/user-analytics')
 @login_required
 def user_analytics():
-    # Check the actual database column: role_superadmin
-    if not getattr(current_user, 'role_superadmin', 0):
+    if not getattr(current_user, 'role_superadmin', False):
         abort(403)
 
-    # Date calculations for current vs previous month
+    # Date calculations for current vs previous month strings
     now = datetime.utcnow()
-    current_month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-    prev_month_start = current_month_start - relativedelta(months=1)
+    current_month_start_str = now.replace(day=1).strftime('%Y-%m-%d')
     
-    # Helper function to calculate trend percentage and direction
+    # Calculate previous month start string safely
+    prev_month_date = now.replace(day=1) - relativedelta(months=1)
+    prev_month_start_str = prev_month_date.strftime('%Y-%m-%d')
+    
     def get_trend_data(current_count, prev_count):
         if prev_count == 0:
             percent = 100.0 if current_count > 0 else 0.0
@@ -437,33 +438,26 @@ def user_analytics():
             'icon': 'fa-arrow-up' if is_increase else 'fa-arrow-down'
         }
 
-    # --- Database Queries ---
-    # Adjust these queries to match your actual SQLAlchemy User model filters
-    # Example: User.query.filter(...)
-    
-    # 1. Driver Signups (Current vs Previous Month)
-    drivers_current = User.query.filter(User.role_driver == 1, User.joined_date >= current_month_start).count()
-    drivers_prev = User.query.filter(User.role_driver == 1, User.joined_date >= prev_month_start, User.joined_date < current_month_start).count()
+    # --- Database Queries using String Comparisons ---
+    drivers_current = User.query.filter(User.role_driver == True, User.joined_date >= current_month_start_str).count()
+    drivers_prev = User.query.filter(User.role_driver == True, User.joined_date >= prev_month_start_str, User.joined_date < current_month_start_str).count()
     driver_stats = get_trend_data(drivers_current, drivers_prev)
 
-    # 2. Enthusiast Signups (Current vs Previous Month)
-    enthusiasts_current = User.query.filter(User.role_enthusiast == 1, User.joined_date >= current_month_start).count()
-    enthusiasts_prev = User.query.filter(User.role_enthusiast == 1, User.joined_date >= prev_month_start, User.joined_date < current_month_start).count()
+    enthusiasts_current = User.query.filter(User.role_enthusiast == True, User.joined_date >= current_month_start_str).count()
+    enthusiasts_prev = User.query.filter(User.role_enthusiast == True, User.joined_date >= prev_month_start_str, User.joined_date < current_month_start_str).count()
     enthusiast_stats = get_trend_data(enthusiasts_current, enthusiasts_prev)
 
-    # 3. Driver Deletions / Churn
-    driver_deletions = User.query.filter(User.role_driver == 1, User.deleted == 1).count()
-
-    # 4. Enthusiast Deletions / Churn
-    enthusiast_deletions = User.query.filter(User.role_enthusiast == 1, User.deleted == 1).count()
+    # Check boolean flags properly instead of integers (True/False)
+    driver_deletions = User.query.filter(User.role_driver == True, User.deleted == True).count()
+    enthusiast_deletions = User.query.filter(User.role_enthusiast == True, User.deleted == True).count()
 
     return render_template(
-            'admin_analytics.html', 
-            drivers=driver_stats, 
-            enthusiasts=enthusiast_stats,
-            driver_deletions=driver_deletions,
-            enthusiast_deletions=enthusiast_deletions
-        )
+        'admin_analytics.html', 
+        drivers=driver_stats, 
+        enthusiasts=enthusiast_stats,
+        driver_deletions=driver_deletions,
+        enthusiast_deletions=enthusiast_deletions
+    )
     
 # -------------------------------------------------------
 # WEEKLY DUTY TOTAL CALCULATIONS (BREAKS / ISSUES / NDW)
