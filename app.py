@@ -1670,6 +1670,37 @@ def settings_system_save():
 
     return redirect("/settings/system")
 
+@app.route("/settings/profile", methods=["GET", "POST"])
+@login_required
+def settings_profile():
+    if request.method == "POST":
+        current_password = request.form.get("current_password")
+        new_password = request.form.get("new_password")
+        confirm_password = request.form.get("confirm_password")
+        
+        # Verify current password
+        if not check_password_hash(current_user.password, current_password):
+            flash("Incorrect current password.", "danger")
+            return redirect(url_for("settings_profile"))
+            
+        # Verify new password match
+        if new_password != confirm_password:
+            flash("New passwords do not match.", "danger")
+            return redirect(url_for("settings_profile"))
+            
+        if len(new_password) < 6:
+            flash("Password must be at least 6 characters long.", "danger")
+            return redirect(url_for("settings_profile"))
+            
+        # Update and commit
+        current_user.password = generate_password_hash(new_password)
+        db.session.commit()
+        
+        flash("Password updated successfully!", "success")
+        return redirect(url_for("settings_profile"))
+        
+    return render_template("profile_settings.html")
+
 # ============================================================
 # SUPERADMIN CHAT SYSTEM (NEW)
 # ============================================================
