@@ -77,7 +77,7 @@ class User(db.Model, UserMixin):
             (today.month, today.day) < (dob.month, dob.day)
         )
 
-    # AUTO ROLE LABEL (CORRECTED)
+    # AUTO ROLE LABEL & INHERITANCE SYSTEM
     @property
     def role_label(self):
         # If boolean flags are set, they override numeric level
@@ -98,6 +98,18 @@ class User(db.Model, UserMixin):
             4: "Enthusiast"
         }
         return mapping.get(self.level, "Unknown")
+
+    @property
+    def is_admin(self):
+        return self.role_superadmin or self.role_admin
+
+    @property
+    def is_driver(self):
+        return self.role_superadmin or self.role_admin or self.role_driver
+
+    @property
+    def is_enthusiast(self):
+        return True
  
  
 # =========================================================
