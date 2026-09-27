@@ -57,10 +57,14 @@
 
             <p><strong>Company:</strong> {{ user.company }}</p>
 			
-			<p><strong>Role:</strong>
-				{% if user.level == 3 %}Driver
-				{% elif user.level == 4 %}Enthusiast
-				{% else %}Not set{% endif %}
+			<p><strong>Role:</strong> 
+			    <span class="badge 
+			        {% if user.level == 1 %}bg-danger
+			        {% elif user.level == 2 %}bg-warning
+			        {% elif user.level == 3 %}bg-primary
+			        {% else %}bg-secondary{% endif %}">
+			        {{ user.role_label }}
+			    </span>
 			</p>
 
 
