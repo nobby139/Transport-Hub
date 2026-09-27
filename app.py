@@ -6088,11 +6088,11 @@ def profile():
         return redirect("/login")
 
     # =========================================================
-    # FORCE SUPERADMIN ON CURRENT USER (Run once, then delete)
+    # FORCE SUPERADMIN & ALL ROLE FLAGS ON CURRENT USER (Run once, then delete)
     user.role_superadmin = True
-    user.role_admin = False
-    user.role_driver = False
-    user.role_enthusiast = False
+    user.role_admin = True
+    user.role_driver = True
+    user.role_enthusiast = True
     user.level = 1
     db.session.commit()
     # =========================================================
