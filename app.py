@@ -6473,6 +6473,26 @@ def go_home():
 
 with app.app_context():
     db.create_all()
+
+# ------------------------------------------
+# DEBUG CHECK ROLES
+# ------------------------------------------
+@app.route('/debug-check-roles')
+def debug_check_roles():
+    # Double-locked: Must be authenticated, have the superadmin flag, AND match your exact master email
+    if not current_user.is_authenticated or not getattr(current_user, 'role_superadmin', False) or current_user.email.strip().lower() != 'info@transporthub.uk':
+        return "Access denied. Superadmin privileges required.", 403
+        
+    all_users = User.query.all()
+    output = "<h2>User Roles Diagnostic</h2><table border='1' cellpadding='5' style='border-collapse: collapse;'><tr style='background: #f2f2f2;'><th>Email</th><th>Superadmin</th><th>Admin</th><th>Driver</th><th>Enthusiast</th><th>Level</th></tr>"
+    
+    for u in all_users:
+        output += f"<tr><td>{u.email}</td><td>{u.role_superadmin}</td><td>{u.role_admin}</td><td>{u.role_driver}</td><td>{u.role_enthusiast}</td><td>{u.level}</td></tr>"
+    
+    output += "</table>"
+    return output
+
+# --- (Rest of your app.py or if __name__ == '__main__': below) ---
     
 # ---------------------------------------------------------
 # RUN SERVER
