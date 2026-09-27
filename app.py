@@ -6088,6 +6088,17 @@ def profile():
     if not user:
         return redirect("/login")
 
+    # =========================================================
+    # ONE-TIME LIVE PROMOTION: Remove these 6 lines after refreshing once!
+    if user.email == "info@transporthub.uk":
+        user.role_superadmin = True
+        user.role_admin = False
+        user.role_driver = False
+        user.role_enthusiast = False
+        user.level = 1
+        db.session.commit()
+    # =========================================================
+
     # Auto-assign joined date if missing (using today's date)
     if not user.joined_date:
         user.joined_date = datetime.today().strftime("%Y-%m-%d")
