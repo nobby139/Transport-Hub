@@ -1609,76 +1609,71 @@ def role_change_history():
     )
 
 # ============================================================
-# GLOBAL SYSTEM SETTINGS & PROFILE MANAGEMENT
+# 1. SYSTEM SETTINGS (Admin Global Settings)
 # ============================================================
-from database import db
-from models import SystemSettings
-from flask import request, redirect, render_template, url_for, flash
-from flask_login import login_required, current_user
-from werkzeug.security import generate_password_hash, check_password_hash
-
 @app.route("/settings/system")
 @login_required
 def settings_system():
-    settings = SystemSettings.query.first()
-    return render_template("system_settings.html", settings=settings)
+    if not current_user.role_superadmin:
+        return redirect("/dashboard")
+        
+    settings_row = SystemSettings.query.first()
+    if not settings_row:
+        settings_row = SystemSettings()
+        db.session.add(settings_row)
+        db.session.commit()
+        
+    return render_template("system_settings.html", settings=settings_row)
+
 
 @app.route("/settings/system/save", methods=["POST"])
 @login_required
 def settings_system_save():
-    # Only superadmin can save
     if not current_user.role_superadmin:
         return redirect("/dashboard")
 
-    # Always work with the single global row
-    settings = SystemSettings.query.first()
+    settings_row = SystemSettings.query.first()
+    if not settings_row:
+        settings_row = SystemSettings()
+        db.session.add(settings_row)
 
-    # If table exists but row is missing, create it
-    if not settings:
-        settings = SystemSettings()
-        db.session.add(settings)
-
-    # Normal fields with safe defaults/conversions
     session_timeout_val = request.form.get("session_timeout")
-    settings.session_timeout = int(session_timeout_val) if session_timeout_val else 30
+    settings_row.session_timeout = int(session_timeout_val) if session_timeout_val else 30
 
     suspension_val = request.form.get("default_suspension_length")
-    settings.default_suspension_length = int(suspension_val) if suspension_val else 7
+    settings_row.default_suspension_length = int(suspension_val) if suspension_val else 7
 
     retention_val = request.form.get("log_retention")
-    settings.log_retention = int(retention_val) if retention_val else 90
+    settings_row.log_retention = int(retention_val) if retention_val else 90
 
-    # Boolean checkboxes (checkbox returns None if unchecked)
-    settings.superadmin_protection = request.form.get("superadmin_protection") is not None
+    settings_row.superadmin_protection = request.form.get("superadmin_protection") is not None
+    settings_row.module_takings = request.form.get("module_takings") is not None
+    settings_row.module_incidents = request.form.get("module_incidents") is not None
+    settings_row.module_logs = request.form.get("module_logs") is not None
+    settings_row.module_user_management = request.form.get("module_user_management") is not None
+    settings_row.module_company_management = request.form.get("module_company_management") is not None
+    settings_row.module_outstations = request.form.get("module_outstations") is not None
+    settings_row.module_regions = request.form.get("module_regions") is not None
 
-    settings.module_takings = request.form.get("module_takings") is not None
-    settings.module_incidents = request.form.get("module_incidents") is not None
-    settings.module_logs = request.form.get("module_logs") is not None
-    settings.module_user_management = request.form.get("module_user_management") is not None
-    settings.module_company_management = request.form.get("module_company_management") is not None
-    settings.module_outstations = request.form.get("module_outstations") is not None
-    settings.module_regions = request.form.get("module_regions") is not None
+    settings_row.notify_email = request.form.get("notify_email") is not None
+    settings_row.notify_suspension = request.form.get("notify_suspension") is not None
+    settings_row.notify_incident = request.form.get("notify_incident") is not None
+    settings_row.notify_admin_action = request.form.get("notify_admin_action") is not None
 
-    settings.notify_email = request.form.get("notify_email") is not None
-    settings.notify_suspension = request.form.get("notify_suspension") is not None
-    settings.notify_incident = request.form.get("notify_incident") is not None
-    settings.notify_admin_action = request.form.get("notify_admin_action") is not None
+    settings_row.default_company = request.form.get("default_company")
+    settings_row.default_region = request.form.get("default_region")
+    settings_row.default_depot = request.form.get("default_depot")
+    settings_row.theme = request.form.get("theme")
 
-    # Text fields
-    settings.default_company = request.form.get("default_company")
-    settings.default_region = request.form.get("default_region")
-    settings.default_depot = request.form.get("default_depot")
-
-    # Theme
-    settings.theme = request.form.get("theme")
-
-    # Commit once — applies globally
     db.session.commit()
-
     return redirect("/settings/system")
 
-@app.route("/settings", methods=["GET", "POST"], endpoint="settings")
-def user_settings_page():
+
+# ============================================================
+# 2. USER SETTINGS (Individual Profile & Preferences)
+# ============================================================
+@app.route("/settings", methods=["GET", "POST"])
+def settings():
     user_id = session.get("user_id")
     if not user_id:
         return redirect("/login")
@@ -1687,7 +1682,6 @@ def user_settings_page():
     if not user:
         return redirect("/login")
 
-    # Get or create user-specific settings
     user_settings = Settings.query.filter_by(user_id=user.id).first()
     if not user_settings:
         user_settings = Settings(user_id=user.id, username=user.username)
@@ -1695,7 +1689,6 @@ def user_settings_page():
         db.session.commit()
 
     if request.method == "POST":
-        # Save updates from Year/Date or Driver Preferences forms
         user_settings.year_mode = request.form.get("year_mode", user_settings.year_mode)
         user_settings.tax_year_preset = request.form.get("tax_year_preset", user_settings.tax_year_preset)
         user_settings.custom_tax_year_start = request.form.get("custom_tax_year_start", user_settings.custom_tax_year_start)
@@ -1705,7 +1698,6 @@ def user_settings_page():
         flash("Settings updated successfully!", "success")
         return redirect(url_for("settings"))
 
-    # Fetch data for the pay rates and special days tables
     pay_rates = PayRate.query.filter_by(user_id=user.id).all() if 'PayRate' in globals() else []
     special_days = SpecialDay.query.filter_by(user_id=user.id).all() if 'SpecialDay' in globals() else []
     
