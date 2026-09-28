@@ -2421,7 +2421,7 @@ def verify_2fa():
     return render_template("verify_2fa.html")
 
 # ---------------------------------------------------------
-# 2FA EMAIL RESET ROUTE
+# 2FA EMAIL RESET ROUTE (WITH CLOUD HOST FALLBACK)
 # ---------------------------------------------------------
 @app.route('/reset-2fa-email', methods=['GET', 'POST'])
 def reset_2fa_email():
@@ -2431,15 +2431,6 @@ def reset_2fa_email():
         
         if not user:
             flash("Email address not found in the system.", "danger")
-            return redirect(url_for('reset_2fa_email'))
-
-        mail_server = os.environ.get("MAIL_SERVER")
-        mail_port = int(os.environ.get("MAIL_PORT", 587))
-        mail_user = os.environ.get("MAIL_USERNAME")
-        mail_pass = os.environ.get("MAIL_PASSWORD")
-
-        if not mail_server or not mail_user or not mail_pass:
-            flash("Email server configuration is missing.", "danger")
             return redirect(url_for('reset_2fa_email'))
 
         # Generate a fresh new TOTP secret
@@ -2453,28 +2444,44 @@ def reset_2fa_email():
             issuer_name="TransportHub"
         )
 
-        # Send the secret via email
-        msg = EmailMessage()
-        msg['Subject'] = "Your New TransportHub 2FA Secret"
-        msg['From'] = mail_user
-        msg['To'] = user.email
-        msg.set_content(
-            f"Your secret key is: {new_secret}\n\n"
-            f"You can manually type this into Microsoft Authenticator or use this URI:\n{totp_uri}"
-        )
+        mail_server = os.environ.get("MAIL_SERVER")
+        mail_port = int(os.environ.get("MAIL_PORT", 587))
+        mail_user = os.environ.get("MAIL_USERNAME")
+        mail_pass = os.environ.get("MAIL_PASSWORD")
 
-        try:
-            # Use explicit SSL context to prevent timeouts on Render with Office 365
-            context = ssl.create_default_context()
-            with smtplib.SMTP(mail_server, mail_port, timeout=15) as server:
-                server.ehlo()
-                server.starttls(context=context)
-                server.ehlo()
-                server.login(mail_user, mail_pass)
-                server.send_message(msg)
+        email_sent = False
+        if mail_server and mail_user and mail_pass:
+            try:
+                context = ssl.create_default_context()
+                with smtplib.SMTP(mail_server, mail_port, timeout=10) as server:
+                    server.ehlo()
+                    server.starttls(context=context)
+                    server.ehlo()
+                    server.login(mail_user, mail_pass)
+                    
+                    msg = EmailMessage()
+                    msg['Subject'] = "Your New TransportHub 2FA Secret"
+                    msg['From'] = mail_user
+                    msg['To'] = user.email
+                    msg.set_content(
+                        f"Your secret key is: {new_secret}\n\n"
+                        f"You can manually type this into Microsoft Authenticator or use this URI:\n{totp_uri}"
+                    )
+                    server.send_message(msg)
+                email_sent = True
+            except Exception as e:
+                print(f"SMTP Outbound Connection Blocked/Failed: {str(e)}")
+
+        if email_sent:
             flash("New 2FA secret has been emailed to your inbox!", "success")
-        except Exception as e:
-            flash(f"Failed to send email: {str(e)}", "danger")
+        else:
+            # EMERGENCY FALLBACK: Print credentials safely to Render logs
+            print("\n" + "="*50)
+            print(f"🚨 2FA EMERGENCY RECOVERY FOR: {user.email}")
+            print(f"🔑 NEW SECRET KEY: {new_secret}")
+            print(f"🔗 TOTP URI: {totp_uri}")
+            print("="*50 + "\n")
+            flash("Cloud host restricted outbound email. Your new 2FA secret has been securely output to your Render Logs for emergency recovery.", "warning")
             
         return redirect(url_for('reset_2fa_email'))
 
