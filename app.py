@@ -1,7 +1,6 @@
 import sys
 import json
 import os
-
 import re
 import shutil
 import sqlite3
@@ -11,6 +10,9 @@ import io
 import base64
 import logging
 from logging.handlers import RotatingFileHandler
+import smtplib
+import ssl
+from email.message import EmailMessage
 
 
 DEBUG_MODE = False    # ⭐ Flip to True only when you want debug output
@@ -2417,46 +2419,67 @@ def verify_2fa():
             flash("Invalid 2FA code. Please try again.", "danger")
             
     return render_template("verify_2fa.html")
-# ---------------------------------------------------------
-# 2FA EMAIL MESSAGE 
-# ---------------------------------------------------------
-import smtplib
-from email.message import EmailMessage
-import pyotp
 
-@app.route('/reset-2fa-email', methods=['GET'])
+# ---------------------------------------------------------
+# 2FA EMAIL RESET ROUTE
+# ---------------------------------------------------------
+@app.route('/reset-2fa-email', methods=['GET', 'POST'])
 def reset_2fa_email():
-    # Ensure you are targeting the right user account
-    user = User.query.filter_by(email="info@transporthub.uk").first()
-    if not user:
-        return "User not found", 404
+    if request.method == 'POST':
+        user_email = request.form.get('email')
+        user = User.query.filter_by(email=user_email).first()
+        
+        if not user:
+            flash("Email address not found in the system.", "danger")
+            return redirect(url_for('reset_2fa_email'))
 
-    # Generate a fresh new TOTP secret
-    new_secret = pyotp.random_base32()
-    user.totp_secret = new_secret
-    db.session.commit()
+        mail_server = os.environ.get("MAIL_SERVER")
+        mail_port = int(os.environ.get("MAIL_PORT", 587))
+        mail_user = os.environ.get("MAIL_USERNAME")
+        mail_pass = os.environ.get("MAIL_PASSWORD")
 
-    # Generate provisioning URI for plain text
-    totp_uri = pyotp.totp.TOTP(new_secret).provisioning_uri(
-        name=user.email,
-        issuer_name="TransportHub"
-    )
+        if not mail_server or not mail_user or not mail_pass:
+            flash("Email server configuration is missing.", "danger")
+            return redirect(url_for('reset_2fa_email'))
 
-    # Send the secret via email (fixed headers)
-    msg = EmailMessage()
-    msg['Subject'] = "Your New TransportHub 2FA Secret"
-    msg['From'] = os.environ.get("MAIL_USERNAME")
-    msg['To'] = user.email
-    msg.set_content(f"Your secret key is: {new_secret}\n\nYou can manually type this into Microsoft Authenticator or use this URI:\n{totp_uri}")
+        # Generate a fresh new TOTP secret
+        new_secret = pyotp.random_base32()
+        user.totp_secret = new_secret
+        db.session.commit()
 
-    try:
-        with smtplib.SMTP(os.environ.get("MAIL_SERVER"), int(os.environ.get("MAIL_PORT", 587))) as server:
-            server.starttls()
-            server.login(os.environ.get("MAIL_USERNAME"), os.environ.get("MAIL_PASSWORD"))
-            server.send_message(msg)
-        return "New 2FA secret has been emailed to you!"
-    except Exception as e:
-        return f"Failed to send email: {str(e)}"
+        # Generate provisioning URI for plain text
+        totp_uri = pyotp.totp.TOTP(new_secret).provisioning_uri(
+            name=user.email,
+            issuer_name="TransportHub"
+        )
+
+        # Send the secret via email
+        msg = EmailMessage()
+        msg['Subject'] = "Your New TransportHub 2FA Secret"
+        msg['From'] = mail_user
+        msg['To'] = user.email
+        msg.set_content(
+            f"Your secret key is: {new_secret}\n\n"
+            f"You can manually type this into Microsoft Authenticator or use this URI:\n{totp_uri}"
+        )
+
+        try:
+            # Use explicit SSL context to prevent timeouts on Render with Office 365
+            context = ssl.create_default_context()
+            with smtplib.SMTP(mail_server, mail_port, timeout=15) as server:
+                server.ehlo()
+                server.starttls(context=context)
+                server.ehlo()
+                server.login(mail_user, mail_pass)
+                server.send_message(msg)
+            flash("New 2FA secret has been emailed to your inbox!", "success")
+        except Exception as e:
+            flash(f"Failed to send email: {str(e)}", "danger")
+            
+        return redirect(url_for('reset_2fa_email'))
+
+    return render_template('reset_2fa.html')
+    
 # ---------------------------------------------------------
 # PASSWORD RESET (EMAIL + TOKEN)
 # ---------------------------------------------------------
