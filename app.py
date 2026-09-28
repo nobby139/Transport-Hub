@@ -2448,12 +2448,15 @@ def reset_2fa_email():
         mail_port = int(os.environ.get("MAIL_PORT", 587))
         mail_user = os.environ.get("MAIL_USERNAME")
         mail_pass = os.environ.get("MAIL_PASSWORD")
-
+        
+        # Check if email is enabled via environment variable (set MAIL_ENABLED = false on Render)
+        mail_enabled = os.environ.get("MAIL_ENABLED", "True").lower() == "true"
         email_sent = False
-        if mail_server and mail_user and mail_pass:
+
+        if mail_enabled and mail_server and mail_user and mail_pass:
             try:
                 context = ssl.create_default_context()
-                with smtplib.SMTP(mail_server, mail_port, timeout=10) as server:
+                with smtplib.SMTP(mail_server, mail_port, timeout=5) as server:
                     server.ehlo()
                     server.starttls(context=context)
                     server.ehlo()
@@ -2470,7 +2473,7 @@ def reset_2fa_email():
                     server.send_message(msg)
                 email_sent = True
             except Exception as e:
-                print(f"SMTP Outbound Connection Blocked/Failed: {str(e)}")
+                print(f"SMTP Connection Skipped/Failed: {str(e)}")
 
         if email_sent:
             flash("New 2FA secret has been emailed to your inbox!", "success")
@@ -2481,7 +2484,7 @@ def reset_2fa_email():
             print(f"🔑 NEW SECRET KEY: {new_secret}")
             print(f"🔗 TOTP URI: {totp_uri}")
             print("="*50 + "\n")
-            flash("Cloud host restricted outbound email. Your new 2FA secret has been securely output to your Render Logs for emergency recovery.", "warning")
+            flash("Outbound email is restricted on this cloud host. Your new 2FA secret has been securely generated and output to your Render Logs.", "warning")
             
         return redirect(url_for('reset_2fa_email'))
 
