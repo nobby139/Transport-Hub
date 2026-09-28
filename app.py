@@ -10,9 +10,7 @@ import io
 import base64
 import logging
 from logging.handlers import RotatingFileHandler
-import smtplib
-import ssl
-from email.message import EmailMessage
+import resend
 
 
 DEBUG_MODE = False    # ⭐ Flip to True only when you want debug output
@@ -2423,6 +2421,9 @@ def verify_2fa():
 # ---------------------------------------------------------
 # 2FA EMAIL RESET ROUTE (NO SMTP - CLOUD HOST SAFE)
 # ---------------------------------------------------------
+# Set your API key from environment variables
+resend.api_key = os.environ.get("RESEND_API_KEY")
+
 @app.route('/reset-2fa-email', methods=['GET', 'POST'])
 def reset_2fa_email():
     if request.method == 'POST':
@@ -2439,26 +2440,34 @@ def reset_2fa_email():
             user.totp_secret = new_secret
             db.session.commit()
 
-            # Generate provisioning URI for Microsoft Authenticator
             totp_uri = pyotp.totp.TOTP(new_secret).provisioning_uri(
                 name=user.email,
                 issuer_name="TransportHub"
             )
 
-            # EMERGENCY RECOVERY: Prints instantly to Render logs without freezing
-            print("\n" + "="*50)
-            print(f"🚨 2FA EMERGENCY RECOVERY FOR: {user.email}")
-            print(f"🔑 NEW SECRET KEY: {new_secret}")
-            print(f"🔗 TOTP URI: {totp_uri}")
-            print("="*50 + "\n")
-
-            flash("Outbound email is restricted on this cloud host. Your new 2FA secret has been securely generated and output to your Render Logs.", "warning")
+            # Send email via HTTPS API (Bypasses Render's SMTP block entirely)
+            params = {
+                "from": "TransportHub <noreply@yourdomain.com>",
+                "to": [user.email],
+                "subject": "Your New TransportHub 2FA Secret",
+                "html": f"""
+                    <p>Hello,</p>
+                    <p>Your 2FA secret has been reset. Your new secret key is:</p>
+                    <p><b>{new_secret}</b></p>
+                    <p>You can manually type this into Microsoft Authenticator or use this URI:</p>
+                    <p>{totp_uri}</p>
+                """
+            }
+            
+            email_response = resend.Emails.send(params)
+            
+            flash("A new 2FA secret has been emailed to your inbox!", "success")
             return redirect(url_for('reset_2fa_email'))
 
         except Exception as e:
             db.session.rollback()
-            print(f"CRITICAL ERROR IN RESET ROUTE: {str(e)}")
-            flash("An error occurred while processing your request.", "danger")
+            print(f"EMAIL API ERROR: {str(e)}")
+            flash("An error occurred while sending the email. Please try again.", "danger")
             return redirect(url_for('reset_2fa_email'))
 
     return render_template('reset_2fa.html')
