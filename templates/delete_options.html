@@ -9,17 +9,25 @@
 
 <form action="/confirm-delete" method="POST">
 
-    <!-- Always show Driver option if they have a driver profile/level -->
+    <!-- Always show Driver option -->
     <label>
         <input type="checkbox" name="delete_driver" value="yes">
         Delete Driver Account
     </label><br>
 
-    <!-- Always show Enthusiast option if they have an enthusiast profile/level -->
+    <!-- Always show Enthusiast option -->
     <label>
         <input type="checkbox" name="delete_enthusiast" value="yes">
         Delete Enthusiast Account
     </label><br>
+
+    <!-- Admin account deletion option (only visible to admins) -->
+    {% if current_user.level == 1 %}
+    <label style="color: red; font-weight: bold;">
+        <input type="checkbox" name="delete_admin" value="yes">
+        Delete Admin Account & Data
+    </label><br>
+    {% endif %}
 
     <br>
     <button type="submit">Confirm Delete</button>
