@@ -2436,17 +2436,17 @@ def reset_2fa_email():
     user.totp_secret = new_secret
     db.session.commit()
 
-    # Generate provisioning URI for a QR code or plain text
+    # Generate provisioning URI for plain text
     totp_uri = pyotp.totp.TOTP(new_secret).provisioning_uri(
         name=user.email,
         issuer_name="TransportHub"
     )
 
-    # Send the secret via email
+    # Send the secret via email (fixed headers)
     msg = EmailMessage()
-    msg.set_subject("Your New TransportHub 2FA Secret")
-    msg.set_from(os.environ.get("MAIL_USERNAME"))
-    msg.set_to(user.email)
+    msg['Subject'] = "Your New TransportHub 2FA Secret"
+    msg['From'] = os.environ.get("MAIL_USERNAME")
+    msg['To'] = user.email
     msg.set_content(f"Your secret key is: {new_secret}\n\nYou can manually type this into Microsoft Authenticator or use this URI:\n{totp_uri}")
 
     try:
