@@ -9,20 +9,24 @@
 
 <form action="/confirm-delete" method="POST">
 
-    <!-- Always show Driver option -->
+    <!-- Show Driver option if they have the driver role -->
+    {% if "Driver" in user_roles %}
     <label>
         <input type="checkbox" name="delete_driver" value="yes">
         Delete Driver Account
     </label><br>
+    {% endif %}
 
-    <!-- Always show Enthusiast option -->
+    <!-- Show Enthusiast option if they have the enthusiast role -->
+    {% if "Enthusiast" in user_roles %}
     <label>
         <input type="checkbox" name="delete_enthusiast" value="yes">
         Delete Enthusiast Account
     </label><br>
+    {% endif %}
 
-    <!-- Admin account deletion option (only visible to admins) -->
-    {% if current_user.level == 1 %}
+    <!-- Show Admin option only if they are an Admin or Superadmin -->
+    {% if "Admin" in user_roles or "Superadmin" in user_roles %}
     <label style="color: red; font-weight: bold;">
         <input type="checkbox" name="delete_admin" value="yes">
         Delete Admin Account & Data
