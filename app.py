@@ -2417,7 +2417,46 @@ def verify_2fa():
             flash("Invalid 2FA code. Please try again.", "danger")
             
     return render_template("verify_2fa.html")
-    
+# ---------------------------------------------------------
+# 2FA EMAIL MESSAGE 
+# ---------------------------------------------------------
+import smtplib
+from email.message import EmailMessage
+import pyotp
+
+@app.route('/reset-2fa-email', methods=['GET'])
+def reset_2fa_email():
+    # Ensure you are targeting the right user account
+    user = User.query.filter_by(email="info@transporthub.uk").first()
+    if not user:
+        return "User not found", 404
+
+    # Generate a fresh new TOTP secret
+    new_secret = pyotp.random_base32()
+    user.totp_secret = new_secret
+    db.session.commit()
+
+    # Generate provisioning URI for a QR code or plain text
+    totp_uri = pyotp.totp.TOTP(new_secret).provisioning_uri(
+        name=user.email,
+        issuer_name="TransportHub"
+    )
+
+    # Send the secret via email
+    msg = EmailMessage()
+    msg.set_subject("Your New TransportHub 2FA Secret")
+    msg.set_from(os.environ.get("MAIL_USERNAME"))
+    msg.set_to(user.email)
+    msg.set_content(f"Your secret key is: {new_secret}\n\nYou can manually type this into Microsoft Authenticator or use this URI:\n{totp_uri}")
+
+    try:
+        with smtplib.SMTP(os.environ.get("MAIL_SERVER"), int(os.environ.get("MAIL_PORT", 587))) as server:
+            server.starttls()
+            server.login(os.environ.get("MAIL_USERNAME"), os.environ.get("MAIL_PASSWORD"))
+            server.send_message(msg)
+        return "New 2FA secret has been emailed to you!"
+    except Exception as e:
+        return f"Failed to send email: {str(e)}"
 # ---------------------------------------------------------
 # PASSWORD RESET (EMAIL + TOKEN)
 # ---------------------------------------------------------
