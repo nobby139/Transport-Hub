@@ -1,1 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+<div style="max-width: 400px; margin: 40px auto; padding: 30px; background: #ffffff; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); text-align: center;">
+    <h2>🔄 Reset 2FA via Email</h2>
+    <p>Enter your registered account email address below, and we'll send you a new 2FA secret key.</p>
 
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div style="padding: 10px; margin-bottom: 15px; border-radius: 4px; background: {% if category == 'danger' %}#f8d7da{% else %}#d1e7dd{% endif %}; color: {% if category == 'danger' %}#842029{% else %}#0f5132{% endif %};">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <form method="POST" style="margin-top: 20px;">
+        <div class="form-group" style="margin-bottom: 15px;">
+            <input type="email" name="email" class="form-control" placeholder="info@transporthub.uk" required style="width: 100%; padding: 12px; font-size: 1rem; border: 1px solid #ced4da; border-radius: 4px;">
+        </div>
+        <button type="submit" style="width: 100%; padding: 12px; font-weight: bold; background: #0d6efd; color: white; border: none; border-radius: 4px; cursor: pointer;">Send New 2FA Secret</button>
+    </form>
+
+    <div style="margin-top: 20px;">
+        <a href="{{ url_for('verify_2fa') }}" style="color: #6c757d; text-decoration: none; font-size: 0.9rem;">
+            ← Back to Verification
+        </a>
+    </div>
+</div>
+{% endblock %}
