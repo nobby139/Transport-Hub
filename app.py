@@ -2421,72 +2421,45 @@ def verify_2fa():
     return render_template("verify_2fa.html")
 
 # ---------------------------------------------------------
-# 2FA EMAIL RESET ROUTE (WITH CLOUD HOST FALLBACK)
+# 2FA EMAIL RESET ROUTE (NO SMTP - CLOUD HOST SAFE)
 # ---------------------------------------------------------
 @app.route('/reset-2fa-email', methods=['GET', 'POST'])
 def reset_2fa_email():
     if request.method == 'POST':
-        user_email = request.form.get('email')
-        user = User.query.filter_by(email=user_email).first()
-        
-        if not user:
-            flash("Email address not found in the system.", "danger")
-            return redirect(url_for('reset_2fa_email'))
+        try:
+            user_email = request.form.get('email')
+            user = User.query.filter_by(email=user_email).first()
+            
+            if not user:
+                flash("Email address not found in the system.", "danger")
+                return redirect(url_for('reset_2fa_email'))
 
-        # Generate a fresh new TOTP secret
-        new_secret = pyotp.random_base32()
-        user.totp_secret = new_secret
-        db.session.commit()
+            # Generate a fresh new TOTP secret
+            new_secret = pyotp.random_base32()
+            user.totp_secret = new_secret
+            db.session.commit()
 
-        # Generate provisioning URI for plain text
-        totp_uri = pyotp.totp.TOTP(new_secret).provisioning_uri(
-            name=user.email,
-            issuer_name="TransportHub"
-        )
+            # Generate provisioning URI for Microsoft Authenticator
+            totp_uri = pyotp.totp.TOTP(new_secret).provisioning_uri(
+                name=user.email,
+                issuer_name="TransportHub"
+            )
 
-        mail_server = os.environ.get("MAIL_SERVER")
-        mail_port = int(os.environ.get("MAIL_PORT", 587))
-        mail_user = os.environ.get("MAIL_USERNAME")
-        mail_pass = os.environ.get("MAIL_PASSWORD")
-        
-        # Check if email is enabled via environment variable (set MAIL_ENABLED = false on Render)
-        mail_enabled = os.environ.get("MAIL_ENABLED", "True").lower() == "true"
-        email_sent = False
-
-        if mail_enabled and mail_server and mail_user and mail_pass:
-            try:
-                context = ssl.create_default_context()
-                with smtplib.SMTP(mail_server, mail_port, timeout=5) as server:
-                    server.ehlo()
-                    server.starttls(context=context)
-                    server.ehlo()
-                    server.login(mail_user, mail_pass)
-                    
-                    msg = EmailMessage()
-                    msg['Subject'] = "Your New TransportHub 2FA Secret"
-                    msg['From'] = mail_user
-                    msg['To'] = user.email
-                    msg.set_content(
-                        f"Your secret key is: {new_secret}\n\n"
-                        f"You can manually type this into Microsoft Authenticator or use this URI:\n{totp_uri}"
-                    )
-                    server.send_message(msg)
-                email_sent = True
-            except Exception as e:
-                print(f"SMTP Connection Skipped/Failed: {str(e)}")
-
-        if email_sent:
-            flash("New 2FA secret has been emailed to your inbox!", "success")
-        else:
-            # EMERGENCY FALLBACK: Print credentials safely to Render logs
+            # EMERGENCY RECOVERY: Prints instantly to Render logs without freezing
             print("\n" + "="*50)
             print(f"🚨 2FA EMERGENCY RECOVERY FOR: {user.email}")
             print(f"🔑 NEW SECRET KEY: {new_secret}")
             print(f"🔗 TOTP URI: {totp_uri}")
             print("="*50 + "\n")
+
             flash("Outbound email is restricted on this cloud host. Your new 2FA secret has been securely generated and output to your Render Logs.", "warning")
-            
-        return redirect(url_for('reset_2fa_email'))
+            return redirect(url_for('reset_2fa_email'))
+
+        except Exception as e:
+            db.session.rollback()
+            print(f"CRITICAL ERROR IN RESET ROUTE: {str(e)}")
+            flash("An error occurred while processing your request.", "danger")
+            return redirect(url_for('reset_2fa_email'))
 
     return render_template('reset_2fa.html')
     
