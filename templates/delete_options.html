@@ -9,26 +9,23 @@
 
 <form action="/confirm-delete" method="POST">
 
-    {% if current_user.level == 3 %}
+    <!-- Always show Driver option if they have a driver profile/level -->
     <label>
-        <input type="checkbox" name="delete_driver">
+        <input type="checkbox" name="delete_driver" value="yes">
         Delete Driver Account
     </label><br>
-    {% endif %}
 
-    {% if current_user.level == 4 %}
+    <!-- Always show Enthusiast option if they have an enthusiast profile/level -->
     <label>
-        <input type="checkbox" name="delete_enthusiast">
+        <input type="checkbox" name="delete_enthusiast" value="yes">
         Delete Enthusiast Account
     </label><br>
-    {% endif %}
 
-    {% if current_user.level in [3, 4] %}
+    <!-- Or a shortcut to tick both -->
     <label>
-        <input type="checkbox" name="delete_both">
+        <input type="checkbox" name="delete_both" value="yes">
         Delete BOTH Accounts
     </label><br>
-    {% endif %}
 
     <br>
     <button type="submit">Confirm Delete</button>
