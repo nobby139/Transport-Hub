@@ -498,11 +498,12 @@ header {
     margin-left: auto; /* pushes logo to far right */
 }
 
-/* ============================
-   MOBILE LAYOUT (FIXED)
-   ============================ */
-@media (max-width: 900px) {
-    /* Prevent body or html from causing sideways scrolling */
+/* ==========================================================
+   FORCED MOBILE & TABLET RESPONSIVE OVERRIDE (<= 1024px)
+   ========================================================== */
+@media screen and (max-width: 1024px) {
+    
+    /* 1. Stop horizontal overflow globally */
     html, body {
         width: 100% !important;
         max-width: 100% !important;
@@ -511,30 +512,29 @@ header {
         padding: 0 !important;
     }
 
-    /* Fix the header: allow items to wrap gracefully instead of clipping them */
-    header, .navbar, .header-container, .blue-header {
+    /* 2. Force Header & Icons to wrap safely instead of clipping */
+    header, .navbar, .header-container, .blue-header, .top-bar {
         width: 100% !important;
         max-width: 100% !important;
         display: flex !important;
-        flex-wrap: wrap !important; /* Allows items to fit on multiple rows if needed */
-        justify-content: space-around !important; /* Evenly spaces all icons */
+        flex-wrap: wrap !important;
+        justify-content: center !important;
         align-items: center !important;
-        padding: 8px 5px !important;
+        padding: 8px 4px !important;
         box-sizing: border-box !important;
-        overflow: visible !important; /* Stop hiding overflowed icons */
+        overflow: visible !important;
     }
 
-    /* Style the header icons/links so they fit nicely side-by-side */
+    /* Scale down header links and images so everything fits nicely */
     header a, .navbar a, .header-container a, .blue-header a,
     header img, .navbar img, .header-container img, .blue-header img {
-        max-height: 32px !important;
+        max-height: 28px !important;
         width: auto !important;
-        object-fit: contain !important;
-        margin: 4px !important;
+        margin: 3px 5px !important;
     }
 
-    /* Force all main content and containers to stay strictly inside 100% width */
-    main, .section, .dashboard-card, .menu-card, .btn-container, .platform-messages, .chat-outer, .chat-container {
+    /* 3. Force all main content areas, cards, and wrappers to screen boundaries */
+    main, .container, .container-fluid, .dashboard-card, .menu-card, .content-wrapper, section {
         width: 100% !important;
         max-width: 100% !important;
         margin-left: 0 !important;
@@ -544,12 +544,24 @@ header {
         box-sizing: border-box !important;
     }
 
-    /* Tables scroll horizontally inside their container */
+    /* 4. Force Tables to stay inline with horizontal scrolling container */
+    .table-responsive, div:has(> table) {
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        display: block !important;
+    }
+
     table {
         width: 100% !important;
-        display: block !important;
-        overflow-x: auto !important;
-        border-collapse: collapse !important;
+        max-width: 100% !important;
+        font-size: 12px !important;
+        white-space: nowrap !important;
+    }
+
+    table th, table td {
+        padding: 6px 4px !important;
     }
 }
 /* ====================================================
