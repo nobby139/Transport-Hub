@@ -1280,16 +1280,15 @@ def restore_backup():
 @app.route("/platform_messages")
 @login_required
 def platform_messages():
-    # Logged-in user
     user = current_user
-
-    # All users (for admin/superadmin dropdown)
     users = User.query.all()
 
-    # All messages sent to OR from the logged-in user
-    messages = UserMessages.query.order_by(UserMessages.created_at.desc()).all()
+    # Only fetch messages sent TO or FROM the logged-in user
+    messages = UserMessages.query.filter(
+        (UserMessages.sender_id == user.id) | 
+        (UserMessages.receiver_id == user.id)
+    ).order_by(UserMessages.created_at.desc()).all()
 
-    # Unread count for logged-in user only (using is_read or read matching your model)
     unread_count = UserMessages.query.filter(
         UserMessages.receiver_id == user.id,
         UserMessages.is_read == False
@@ -1297,7 +1296,7 @@ def platform_messages():
 
     return render_template(
         "platform_messages.html",
-        user=user,                # ⭐ REQUIRED
+        user=user,
         current_user=current_user,
         users=users,
         messages=messages,
