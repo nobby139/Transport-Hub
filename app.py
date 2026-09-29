@@ -1578,13 +1578,14 @@ def create_user_by_email():
 def get_role_string(user):
     roles = []
     
-    if user.role_superadmin:
+    # Safe check that handles booleans, strings ("True"/"False"), or integers (1/0)
+    if user.role_superadmin and str(user.role_superadmin).lower() not in ['false', '0', 'none']:
         roles.append("Superadmin")
-    if user.role_admin:
+    if user.role_admin and str(user.role_admin).lower() not in ['false', '0', 'none']:
         roles.append("Admin")
-    if user.role_driver:
+    if user.role_driver and str(user.role_driver).lower() not in ['false', '0', 'none']:
         roles.append("Driver")
-    if user.role_enthusiast:
+    if user.role_enthusiast and str(user.role_enthusiast).lower() not in ['false', '0', 'none']:
         roles.append("Enthusiast")
         
     return ", ".join(roles) if roles else "None"
