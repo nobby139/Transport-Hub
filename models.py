@@ -111,7 +111,125 @@ class User(db.Model, UserMixin):
     def is_enthusiast(self):
         return True
  
- 
+# ---------------------------------------------------------
+# SYSTEM SETTINGS MODEL 
+# --------------------------------------------------------- 
+class SystemSettings(db.Model):
+    __tablename__ = "system_settings"
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    # Session timeout (minutes)
+    session_timeout = db.Column(db.Integer, default=30)
+
+    # Superadmin protection
+    superadmin_protection = db.Column(db.Boolean, default=True)
+
+    # Default suspension length (days)
+    default_suspension_length = db.Column(db.Integer, default=7)
+
+    # Log retention period (days)
+    log_retention = db.Column(db.Integer, default=30)
+
+    # Module toggles
+    module_takings = db.Column(db.Boolean, default=True)
+    module_incidents = db.Column(db.Boolean, default=True)
+    module_logs = db.Column(db.Boolean, default=True)
+    module_user_management = db.Column(db.Boolean, default=True)
+    module_company_management = db.Column(db.Boolean, default=True)
+    module_outstations = db.Column(db.Boolean, default=True)
+    module_regions = db.Column(db.Boolean, default=True)
+
+    # System-wide notifications
+    notify_email = db.Column(db.Boolean, default=True)
+    notify_suspension = db.Column(db.Boolean, default=True)
+    notify_incident = db.Column(db.Boolean, default=True)
+    notify_admin_action = db.Column(db.Boolean, default=True)
+
+    # Default assignment
+    default_company = db.Column(db.String(100), default="")
+    default_region = db.Column(db.String(100), default="")
+    default_depot = db.Column(db.String(100), default="")
+
+    # Global theme
+    theme = db.Column(db.String(20), default="light")
+
+# ---------------------------------------------------------
+# SETTINGS MODEL (GLOBAL SITE SETTINGS)
+# ---------------------------------------------------------
+class Settings(db.Model):
+    __tablename__ = "settings"
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    # Link settings to a user
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), unique=True, nullable=False)
+
+    # Username for visibility in DB Browser
+    username = db.Column(db.String(100), nullable=False)
+
+    # Account Type
+    account_type = db.Column(db.String(20), default="driver")
+
+    # Theme: light or dark
+    theme = db.Column(db.String(10), default="light")
+
+    # Year mode: calendar or tax
+    year_mode = db.Column(db.String(10), default="calendar")
+
+    # Preset selected (6-apr, 1-apr, 1-jan, custom)
+    tax_year_preset = db.Column(db.String(20), default="6-apr")
+
+    # Custom date if preset = custom
+    custom_tax_year_start = db.Column(db.String(20), nullable=True)
+
+    # Week start day
+    week_start_day = db.Column(db.String(10), nullable=False)
+
+    # Relationship to User
+    user = db.relationship("User", backref="settings", uselist=False)
+
+
+
+# ---------------------------------------------------------
+# PAY RATE MODEL
+# ---------------------------------------------------------
+class PayRate(db.Model):
+    __tablename__ = "pay_rates"
+
+    id = db.Column(db.Integer, primary_key=True)
+    effective_from = db.Column(db.Date, nullable=False)
+
+    # Standard rates
+    mon_fri_rate = db.Column(db.Float, nullable=True)
+    sat_rate = db.Column(db.Float, nullable=True)
+    sun_rate = db.Column(db.Float, nullable=True)
+    bank_hol_rate = db.Column(db.Float, nullable=True)
+
+    # Late duties
+    late_week_rate = db.Column(db.Float, nullable=True)
+    late_sat_rate = db.Column(db.Float, nullable=True)
+    late_sun_rate = db.Column(db.Float, nullable=True)
+    night_rate = db.Column(db.Float, nullable=True)
+
+    # Special days
+    christmas_rate = db.Column(db.Float, nullable=True)
+    boxingday_rate = db.Column(db.Float, nullable=True)
+    newyear_rate = db.Column(db.Float, nullable=True)
+    goodfriday_rate = db.Column(db.Float, nullable=True)
+
+
+# ==================================
+# SPECIAL DAYS
+# ==================================
+class SpecialDay(db.Model):
+    __tablename__ = "special_days"
+
+    id = db.Column(db.Integer, primary_key=True)
+    date = db.Column(db.Date, nullable=False, unique=True)
+    name = db.Column(db.String(50), nullable=False)
+    rate = db.Column(db.Float, nullable=False)
+
 # =========================================================
 # ROLE CHANGE HISTORY
 # =========================================================
@@ -337,123 +455,6 @@ class DutyBus(db.Model):
     # Relationship back to WeeklyDuty so we can easily query all buses for a shift
     duty = db.relationship('WeeklyDuty', backref=db.backref('buses', cascade='all, delete-orphan'))    
 
-# ---------------------------------------------------------
-# SETTINGS MODEL (GLOBAL SITE SETTINGS)
-# ---------------------------------------------------------
-class Settings(db.Model):
-    __tablename__ = "settings"
-
-    id = db.Column(db.Integer, primary_key=True)
-
-    # Link settings to a user
-    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), unique=True, nullable=False)
-
-    # Username for visibility in DB Browser
-    username = db.Column(db.String(100), nullable=False)
-
-    # Account Type
-    account_type = db.Column(db.String(20), default="driver")
-
-    # Theme: light or dark
-    theme = db.Column(db.String(10), default="light")
-
-    # Year mode: calendar or tax
-    year_mode = db.Column(db.String(10), default="calendar")
-
-    # Preset selected (6-apr, 1-apr, 1-jan, custom)
-    tax_year_preset = db.Column(db.String(20), default="6-apr")
-
-    # Custom date if preset = custom
-    custom_tax_year_start = db.Column(db.String(20), nullable=True)
-
-    # Week start day
-    week_start_day = db.Column(db.String(10), nullable=False)
-
-    # Relationship to User
-    user = db.relationship("User", backref="settings", uselist=False)
-
-# ---------------------------------------------------------
-# SYSTEM SETTINGS MODEL 
-# --------------------------------------------------------- 
-class SystemSettings(db.Model):
-    __tablename__ = "system_settings"
-
-    id = db.Column(db.Integer, primary_key=True)
-
-    # Session timeout (minutes)
-    session_timeout = db.Column(db.Integer, default=30)
-
-    # Superadmin protection
-    superadmin_protection = db.Column(db.Boolean, default=True)
-
-    # Default suspension length (days)
-    default_suspension_length = db.Column(db.Integer, default=7)
-
-    # Log retention period (days)
-    log_retention = db.Column(db.Integer, default=30)
-
-    # Module toggles
-    module_takings = db.Column(db.Boolean, default=True)
-    module_incidents = db.Column(db.Boolean, default=True)
-    module_logs = db.Column(db.Boolean, default=True)
-    module_user_management = db.Column(db.Boolean, default=True)
-    module_company_management = db.Column(db.Boolean, default=True)
-    module_outstations = db.Column(db.Boolean, default=True)
-    module_regions = db.Column(db.Boolean, default=True)
-
-    # System-wide notifications
-    notify_email = db.Column(db.Boolean, default=True)
-    notify_suspension = db.Column(db.Boolean, default=True)
-    notify_incident = db.Column(db.Boolean, default=True)
-    notify_admin_action = db.Column(db.Boolean, default=True)
-
-    # Default assignment
-    default_company = db.Column(db.String(100), default="")
-    default_region = db.Column(db.String(100), default="")
-    default_depot = db.Column(db.String(100), default="")
-
-    # Global theme
-    theme = db.Column(db.String(20), default="light")
-
-
-# ---------------------------------------------------------
-# PAY RATE MODEL
-# ---------------------------------------------------------
-class PayRate(db.Model):
-    __tablename__ = "pay_rates"
-
-    id = db.Column(db.Integer, primary_key=True)
-    effective_from = db.Column(db.Date, nullable=False)
-
-    # Standard rates
-    mon_fri_rate = db.Column(db.Float, nullable=True)
-    sat_rate = db.Column(db.Float, nullable=True)
-    sun_rate = db.Column(db.Float, nullable=True)
-    bank_hol_rate = db.Column(db.Float, nullable=True)
-
-    # Late duties
-    late_week_rate = db.Column(db.Float, nullable=True)
-    late_sat_rate = db.Column(db.Float, nullable=True)
-    late_sun_rate = db.Column(db.Float, nullable=True)
-    night_rate = db.Column(db.Float, nullable=True)
-
-    # Special days
-    christmas_rate = db.Column(db.Float, nullable=True)
-    boxingday_rate = db.Column(db.Float, nullable=True)
-    newyear_rate = db.Column(db.Float, nullable=True)
-    goodfriday_rate = db.Column(db.Float, nullable=True)
-
-
-# ==================================
-# SPECIAL DAYS
-# ==================================
-class SpecialDay(db.Model):
-    __tablename__ = "special_days"
-
-    id = db.Column(db.Integer, primary_key=True)
-    date = db.Column(db.Date, nullable=False, unique=True)
-    name = db.Column(db.String(50), nullable=False)
-    rate = db.Column(db.Float, nullable=False)
 
 # ---------------------------------------------------------
 #       DAILY ENTRIES
