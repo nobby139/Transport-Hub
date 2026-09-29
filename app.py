@@ -1810,24 +1810,58 @@ def superadmin_messages(target):
     if not superadmin:
         superadmin = current_user
 
+    selected_user = None
+    messages = []
+    users = []
+
+    # ============================
+    # INDIVIDUAL USER CHAT MODE (Numeric ID)
+    # ============================
+    if target.isdigit():
+        user_id = int(target)
+        selected_user = db.session.get(User, user_id)
+        
+        # Populate the dropdown list for users
+        users = User.query.filter(User.level != 1).all()
+
+        if selected_user:
+            # Load messages between current superadmin and the selected user
+            messages = UserMessages.query.filter(
+                (
+                    (UserMessages.sender_id == current_user.id) & 
+                    (UserMessages.receiver_id == selected_user.id)
+                )
+                |
+                (
+                    (UserMessages.sender_id == selected_user.id) & 
+                    (UserMessages.receiver_id == current_user.id)
+                )
+            ).order_by(UserMessages.created_at.asc()).all()
+
+            # Mark incoming messages from this user as read
+            for m in messages:
+                if m.receiver_id == current_user.id:
+                    if hasattr(m, 'read'):
+                        m.read = True
+                    if hasattr(m, 'is_read'):
+                        m.is_read = True
+
+            db.session.commit()
+
     # ============================
     # CATEGORY MODE — MERGED INBOX
     # ============================
-    if target in ["user", "enthusiast", "driver", "admin", "all"]:
+    elif target in ["user", "enthusiast", "driver", "admin", "all"]:
 
         # Build user list based on category (Using Level 3 for Drivers)
         if target == "user":
             users = User.query.filter(User.level != 1).all()
-
         elif target == "enthusiast":
             users = User.query.filter_by(level=4).all()
-
         elif target == "driver":
             users = User.query.filter_by(level=3).all()
-
         elif target == "admin":
             users = User.query.filter_by(level=2).all()
-
         elif target == "all":
             users = User.query.filter(User.level != 1).all()
         else:
@@ -1849,25 +1883,27 @@ def superadmin_messages(target):
 
             # Mark messages as read for both
             for m in messages:
-                if m.receiver_id in [admin.id, superadmin.id] and not m.read:
-                    m.read = True
+                if m.receiver_id in [admin.id, superadmin.id]:
+                    if hasattr(m, 'read') and not m.read:
+                        m.read = True
+                    if hasattr(m, 'is_read') and not m.is_read:
+                        m.is_read = True
 
             db.session.commit()
         else:
             messages = []
+    else:
+        return "Invalid target category", 404
 
-        return render_template(
-            "superadmin_messages.html",
-            users=users,
-            messages=messages,
-            user=None,
-            target=target,            
-            admin=admin,
-            superadmin=superadmin
-        )
-    
-    return "Invalid target category", 404
-
+    return render_template(
+        "superadmin_messages.html",
+        users=users,
+        messages=messages,
+        user=selected_user,
+        target=target,            
+        admin=admin,
+        superadmin=superadmin
+    )
 
     # ============================
     # PRIVATE CHAT MODE
