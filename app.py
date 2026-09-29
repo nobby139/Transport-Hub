@@ -6209,16 +6209,6 @@ def profile():
     if not user:
         return redirect("/login")
 
-    # =========================================================
-    # FORCE SUPERADMIN & ALL ROLE FLAGS ON CURRENT USER (Run once, then delete)
-    user.role_superadmin = True
-    user.role_admin = True
-    user.role_driver = True
-    user.role_enthusiast = True
-    user.level = 1
-    db.session.commit()
-    # =========================================================
-
     # Auto-assign joined date if missing (using today's date)
     if not user.joined_date:
         user.joined_date = datetime.today().strftime("%Y-%m-%d")
@@ -6260,7 +6250,6 @@ def profile():
         settings=settings,
         return_to=return_to
     )
-
 # -----------------------------------------------------
 # EDIT PROFILE ROUTE
 # -----------------------------------------------------
