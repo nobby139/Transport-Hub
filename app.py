@@ -869,12 +869,11 @@ def user_accounts():
             u.role = "Enthusiast"
         else:
             u.role = "Unknown"
-
     # ============================
     # USER COUNTS FOR STATS GRID
     # ============================
 
-    total_users = User.query.count()
+    total_users_in_db = User.query.count()
 
     enthusiast_count = User.query.filter_by(role_enthusiast=True).count()
     driver_count = User.query.filter_by(role_driver=True).count()
@@ -882,7 +881,7 @@ def user_accounts():
     superadmin_count = User.query.filter_by(role_superadmin=True).count()
 
     upgraded_count = RoleChangeHistory.query.filter_by(change_type="upgrade").count()
-    downgraded_count = RoleChangeHistory.query.filter_by(change_type="downgrade").count()
+    downgraded_count = RoleChangeHistory.query.filter_by(change_type="downgraded").count()
 
     suspended_count = User.query.filter(User.suspended_until.isnot(None)).count()
 
@@ -891,15 +890,17 @@ def user_accounts():
         (User.suspension_reason != None)
     ).count()
 
-    # Count only users who have at least one active role
-    active_users_count = User.query.filter(
-        ~(
-            (User.role_driver == False) &
-            (User.role_enthusiast == False) &
-            (User.role_admin == False) &
-            (User.role_superadmin == False)
-        )
+    # 1. Define deleted_count here first:
+    deleted_count = User.query.filter_by(
+        role_driver=False,
+        role_enthusiast=False,
+        role_admin=False,
+        role_superadmin=False
     ).count()
+
+    # 2. Then calculate total active users:
+    total_users = total_users_in_db - deleted_count
+
 
     # ============================
     # SITE STATS (GLOBAL TRAFFIC)
