@@ -6675,8 +6675,12 @@ def debug_current_user():
     role_admin: {current_user.role_admin} (Type: {type(current_user.role_admin)})<br>
     <b>Evaluated role_label: {current_user.role_label}</b>
     """
-
-
+# ---------------------------------------------------------
+# WAKEUP CALL
+# ---------------------------------------------------------
+@app.route('/healthz')
+def health_check():
+    return "OK", 200
 # ---------------------------------------------------------
 # RUN SERVER
 # ---------------------------------------------------------
