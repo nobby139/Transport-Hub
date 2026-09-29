@@ -415,6 +415,7 @@ class SystemSettings(db.Model):
     # Global theme
     theme = db.Column(db.String(20), default="light")
 
+
 # ---------------------------------------------------------
 # PAY RATE MODEL
 # ---------------------------------------------------------
@@ -441,6 +442,7 @@ class PayRate(db.Model):
     boxingday_rate = db.Column(db.Float, nullable=True)
     newyear_rate = db.Column(db.Float, nullable=True)
     goodfriday_rate = db.Column(db.Float, nullable=True)
+
 
 # ==================================
 # SPECIAL DAYS
