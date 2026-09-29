@@ -1308,20 +1308,25 @@ def platform_messages():
 @app.route("/mark_read/<int:msg_id>", methods=["POST"])
 @login_required
 def mark_read(msg_id):
-    msg = UserMessages.query.get(msg_id)
+    # Use modern SQLAlchemy syntax to prevent 500 errors
+    msg = db.session.get(UserMessages, msg_id)
 
     if not msg:
         return jsonify({"success": False, "error": "Message not found"}), 404
 
-    # Only allow the receiver to mark it read
-    if msg.receiver_id != current_user.id:
+    # Allow the receiver OR a Superadmin (level 1) to mark it read
+    if msg.receiver_id != current_user.id and current_user.level != 1:
         return jsonify({"success": False, "error": "Not allowed"}), 403
 
-    msg.is_read = True
+    # Update both possible column names used across your app to prevent conflicts
+    if hasattr(msg, 'is_read'):
+        msg.is_read = True
+    if hasattr(msg, 'read'):
+        msg.read = True
+        
     db.session.commit()
 
     return jsonify({"success": True})
-
 # =========================================
 # SET ROLE
 # =========================================
