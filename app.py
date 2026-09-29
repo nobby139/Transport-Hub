@@ -1305,7 +1305,7 @@ def platform_messages():
     )
 
 
-@app.route("/mark_read/<int:msg_id>", methods=["POST"])
+@app.route("/mark_message_read/<int:msg_id>", methods=["POST"])
 @login_required
 def mark_read(msg_id):
     # Use modern SQLAlchemy syntax to prevent 500 errors
