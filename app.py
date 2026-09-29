@@ -2256,35 +2256,43 @@ def confirm_delete():
 
     delete_driver = "delete_driver" in request.form
     delete_enthusiast = "delete_enthusiast" in request.form
-    delete_both = "delete_both" in request.form  # Matches name="delete_both" in your template
+    delete_admin = "delete_admin" in request.form
 
-    # ⭐ FULL ACCOUNT DELETE (Matches your HTML checkbox)
-    if delete_both:
-        db.session.delete(user)
-        db.session.commit()
-        session.clear()
-        return redirect("/goodbye")
+    # Ensure at least one box was ticked
+    if not delete_driver and not delete_enthusiast and not delete_admin:
+        flash("Please select at least one account type to delete.", "warning")
+        return redirect(url_for('delete_account_options'))
 
-    # ⭐ DELETE DRIVER ROLE ONLY
+    # Process selections
     if delete_driver:
-        user.level = 4  # downgrade to enthusiast
-        db.session.commit()
-        return redirect("/profile")
-
-    # ⭐ DELETE ENTHUSIAST ROLE ONLY
+        user.role_driver = False
+    
     if delete_enthusiast:
-        user.level = 3  # downgrade to driver
-        db.session.commit()
-        return redirect("/profile")
+        user.role_enthusiast = False
 
-    # If all roles are now zero → delete whole account
-    if getattr(user, 'role_driver', 0) == 0 and getattr(user, 'role_enthusiast', 0) == 0:
+    if delete_admin:
+        user.role_admin = False
+        user.role_superadmin = False
+
+    # Check if any roles/accounts remain active
+    has_remaining_roles = (
+        getattr(user, 'role_driver', False) or 
+        getattr(user, 'role_enthusiast', False) or 
+        getattr(user, 'role_admin', False) or 
+        getattr(user, 'role_superadmin', False)
+    )
+
+    # If all roles are gone (or admin was wiped), delete the user record entirely
+    if not has_remaining_roles or delete_admin:
         db.session.delete(user)
         db.session.commit()
         session.clear()
         return redirect("/goodbye")
 
-    return redirect(url_for("home"))
+    db.session.commit()
+    
+    # If they only deleted one role and others remain, redirect back to profile or dashboard
+    return redirect("/profile")
 
 @app.route("/goodbye")
 def goodbye():
