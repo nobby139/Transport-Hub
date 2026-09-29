@@ -2308,6 +2308,10 @@ def unified_login():
     if not check_password_hash(user.password, password):
         return jsonify({"message": "Incorrect password"}), 400
     
+    # 🛑 CHECK IF ACCOUNT IS DELETED (Soft-delete check)
+    if not user.role_driver and not user.role_enthusiast and not user.role_admin and not user.role_superadmin:
+        return jsonify({"message": "This account has been deleted"}), 400
+    
     # 🛡️ MANDATORY 2FA ENFORCEMENT CHECK
     if not user.is_2fa_enabled or not user.totp_secret:
         session["pre_2fa_user_id"] = user.id
