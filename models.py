@@ -415,7 +415,6 @@ class SystemSettings(db.Model):
     # Global theme
     theme = db.Column(db.String(20), default="light")
 
-
 # ---------------------------------------------------------
 # PAY RATE MODEL
 # ---------------------------------------------------------
