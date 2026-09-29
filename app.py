@@ -6622,6 +6622,19 @@ def debug_current_user():
     role_admin: {current_user.role_admin} (Type: {type(current_user.role_admin)})<br>
     <b>Evaluated role_label: {current_user.role_label}</b>
     """
+
+@app.route("/reset_alex")
+def reset_alex():
+    alex = User.query.filter_by(username="Alex").first()
+    if alex:
+        alex.role_superadmin = False
+        alex.role_admin = False
+        alex.role_driver = True
+        alex.role_enthusiast = True
+        alex.level = 3
+        db.session.commit()
+        return "Alex has been reset on Render!"
+    return "Alex not found."
 # ---------------------------------------------------------
 # RUN SERVER
 # ---------------------------------------------------------
