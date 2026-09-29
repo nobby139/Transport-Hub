@@ -1431,13 +1431,31 @@ def set_role():
         return jsonify({"status": "lifted"})
 
     # ============================================================
-    # UPGRADE / DOWNGRADE
+    # UPGRADE / DOWNGRADE (AUTOMATIC DETECTION)
     # ============================================================
-    if change_type in ["upgrade", "downgrade"]:
-
+    if change_type in ["upgrade", "downgrade", "role_change"]:
         # Clear suspension
         user.suspended_until = None
         user.suspension_reason = None
+
+        # Define role hierarchy levels (Lower number = higher privilege)
+        role_levels = {
+            "Superadmin": 1,
+            "Admin": 2,
+            "Driver": 3,
+            "Enthusiast": 4
+        }
+
+        new_level = role_levels.get(new_role, 4)
+        old_level = user.level if user.level else 4
+
+        # Automatically determine if it's an upgrade or downgrade
+        if new_level < old_level:
+            actual_change_type = "upgrade"
+        elif new_level > old_level:
+            actual_change_type = "downgrade"
+        else:
+            actual_change_type = "role_change"
 
         # Apply selected role level & boolean flags
         if new_role == "Driver":
@@ -1465,8 +1483,8 @@ def set_role():
             user.role_driver = False
             user.role_enthusiast = False
 
-        # Set correct message + reason
-        if change_type == "downgrade":
+        # Set correct message + reason based on automatic detection
+        if actual_change_type == "downgrade":
             user.role_change_message = f"Sorry, you have been downgraded to {new_role}."
             user.downgrade_reason = reason
 
@@ -1478,8 +1496,7 @@ def set_role():
                 msg_type="system_downgrade",
                 popup=True
             )
-
-        elif change_type == "upgrade":
+        else:
             user.role_change_message = f"You have been upgraded to {new_role}."
             user.downgrade_reason = None
 
@@ -1497,7 +1514,7 @@ def set_role():
         log_role_change(
             user_id=user.id,
             admin_id=current_user.id,
-            change_type=change_type,
+            change_type=actual_change_type,
             old_role=old_role,
             new_role=new_role,
             reason=reason,
@@ -1508,7 +1525,6 @@ def set_role():
         return jsonify({"status": "role_changed"})
 
     return jsonify({"error": "Invalid change type"})
-
 
 # =========================================================
 # BACK TO COLUMN 0 FOR THE NEXT ROUTE
