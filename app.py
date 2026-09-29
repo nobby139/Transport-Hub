@@ -1576,15 +1576,18 @@ def create_user_by_email():
 #  LOG ROLE CHANGE (HELPER FUNCTIONS)
 # =========================================================
 def get_role_string(user):
-    if user.level == 1: 
-        return "Superadmin"
-    if user.level == 2: 
-        return "Admin"
-    if user.level == 3: 
-        return "Driver"
-    if user.level == 4: 
-        return "Enthusiast"
-    return "None"
+    roles = []
+    
+    if user.role_superadmin:
+        roles.append("Superadmin")
+    if user.role_admin:
+        roles.append("Admin")
+    if user.role_driver:
+        roles.append("Driver")
+    if user.role_enthusiast:
+        roles.append("Enthusiast")
+        
+    return ", ".join(roles) if roles else "None"
 
 def log_role_change(user_id, admin_id, change_type, old_role, new_role, reason, extra_info=None):
     entry = RoleChangeHistory(
