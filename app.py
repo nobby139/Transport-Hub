@@ -891,7 +891,12 @@ def user_accounts():
         (User.suspension_reason != None)
     ).count()
 
-    deleted_count = User.query.filter_by(deleted=True).count()
+    deleted_count = User.query.filter_by(
+        role_driver=False,
+        role_enthusiast=False,
+        role_admin=False,
+        role_superadmin=False
+    ).count()
 
     # ============================
     # SITE STATS (GLOBAL TRAFFIC)
