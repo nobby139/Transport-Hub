@@ -2499,18 +2499,28 @@ def verify_2fa():
     
     if request.method == "POST":
         token = request.form.get("token")
+        
+        # --- DEBUG LOGS ---
+        print(f"DEBUG: User ID: {user.id}")
+        print(f"DEBUG: Stored Secret: {user.totp_secret}")
+        print(f"DEBUG: Received Token: {token}")
+        if user.totp_secret:
+            debug_totp = pyotp.TOTP(user.totp_secret)
+            print(f"DEBUG: Server Expected Token NOW: {debug_totp.now()}")
+        # ------------------
+
+        if not user.totp_secret:
+            flash("No 2FA secret found for this account.", "danger")
+            return render_template("verify_2fa.html")
+
         totp = pyotp.TOTP(user.totp_secret)
         
         if totp.verify(token, valid_window=1):
             session.pop("pre_2fa_user_id", None)
-            
-            # --- FIX: Set the session key your dashboards look for! ---
             session["user_id"] = user.id
-            
             login_user(user)
             flash("Logged in successfully!", "success")
             
-            # Safe dashboard redirect based on role
             if user.role_driver:
                 return redirect(url_for("driver_dashboard"))
             else:
