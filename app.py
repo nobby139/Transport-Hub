@@ -6622,13 +6622,7 @@ def debug_current_user():
     role_admin: {current_user.role_admin} (Type: {type(current_user.role_admin)})<br>
     <b>Evaluated role_label: {current_user.role_label}</b>
     """
-@app.route("/reset_alex")
-def reset_alex():
-    # Pass the email in the URL like: /reset_alex?email=alex@example.com
-    email = request.args.get("email", "").strip().lower()
-    
-    if not email:
-        return "Please provide an email in the URL. Example: /reset_alex?email=alex@yourdomain.com"
+
         
 @app.route("/reset_alex")
 def reset_alex():
