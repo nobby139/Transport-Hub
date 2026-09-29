@@ -506,38 +506,44 @@ header {
         padding: 0;
         margin: 0;
         font-size: 16px;
+        overflow-x: hidden; /* Stops accidental horizontal page sliding */
     }
 
-    /* Force the header container to stay within the screen width */
-    header, .navbar, .header-container {
+    /* Force the header container to use Flexbox so items stay inline and inside the blue bar */
+    header, .navbar, .header-container, .blue-header {
         width: 100% !important;
-        max-width: 100% !important;
-        padding: 10px 15px;
-        box-sizing: border-box;
+        max-width: 100vw !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        padding: 10px 15px !important;
+        box-sizing: border-box !important;
+        overflow: hidden !important;
     }
 
-    /* Keep the logo scaled properly so it doesn't overflow */
-    .logo, img.brand-logo {
-        max-height: 40px;
-        width: auto;
+    /* Keep the logo scaled properly so it fits neatly inside the blue header bar */
+    .logo, img.brand-logo, header img {
+        max-height: 32px !important;
+        width: auto !important;
+        max-width: 45% !important;
+        object-fit: contain !important;
     }
-}
 
-    /* Force the main content area to take up the full screen width */
+    /* Force the main content area to take up the full screen width safely */
     main {
-        width: 100%;
-        padding: 10px 15px;
-        box-sizing: border-box;
+        width: 100% !important;
+        padding: 10px 15px !important;
+        box-sizing: border-box !important;
     }
 
     /* Make sure all dashboard cards and content blocks use full width */
     .section, .dashboard-card, .menu-card, .btn-container {
         width: 100% !important;
         max-width: 100% !important;
-        box-sizing: border-box;
+        box-sizing: border-box !important;
     }
 
-    /* Tables scroll horizontally */
+    /* Tables scroll horizontally without breaking layout */
     table {
         width: 100%;
         display: block;
@@ -545,6 +551,7 @@ header {
         border-collapse: collapse;
     }
 }
+
 /* ====================================================
    PLATFORM MESSAGES
 ==================================================== */
