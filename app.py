@@ -1431,79 +1431,79 @@ def set_role():
 
         return jsonify({"status": "lifted"})
 
-    # ============================================================
-    # UPGRADE / DOWNGRADE
-    # ============================================================
-    if change_type in ["upgrade", "downgrade"]:
+        # ============================================================
+        # UPGRADE / DOWNGRADE (Inside /set_role)
+        # ============================================================
+        if change_type in ["upgrade", "downgrade"]:
 
-        # Clear suspension
-        user.suspended_until = None
-        user.suspension_reason = None
+            # Clear suspension
+            user.suspended_until = None
+            user.suspension_reason = None
 
-        # Apply selected role level
-        # 1 = SuperAdmin
-        # 2 = Admin
-        # 3 = Driver
-        # 4 = Enthusiast (Basic)
+            # Apply selected role level & boolean flags
+            if new_role == "Driver":
+                user.level = 3
+                user.role_driver = True
+                user.role_enthusiast = False  
+            elif new_role == "Enthusiast":
+                user.level = 4
+                user.role_driver = False
+                user.role_enthusiast = True
+            elif new_role == "Admin":
+                user.level = 2
+                user.role_admin = True
+            elif new_role == "Superadmin":
+                user.level = 1
+                user.role_superadmin = True
 
-        if new_role == "Driver":
-            user.level = 3
+            # Set correct message + reason
+            if change_type == "downgrade":
+                user.role_change_message = f"Sorry, you have been downgraded to {new_role}."
+                user.downgrade_reason = reason
 
-        elif new_role == "Enthusiast":
-            user.level = 4
+                create_platform_message(
+                    sender_id=current_user.id,
+                    receiver_id=user.id,
+                    title="Account Downgraded",
+                    body=f"Your account has been downgraded to {new_role}. Reason: {reason}",
+                    msg_type="system_downgrade",
+                    popup=True
+                )
 
-        elif new_role == "Admin":
-            user.level = 2
+            elif change_type == "upgrade":
+                user.role_change_message = f"You have been upgraded to {new_role}."
+                user.downgrade_reason = None
 
-        elif new_role == "Superadmin":
-            user.level = 1
+                create_platform_message(
+                    sender_id=current_user.id,
+                    receiver_id=user.id,
+                    title="Account Upgraded",
+                    body=f"Your account has been upgraded to {new_role}.",
+                    msg_type="system_upgrade",
+                    popup=True
+                )
 
+            db.session.commit()
 
-        # Set correct message + reason
-        if change_type == "downgrade":
-            user.role_change_message = f"Sorry, you have been downgraded to {new_role}."
-            user.downgrade_reason = reason
-
-            create_platform_message(
-                sender_id=current_user.id,
-                receiver_id=user.id,
-                title="Account Downgraded",
-                body=f"Your account has been downgraded to {new_role}. Reason: {reason}",
-                msg_type="system_downgrade",
-                popup=True
+            log_role_change(
+                user_id=user.id,
+                admin_id=current_user.id,
+                change_type=change_type,
+                old_role=old_role,
+                new_role=new_role,
+                reason=reason,
+                extra_info=None
             )
+            db.session.commit()
 
-        elif change_type == "upgrade":
-            user.role_change_message = f"You have been upgraded to {new_role}."
-            user.downgrade_reason = None
+            return jsonify({"status": "role_changed"})
 
-            create_platform_message(
-                sender_id=current_user.id,
-                receiver_id=user.id,
-                title="Account Upgraded",
-                body=f"Your account has been upgraded to {new_role}.",
-                msg_type="system_upgrade",
-                popup=True
-            )
-
-        db.session.commit()
-
-        log_role_change(
-            user_id=user.id,
-            admin_id=current_user.id,
-            change_type=change_type,
-            old_role=old_role,
-            new_role=new_role,
-            reason=reason,
-            extra_info=None
-        )
-        db.session.commit()
-
-        return jsonify({"status": "role_changed"})
-
-    return jsonify({"error": "Invalid change type"})
+        return jsonify({"error": "Invalid change type"})
 
 
+# =========================================================
+# BACK TO COLUMN 0 FOR THE NEXT ROUTE
+# =========================================================
 @app.route('/create_user_by_email', methods=['POST'])
 @login_required
 def create_user_by_email():
@@ -1522,12 +1522,10 @@ def create_user_by_email():
         level=4   # Enthusiast (Basic)
     )
 
-
     db.session.add(new_user)
     db.session.commit()
 
     return jsonify({"success": True})
-
 # =========================================================
 #  LOG ROLE CHANGE (HELPER FUNCTIONS)
 # =========================================================
@@ -1570,20 +1568,31 @@ def apply_role_change():
 
     old_role = get_role_string(user)
 
-    # Apply selected role level
-    # 1 = SuperAdmin
-    # 2 = Admin
-    # 3 = Driver
-    # 4 = Enthusiast (Basic)
-
+    # Apply selected role level and matching boolean flags
     if selected_role == "Superadmin":
         user.level = 1
+        user.role_superadmin = True
+        user.role_admin = False
+        user.role_driver = False
+        user.role_enthusiast = False
     elif selected_role == "Admin":
         user.level = 2
+        user.role_superadmin = False
+        user.role_admin = True
+        user.role_driver = False
+        user.role_enthusiast = False
     elif selected_role == "Driver":
         user.level = 3
+        user.role_superadmin = False
+        user.role_admin = False
+        user.role_driver = True
+        user.role_enthusiast = False
     elif selected_role == "Enthusiast":
         user.level = 4
+        user.role_superadmin = False
+        user.role_admin = False
+        user.role_driver = False
+        user.role_enthusiast = True
 
     db.session.commit()
 
