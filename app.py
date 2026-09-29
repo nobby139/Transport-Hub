@@ -2195,9 +2195,43 @@ def create_profile():
     if role_enthusiast and age < 16:
         return "You must be 16+ to have enthusiast access", 400
 
-    # CREATE USER
     hashed_password = generate_password_hash(password)
 
+    # CHECK IF EMAIL ALREADY EXISTS
+    existing_user = User.query.filter_by(email=email).first()
+
+    if existing_user:
+        # Check if the account was soft-deleted (all roles are False)
+        is_soft_deleted = (
+            not existing_user.role_driver and 
+            not existing_user.role_enthusiast and 
+            not existing_user.role_admin and 
+            not existing_user.role_superadmin
+        )
+
+        if is_soft_deleted:
+            # REACTIVATE EXISTING USER: Update details while keeping historical record ID intact
+            existing_user.first_name = first_name
+            existing_user.last_name = last_name
+            existing_user.username = username if username else None
+            existing_user.password = hashed_password
+            existing_user.date_of_birth = date_of_birth
+            existing_user.level = int(level_value) if level_value else 4
+            existing_user.role_driver = role_driver
+            existing_user.role_enthusiast = role_enthusiast
+            existing_user.joined_date = datetime.today().strftime("%Y-%m-%d")
+            
+            # Reset security flags if needed for a fresh setup
+            existing_user.is_2fa_enabled = False
+            existing_user.totp_secret = None
+
+            db.session.commit()
+            return redirect("/profile")
+        else:
+            # If an active account already uses this email, reject the signup
+            return "An active account with this email already exists", 400
+
+    # CREATE NEW USER IF NO EXISTING RECORD FOUND
     user = User(
         first_name=first_name,
         last_name=last_name,
@@ -2223,7 +2257,6 @@ def create_profile():
 @app.get("/create_account")
 def show_create_account():
     return render_template("create_account.html")
-
 # =====================================================================
 # DELETE  OPTIONS
 # =====================================================================
