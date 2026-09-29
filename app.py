@@ -891,11 +891,14 @@ def user_accounts():
         (User.suspension_reason != None)
     ).count()
 
-    deleted_count = User.query.filter_by(
-        role_driver=False,
-        role_enthusiast=False,
-        role_admin=False,
-        role_superadmin=False
+    # Count only users who have at least one active role
+    active_users_count = User.query.filter(
+        ~(
+            (User.role_driver == False) &
+            (User.role_enthusiast == False) &
+            (User.role_admin == False) &
+            (User.role_superadmin == False)
+        )
     ).count()
 
     # ============================
