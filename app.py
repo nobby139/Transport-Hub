@@ -2525,8 +2525,6 @@ def setup_2fa():
 def verify_2fa():
     user_id = session.get("pre_2fa_user_id")
     if not user_id:
-        # Only flash if they submitted a form or came from login, 
-        # or remove the flash line completely to stop the message from appearing
         if request.method == "POST":
             flash("Session expired. Please log in again.", "warning")
         return redirect(url_for("login"))
@@ -2534,12 +2532,13 @@ def verify_2fa():
     user = db.session.get(User, user_id)
     
     if request.method == "POST":
-        token = request.form.get("token")
+        # .strip() removes accidental leading/trailing spaces from mobile auto-fill
+        token = request.form.get("token", "").strip()
         
         # --- DEBUG LOGS ---
         print(f"DEBUG: User ID: {user.id}")
         print(f"DEBUG: Stored Secret: {user.totp_secret}")
-        print(f"DEBUG: Received Token: {token}")
+        print(f"DEBUG: Received Token (Cleaned): '{token}'")
         if user.totp_secret:
             debug_totp = pyotp.TOTP(user.totp_secret)
             print(f"DEBUG: Server Expected Token NOW: {debug_totp.now()}")
@@ -2551,10 +2550,13 @@ def verify_2fa():
 
         totp = pyotp.TOTP(user.totp_secret)
         
-        if totp.verify(token, valid_window=1):
+        # valid_window=2 gives a 90-second buffer for mobile network or clock drift
+        if totp.verify(token, valid_window=2):
             session.pop("pre_2fa_user_id", None)
             session["user_id"] = user.id
-            login_user(user)
+            
+            # remember=True prevents mobile browsers from dropping the session on redirect
+            login_user(user, remember=True)
             flash("Logged in successfully!", "success")
             
             if user.role_driver:
@@ -2565,7 +2567,6 @@ def verify_2fa():
             flash("Invalid 2FA code. Please try again.", "danger")
             
     return render_template("verify_2fa.html")
-
 # ---------------------------------------------------------
 # 2FA EMAIL RESET ROUTE (NO SMTP - CLOUD HOST SAFE)
 # ---------------------------------------------------------
