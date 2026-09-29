@@ -2242,7 +2242,7 @@ def suspended():
     return render_template("suspended.html")
 
 # =====================================================================
-# DELETE ACCOUNTS
+# DELETE ACCOUNTS (SOFT DELETE)
 # =====================================================================
 @app.route("/confirm-delete", methods=["POST"])
 def confirm_delete():
@@ -2263,36 +2263,19 @@ def confirm_delete():
         flash("Please select at least one account type to delete.", "warning")
         return redirect(url_for('delete_account_options'))
 
-    # Process selections
-    if delete_driver:
-        user.role_driver = False
+    # Soft-delete: Strip all roles and deactivate the account 
+    # (The user row stays in the database, preserving all history log references)
+    user.role_driver = False
+    user.role_enthusiast = False
+    user.role_admin = False
+    user.role_superadmin = False
     
-    if delete_enthusiast:
-        user.role_enthusiast = False
-
-    if delete_admin:
-        user.role_admin = False
-        user.role_superadmin = False
-
-    # Check if any roles/accounts remain active
-    has_remaining_roles = (
-        getattr(user, 'role_driver', False) or 
-        getattr(user, 'role_enthusiast', False) or 
-        getattr(user, 'role_admin', False) or 
-        getattr(user, 'role_superadmin', False)
-    )
-
-    # If all roles are gone (or admin was wiped), delete the user record entirely
-    if not has_remaining_roles or delete_admin:
-        db.session.delete(user)
-        db.session.commit()
-        session.clear()
-        return redirect("/goodbye")
+    # If you have an active status flag on your model, you can set it here:
+    # user.is_active = False 
 
     db.session.commit()
-    
-    # If they only deleted one role and others remain, redirect back to profile or dashboard
-    return redirect("/profile")
+    session.clear()
+    return redirect("/goodbye")
 
 @app.route("/goodbye")
 def goodbye():
