@@ -6623,21 +6623,7 @@ def debug_current_user():
     <b>Evaluated role_label: {current_user.role_label}</b>
     """
 
-@app.route("/reset_alex")
-def reset_alex():
-    # Target Alex strictly by his email - do NOT fall back to ID 1
-    alex = User.query.filter_by(email="test1transporthub@outlook.com").first()
-    
-    if alex:
-        alex.role_superadmin = False
-        alex.role_admin = False
-        alex.role_driver = True
-        alex.role_enthusiast = True
-        alex.level = 3  # Standard user level
-        db.session.commit()
-        return f"SUCCESS: {alex.username} ({alex.email}) is now stripped of superadmin."
-        
-    return "ERROR: Could not find a user with Alex's exact email in the database."
+
 # ---------------------------------------------------------
 # RUN SERVER
 # ---------------------------------------------------------
