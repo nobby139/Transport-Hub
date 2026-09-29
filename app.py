@@ -6625,18 +6625,22 @@ def debug_current_user():
 
 @app.route("/reset_alex")
 def reset_alex():
-    # Target User ID #1 directly, bypassing email string mismatches
-    alex = db.session.get(User, 1)
+    # Target Alex by his exact email
+    alex = User.query.filter_by(email="test1transporthub@outlook.com").first()
+    if not alex:
+        # Fallback to User ID 1 if email lookup misses
+        alex = db.session.get(User, 1)
+        
     if alex:
         alex.role_superadmin = False
         alex.role_admin = False
         alex.role_driver = True
         alex.role_enthusiast = True
-        alex.level = 3
+        alex.level = 3  # Set to standard user level (not level 1)
         db.session.commit()
-        return f"SUCCESS! Updated User ID 1. Username: '{alex.username}', Email: '{alex.email}' is now Driver/Enthusiast."
+        return f"SUCCESS: {alex.username} ({alex.email}) is now stripped of superadmin and set to level 3."
         
-    return "ERROR: User ID 1 was not found in the database at all."
+    return "ERROR: Could not find Alex in the database."
 # ---------------------------------------------------------
 # RUN SERVER
 # ---------------------------------------------------------
