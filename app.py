@@ -1677,13 +1677,13 @@ def role_change_history():
     )
 
 # ============================================================
-# 1. SYSTEM SETTINGS (Admin Global Settings)
+# 1. SYSTEM SETTINGS (Superadmin Only)
 # ============================================================
 @app.route("/settings/system")
 @login_required
 def settings_system():
-    # Allow if superadmin role flag is true OR level is 1
-    if not current_user.role_superadmin and current_user.level != 1:
+    # Strict Superadmin check: Regular Admins are NOT allowed
+    if not (getattr(current_user, 'role_superadmin', False) in [True, 1] or getattr(current_user, 'level', 99) == 1):
         return redirect("/dashboard")
         
     settings_row = SystemSettings.query.first()
@@ -1698,10 +1698,46 @@ def settings_system():
 @app.route("/settings/system/save", methods=["POST"])
 @login_required
 def settings_system_save():
-    if not current_user.role_superadmin and current_user.level != 1:
+    # Strict Superadmin check: Regular Admins are NOT allowed
+    if not (getattr(current_user, 'role_superadmin', False) in [True, 1] or getattr(current_user, 'level', 99) == 1):
         return redirect("/dashboard")
 
-    # ... rest of your save logic ...
+    settings_row = SystemSettings.query.first()
+    if not settings_row:
+        settings_row = SystemSettings()
+        db.session.add(settings_row)
+
+    session_timeout_val = request.form.get("session_timeout")
+    settings_row.session_timeout = int(session_timeout_val) if session_timeout_val else 30
+
+    suspension_val = request.form.get("default_suspension_length")
+    settings_row.default_suspension_length = int(suspension_val) if suspension_val else 7
+
+    retention_val = request.form.get("log_retention")
+    settings_row.log_retention = int(retention_val) if retention_val else 90
+
+    settings_row.superadmin_protection = request.form.get("superadmin_protection") is not None
+    settings_row.module_takings = request.form.get("module_takings") is not None
+    settings_row.module_incidents = request.form.get("module_incidents") is not None
+    settings_row.module_logs = request.form.get("module_logs") is not None
+    settings_row.module_user_management = request.form.get("module_user_management") is not None
+    settings_row.module_company_management = request.form.get("module_company_management") is not None
+    settings_row.module_outstations = request.form.get("module_outstations") is not None
+    settings_row.module_regions = request.form.get("module_regions") is not None
+
+    settings_row.notify_email = request.form.get("notify_email") is not None
+    settings_row.notify_suspension = request.form.get("notify_suspension") is not None
+    settings_row.notify_incident = request.form.get("notify_incident") is not None
+    settings_row.notify_admin_action = request.form.get("notify_admin_action") is not None
+
+    settings_row.default_company = request.form.get("default_company")
+    settings_row.default_region = request.form.get("default_region")
+    settings_row.default_depot = request.form.get("default_depot")
+    settings_row.theme = request.form.get("theme")
+
+    db.session.commit()
+    return redirect("/settings/system")
+    
 # ============================================================
 # 2. USER SETTINGS (Individual Profile & Preferences)
 # ============================================================
