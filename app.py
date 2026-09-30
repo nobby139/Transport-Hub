@@ -137,6 +137,23 @@ migrate = Migrate(app, db)
 with app.app_context():
     db.create_all()
     print("Database tables checked/created successfully!")
+    
+    # Bulletproof check: Ensure only ONE superadmin can ever be auto-created
+    admin_exists = User.query.filter_by(is_admin=True).first()
+    
+    if not admin_exists:
+        hashed_password = generate_password_hash("YourSecurePassword123")
+        superadmin = User(
+            username="admin", 
+            email="info@transporthub.uk", 
+            is_admin=True
+        )
+        db.session.add(superadmin)
+        db.session.commit()
+        print("Default superadmin created successfully!")
+    else:
+        print("Superadmin already exists. Skipping creation.")
+
 
 
 # =======================================================
