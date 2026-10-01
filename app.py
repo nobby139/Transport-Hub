@@ -1706,7 +1706,7 @@ def role_change_history():
 # ============================================================
 # 1. SYSTEM SETTINGS (Superadmin Only)
 # ============================================================
-@app.route("/system/settings")
+@app.route("/settings/system")
 @login_required
 def settings_system():
     # Strict Superadmin check: Regular Admins are NOT allowed
@@ -1722,7 +1722,7 @@ def settings_system():
     return render_template("system_settings.html", settings=settings_row)
 
 
-@app.route("/system/settings/save", methods=["POST"])
+@app.route("/settings/system/save", methods=["POST"])
 @login_required
 def settings_system_save():
     # Strict Superadmin check: Regular Admins are NOT allowed
@@ -1763,7 +1763,7 @@ def settings_system_save():
     settings_row.theme = request.form.get("theme")
 
     db.session.commit()
-    return redirect("/system/settings")
+    return redirect("/settings/system")
     
 # ============================================================
 # 2. USER SETTINGS (Individual Profile & Preferences)
