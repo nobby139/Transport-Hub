@@ -146,7 +146,8 @@ with app.app_context():
         superadmin = User(
             username="admin", 
             email="info@transporthub.uk", 
-            is_admin=True
+            role_superadmin=True,
+            role_admin=True
         )
         db.session.add(superadmin)
         db.session.commit()
