@@ -1716,7 +1716,7 @@ def settings_system():
         db.session.add(settings_row)
         db.session.commit()
         
-    return render_template("system_setting.html", settings=settings_row)
+    return render_template("system_settings.html", settings=settings_row)
 
 
 @app.route("/system/settings/save", methods=["POST"])
