@@ -141,22 +141,26 @@ with app.app_context():
     # Bulletproof check: Ensure only ONE superadmin can ever be auto-created
     admin_exists = User.query.filter_by(is_admin=True).first()
     
-    # Check if the superadmin account already exists by username or email
-    existing_admin = User.query.filter_by(username="admin").first()
-    
-    if not existing_admin:
-        superadmin = User(
-            first_name="Chris",
-            last_name="Clark",
-            username="admin",
-            email="info@transporthub.uk",
-            level=4,
-            role_superadmin=True,
-            role_admin=True
-            # Leave password empty/unset or handle it during your first-run setup flow
-        )
-        db.session.add(superadmin)
-        db.session.commit()
+    # Safe startup check that preserves your existing user record and password
+    try:
+        existing_admin = User.query.filter_by(username="admin").first()
+        if not existing_admin:
+            superadmin = User(
+                first_name="Chris",
+                last_name="Clark",
+                username="admin",
+                email="info@transporthub.uk",
+                level=4,
+                role_superadmin=True,
+                role_admin=True
+                # Keep your original password insertion here if your code had it, 
+                # or leave it alone if your database already has the correct hashed user row.
+            )
+            db.session.add(superadmin)
+            db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        print(f"Startup user check note: {e}")
         print("Default superadmin created successfully!")
         db.session.add(superadmin)
         db.session.commit()
