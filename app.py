@@ -141,16 +141,19 @@ with app.app_context():
     # Bulletproof check: Ensure only ONE superadmin can ever be auto-created
     admin_exists = User.query.filter_by(is_admin=True).first()
     
-    if not admin_exists:
-        hashed_password = generate_password_hash("YourSecurePassword123")
+    # Check if the superadmin account already exists by username or email
+    existing_admin = User.query.filter_by(username="admin").first()
+    
+    if not existing_admin:
         superadmin = User(
-            username="admin", 
-            email="info@transporthub.uk",
             first_name="Chris",
             last_name="Clark",
-            password=hashed_password,
+            username="admin",
+            email="info@transporthub.uk",
+            level=4,
             role_superadmin=True,
             role_admin=True
+            # Leave password empty/unset or handle it during your first-run setup flow
         )
         db.session.add(superadmin)
         db.session.commit()
