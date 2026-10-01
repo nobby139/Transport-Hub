@@ -145,10 +145,16 @@ with app.app_context():
         hashed_password = generate_password_hash("YourSecurePassword123")
         superadmin = User(
             username="admin", 
-            email="info@transporthub.uk", 
+            email="info@transporthub.uk",
+            first_name="Chris",
+            last_name="Clark",
+            password=hashed_password,
             role_superadmin=True,
             role_admin=True
         )
+        db.session.add(superadmin)
+        db.session.commit()
+        print("Default superadmin created successfully!")
         db.session.add(superadmin)
         db.session.commit()
         print("Default superadmin created successfully!")
